@@ -21,6 +21,7 @@ import StudentTeacherConnect from "@/pages/StudentTeacherConnect";
 import TutorBooking from "@/pages/TutorBooking";
 import Dashboard from "@/pages/Dashboard";
 import LearningPaths from "@/pages/LearningPaths";
+import Pricing from "@/pages/Pricing";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import NotFound from "@/pages/NotFound";
@@ -58,7 +59,7 @@ function App() {
               <Route path="/tutoring" element={<Tutors />} />
               <Route path="/book-tutor" element={<TutorBooking />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/pricing" element={<Index />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="*" element={<NotFound />} />

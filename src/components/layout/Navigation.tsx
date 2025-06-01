@@ -15,6 +15,7 @@ export function Navigation() {
     { name: "AI Videos", href: "/ai-videos" },
     { name: "EduReels", href: "/edu-reels" },
     { name: "Tutors", href: "/local-tutors" },
+    { name: "Pricing", href: "/pricing" },
   ];
 
   const isActive = (path: string) => location.pathname === path;

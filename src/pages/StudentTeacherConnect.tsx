@@ -1,17 +1,29 @@
-import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { 
-  MessageSquare, 
-  Phone, 
-  Video, 
-  Calendar, 
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  MessageSquare,
+  Phone,
+  Video,
+  Calendar,
   Clock,
   Star,
   MapPin,
@@ -21,147 +33,177 @@ import {
   Users,
   Zap,
   Shield,
-  Heart
-} from 'lucide-react'
-import { motion } from 'framer-motion'
+  Heart,
+} from "lucide-react";
+import { motion } from "framer-motion";
 
 interface Teacher {
-  id: string
-  name: string
-  avatar: string
-  subjects: string[]
-  languages: string[]
-  rating: number
-  reviews: number
-  experience: string
-  responseTime: string
-  pricePerHour: number
-  location: string
-  verified: boolean
-  availability: 'online' | 'busy' | 'offline'
-  specialties: string[]
-  bio: string
-  totalStudents: number
+  id: string;
+  name: string;
+  avatar: string;
+  subjects: string[];
+  languages: string[];
+  rating: number;
+  reviews: number;
+  experience: string;
+  responseTime: string;
+  pricePerHour: number;
+  location: string;
+  verified: boolean;
+  availability: "online" | "busy" | "offline";
+  specialties: string[];
+  bio: string;
+  totalStudents: number;
 }
 
 const featuredTeachers: Teacher[] = [
   {
-    id: '1',
-    name: 'Dr. Priya Sharma',
-    avatar: '',
-    subjects: ['Mathematics', 'Physics', 'Chemistry'],
-    languages: ['Hindi', 'English'],
+    id: "1",
+    name: "Dr. Priya Sharma",
+    avatar: "",
+    subjects: ["Mathematics", "Physics", "Chemistry"],
+    languages: ["Hindi", "English"],
     rating: 4.9,
     reviews: 347,
-    experience: '12 years',
-    responseTime: '< 30 mins',
+    experience: "12 years",
+    responseTime: "< 30 mins",
     pricePerHour: 1200,
-    location: 'Delhi, India',
+    location: "Delhi, India",
     verified: true,
-    availability: 'online',
-    specialties: ['IIT-JEE', 'NEET', 'Board Exams'],
-    bio: 'IIT Delhi graduate with 12+ years of teaching experience. Specialized in helping students crack competitive exams.',
-    totalStudents: 1250
+    availability: "online",
+    specialties: ["IIT-JEE", "NEET", "Board Exams"],
+    bio: "IIT Delhi graduate with 12+ years of teaching experience. Specialized in helping students crack competitive exams.",
+    totalStudents: 1250,
   },
   {
-    id: '2',
-    name: 'Prof. Rajesh Kumar',
-    avatar: '',
-    subjects: ['Computer Science', 'Programming', 'Data Science'],
-    languages: ['English', 'Hindi', 'Tamil'],
+    id: "2",
+    name: "Prof. Rajesh Kumar",
+    avatar: "",
+    subjects: ["Computer Science", "Programming", "Data Science"],
+    languages: ["English", "Hindi", "Tamil"],
     rating: 4.8,
     reviews: 289,
-    experience: '8 years',
-    responseTime: '< 1 hour',
+    experience: "8 years",
+    responseTime: "< 1 hour",
     pricePerHour: 1500,
-    location: 'Bangalore, India',
+    location: "Bangalore, India",
     verified: true,
-    availability: 'online',
-    specialties: ['Python', 'Machine Learning', 'Web Development'],
-    bio: 'Former Google engineer turned educator. Passionate about making programming accessible to everyone.',
-    totalStudents: 890
+    availability: "online",
+    specialties: ["Python", "Machine Learning", "Web Development"],
+    bio: "Former Google engineer turned educator. Passionate about making programming accessible to everyone.",
+    totalStudents: 890,
   },
   {
-    id: '3',
-    name: 'Ms. Anjali Verma',
-    avatar: '',
-    subjects: ['English', 'Literature', 'Creative Writing'],
-    languages: ['English', 'Hindi'],
+    id: "3",
+    name: "Ms. Anjali Verma",
+    avatar: "",
+    subjects: ["English", "Literature", "Creative Writing"],
+    languages: ["English", "Hindi"],
     rating: 4.9,
     reviews: 456,
-    experience: '15 years',
-    responseTime: '< 2 hours',
+    experience: "15 years",
+    responseTime: "< 2 hours",
     pricePerHour: 900,
-    location: 'Mumbai, India',
+    location: "Mumbai, India",
     verified: true,
-    availability: 'busy',
-    specialties: ['IELTS', 'TOEFL', 'Creative Writing'],
-    bio: 'Published author and English literature expert. Helping students excel in language skills for 15+ years.',
-    totalStudents: 2100
-  }
-]
+    availability: "busy",
+    specialties: ["IELTS", "TOEFL", "Creative Writing"],
+    bio: "Published author and English literature expert. Helping students excel in language skills for 15+ years.",
+    totalStudents: 2100,
+  },
+];
 
 const subjects = [
-  'Mathematics', 'Physics', 'Chemistry', 'Biology', 'Computer Science',
-  'English', 'Hindi', 'History', 'Geography', 'Economics',
-  'Programming', 'Data Science', 'Web Development', 'Machine Learning',
-  'Art & Design', 'Music', 'Languages', 'Business Studies'
-]
+  "Mathematics",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "Computer Science",
+  "English",
+  "Hindi",
+  "History",
+  "Geography",
+  "Economics",
+  "Programming",
+  "Data Science",
+  "Web Development",
+  "Machine Learning",
+  "Art & Design",
+  "Music",
+  "Languages",
+  "Business Studies",
+];
 
 const urgencyLevels = [
-  { value: 'immediate', label: '🚨 Urgent (Within 1 hour)', color: 'text-red-600' },
-  { value: 'today', label: '⚡ Today (Within 24 hours)', color: 'text-orange-600' },
-  { value: 'week', label: '📅 This Week', color: 'text-blue-600' },
-  { value: 'flexible', label: '🕐 Flexible', color: 'text-green-600' }
-]
+  {
+    value: "immediate",
+    label: "🚨 Urgent (Within 1 hour)",
+    color: "text-red-600",
+  },
+  {
+    value: "today",
+    label: "⚡ Today (Within 24 hours)",
+    color: "text-orange-600",
+  },
+  { value: "week", label: "📅 This Week", color: "text-blue-600" },
+  { value: "flexible", label: "🕐 Flexible", color: "text-green-600" },
+];
 
 export default function StudentTeacherConnect() {
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null)
-  const [showContactForm, setShowContactForm] = useState(false)
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+  const [showContactForm, setShowContactForm] = useState(false);
   const [contactForm, setContactForm] = useState({
-    subject: '',
-    urgency: '',
-    message: '',
-    preferredTime: '',
-    sessionType: 'video'
-  })
+    subject: "",
+    urgency: "",
+    message: "",
+    preferredTime: "",
+    sessionType: "video",
+  });
 
   const handleContactTeacher = (teacher: Teacher) => {
-    setSelectedTeacher(teacher)
-    setShowContactForm(true)
-  }
+    setSelectedTeacher(teacher);
+    setShowContactForm(true);
+  };
 
   const handleSendMessage = () => {
     // Handle message sending logic
-    console.log('Sending message to', selectedTeacher?.name, contactForm)
+    console.log("Sending message to", selectedTeacher?.name, contactForm);
     // Reset form and close
-    setShowContactForm(false)
+    setShowContactForm(false);
     setContactForm({
-      subject: '',
-      urgency: '',
-      message: '',
-      preferredTime: '',
-      sessionType: 'video'
-    })
-  }
+      subject: "",
+      urgency: "",
+      message: "",
+      preferredTime: "",
+      sessionType: "video",
+    });
+  };
 
   const getAvailabilityColor = (availability: string) => {
     switch (availability) {
-      case 'online': return 'bg-green-500'
-      case 'busy': return 'bg-yellow-500'
-      case 'offline': return 'bg-gray-500'
-      default: return 'bg-gray-500'
+      case "online":
+        return "bg-green-500";
+      case "busy":
+        return "bg-yellow-500";
+      case "offline":
+        return "bg-gray-500";
+      default:
+        return "bg-gray-500";
     }
-  }
+  };
 
   const getAvailabilityText = (availability: string) => {
     switch (availability) {
-      case 'online': return 'Available Now'
-      case 'busy': return 'Busy'
-      case 'offline': return 'Offline'
-      default: return 'Unknown'
+      case "online":
+        return "Available Now";
+      case "busy":
+        return "Busy";
+      case "offline":
+        return "Offline";
+      default:
+        return "Unknown";
     }
-  }
+  };
 
   return (
     <div className="min-h-screen pt-20 pb-12">
@@ -184,8 +226,9 @@ export default function StudentTeacherConnect() {
             </h1>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            🎓 Get personalized 1-on-1 assistance from verified teachers across India! 
-            Ask questions, book sessions, or get instant help - anytime, anywhere! 📚✨
+            🎓 Get personalized 1-on-1 assistance from verified teachers across
+            India! Ask questions, book sessions, or get instant help - anytime,
+            anywhere! 📚✨
           </p>
         </motion.div>
 
@@ -198,7 +241,9 @@ export default function StudentTeacherConnect() {
         >
           <div className="text-center">
             <div className="text-3xl font-bold text-blue-500">5,000+</div>
-            <div className="text-sm text-muted-foreground">Verified Teachers</div>
+            <div className="text-sm text-muted-foreground">
+              Verified Teachers
+            </div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-purple-500">50+</div>
@@ -209,7 +254,7 @@ export default function StudentTeacherConnect() {
             <div className="text-sm text-muted-foreground">Availability</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-green-500">< 30min</div>
+            <div className="text-3xl font-bold text-green-500">&lt; 30min</div>
             <div className="text-sm text-muted-foreground">Avg Response</div>
           </div>
         </motion.div>
@@ -221,8 +266,10 @@ export default function StudentTeacherConnect() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mb-12"
         >
-          <h2 className="text-2xl font-bold mb-8 text-center">⭐ Top-Rated Teachers Available Now</h2>
-          
+          <h2 className="text-2xl font-bold mb-8 text-center">
+            ⭐ Top-Rated Teachers Available Now
+          </h2>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredTeachers.map((teacher, index) => (
               <motion.div
@@ -238,15 +285,22 @@ export default function StudentTeacherConnect() {
                       <div className="relative">
                         <Avatar className="w-16 h-16">
                           <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-lg">
-                            {teacher.name.split(' ').map(n => n[0]).join('')}
+                            {teacher.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
                           </AvatarFallback>
                         </Avatar>
-                        <div className={`absolute -bottom-1 -right-1 w-4 h-4 ${getAvailabilityColor(teacher.availability)} rounded-full border-2 border-white`} />
+                        <div
+                          className={`absolute -bottom-1 -right-1 w-4 h-4 ${getAvailabilityColor(teacher.availability)} rounded-full border-2 border-white`}
+                        />
                       </div>
-                      
+
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
-                          <h3 className="text-lg font-semibold">{teacher.name}</h3>
+                          <h3 className="text-lg font-semibold">
+                            {teacher.name}
+                          </h3>
                           {teacher.verified && (
                             <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
                               <Shield className="w-3 h-3 mr-1" />
@@ -254,22 +308,30 @@ export default function StudentTeacherConnect() {
                             </Badge>
                           )}
                         </div>
-                        
+
                         <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
                           <div className="flex items-center space-x-1">
                             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            <span>{teacher.rating} ({teacher.reviews})</span>
+                            <span>
+                              {teacher.rating} ({teacher.reviews})
+                            </span>
                           </div>
                           <div className="flex items-center space-x-1">
                             <Clock className="w-4 h-4" />
                             <span>{teacher.experience}</span>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2 text-xs">
-                          <div className={`w-2 h-2 ${getAvailabilityColor(teacher.availability)} rounded-full`} />
-                          <span className="text-muted-foreground">{getAvailabilityText(teacher.availability)}</span>
-                          <span className="text-muted-foreground">• Responds {teacher.responseTime}</span>
+                          <div
+                            className={`w-2 h-2 ${getAvailabilityColor(teacher.availability)} rounded-full`}
+                          />
+                          <span className="text-muted-foreground">
+                            {getAvailabilityText(teacher.availability)}
+                          </span>
+                          <span className="text-muted-foreground">
+                            • Responds {teacher.responseTime}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -277,7 +339,11 @@ export default function StudentTeacherConnect() {
                     {/* Subjects */}
                     <div className="flex flex-wrap gap-2">
                       {teacher.subjects.slice(0, 3).map((subject) => (
-                        <Badge key={subject} variant="secondary" className="text-xs">
+                        <Badge
+                          key={subject}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {subject}
                         </Badge>
                       ))}
@@ -300,7 +366,10 @@ export default function StudentTeacherConnect() {
                       <p className="text-sm font-medium mb-2">Specialties:</p>
                       <div className="flex flex-wrap gap-1">
                         {teacher.specialties.map((specialty) => (
-                          <Badge key={specialty} className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100 text-xs">
+                          <Badge
+                            key={specialty}
+                            className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100 text-xs"
+                          >
                             {specialty}
                           </Badge>
                         ))}
@@ -319,10 +388,12 @@ export default function StudentTeacherConnect() {
                       </div>
                       <div className="flex items-center space-x-2">
                         <Languages className="w-4 h-4 text-muted-foreground" />
-                        <span>{teacher.languages.join(', ')}</span>
+                        <span>{teacher.languages.join(", ")}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <span className="text-lg font-bold text-green-600">₹{teacher.pricePerHour}/hr</span>
+                        <span className="text-lg font-bold text-green-600">
+                          ₹{teacher.pricePerHour}/hr
+                        </span>
                       </div>
                     </div>
 
@@ -371,7 +442,10 @@ export default function StudentTeacherConnect() {
                   <CardTitle className="flex items-center space-x-2">
                     <Avatar className="w-10 h-10">
                       <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                        {selectedTeacher.name.split(' ').map(n => n[0]).join('')}
+                        {selectedTeacher.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
                       </AvatarFallback>
                     </Avatar>
                     <div>
@@ -387,7 +461,12 @@ export default function StudentTeacherConnect() {
                   {/* Subject */}
                   <div className="space-y-2">
                     <Label htmlFor="subject">Subject/Topic</Label>
-                    <Select value={contactForm.subject} onValueChange={(value) => setContactForm({...contactForm, subject: value})}>
+                    <Select
+                      value={contactForm.subject}
+                      onValueChange={(value) =>
+                        setContactForm({ ...contactForm, subject: value })
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="What do you need help with?" />
                       </SelectTrigger>
@@ -404,7 +483,12 @@ export default function StudentTeacherConnect() {
                   {/* Urgency */}
                   <div className="space-y-2">
                     <Label htmlFor="urgency">How urgent is this?</Label>
-                    <Select value={contactForm.urgency} onValueChange={(value) => setContactForm({...contactForm, urgency: value})}>
+                    <Select
+                      value={contactForm.urgency}
+                      onValueChange={(value) =>
+                        setContactForm({ ...contactForm, urgency: value })
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select urgency level" />
                       </SelectTrigger>
@@ -426,7 +510,12 @@ export default function StudentTeacherConnect() {
                       placeholder="Describe your question or what kind of help you need..."
                       rows={4}
                       value={contactForm.message}
-                      onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                      onChange={(e) =>
+                        setContactForm({
+                          ...contactForm,
+                          message: e.target.value,
+                        })
+                      }
                     />
                   </div>
 
@@ -436,27 +525,54 @@ export default function StudentTeacherConnect() {
                     <div className="flex space-x-2">
                       <Button
                         type="button"
-                        variant={contactForm.sessionType === 'video' ? 'default' : 'outline'}
+                        variant={
+                          contactForm.sessionType === "video"
+                            ? "default"
+                            : "outline"
+                        }
                         size="sm"
-                        onClick={() => setContactForm({...contactForm, sessionType: 'video'})}
+                        onClick={() =>
+                          setContactForm({
+                            ...contactForm,
+                            sessionType: "video",
+                          })
+                        }
                       >
                         <Video className="w-4 h-4 mr-1" />
                         Video Call
                       </Button>
                       <Button
                         type="button"
-                        variant={contactForm.sessionType === 'audio' ? 'default' : 'outline'}
+                        variant={
+                          contactForm.sessionType === "audio"
+                            ? "default"
+                            : "outline"
+                        }
                         size="sm"
-                        onClick={() => setContactForm({...contactForm, sessionType: 'audio'})}
+                        onClick={() =>
+                          setContactForm({
+                            ...contactForm,
+                            sessionType: "audio",
+                          })
+                        }
                       >
                         <Phone className="w-4 h-4 mr-1" />
                         Audio Call
                       </Button>
                       <Button
                         type="button"
-                        variant={contactForm.sessionType === 'chat' ? 'default' : 'outline'}
+                        variant={
+                          contactForm.sessionType === "chat"
+                            ? "default"
+                            : "outline"
+                        }
                         size="sm"
-                        onClick={() => setContactForm({...contactForm, sessionType: 'chat'})}
+                        onClick={() =>
+                          setContactForm({
+                            ...contactForm,
+                            sessionType: "chat",
+                          })
+                        }
                       >
                         <MessageSquare className="w-4 h-4 mr-1" />
                         Chat Only
@@ -495,8 +611,10 @@ export default function StudentTeacherConnect() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-16"
         >
-          <h2 className="text-2xl font-bold text-center mb-8">🤝 How Student-Teacher Connect Works</h2>
-          
+          <h2 className="text-2xl font-bold text-center mb-8">
+            🤝 How Student-Teacher Connect Works
+          </h2>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -504,32 +622,35 @@ export default function StudentTeacherConnect() {
               </div>
               <h3 className="font-semibold mb-2">Find Your Teacher</h3>
               <p className="text-muted-foreground text-sm">
-                Browse verified teachers by subject, location, rating, and availability
+                Browse verified teachers by subject, location, rating, and
+                availability
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-white font-bold text-xl">2</span>
               </div>
               <h3 className="font-semibold mb-2">Send Your Question</h3>
               <p className="text-muted-foreground text-sm">
-                Describe your problem, set urgency level, and choose session type
+                Describe your problem, set urgency level, and choose session
+                type
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-white font-bold text-xl">3</span>
               </div>
               <h3 className="font-semibold mb-2">Get Help Instantly</h3>
               <p className="text-muted-foreground text-sm">
-                Connect via chat, audio, or video call and solve your doubts immediately
+                Connect via chat, audio, or video call and solve your doubts
+                immediately
               </p>
             </div>
           </div>
         </motion.div>
       </div>
     </div>
-  )
+  );
 }
