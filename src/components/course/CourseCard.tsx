@@ -62,49 +62,127 @@ export function CourseCard({ course, index = 0 }: CourseCardProps) {
               {course.level}
             </Badge>
           </div>
+
+          {/* Enrolled Badge */}
+          {course.enrolled && (
+            <div className="absolute top-4 right-4">
+              <Badge className="bg-green-500 text-white">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Enrolled
+              </Badge>
+            </div>
+          )}
+
+          {/* Price Badge */}
+          <div className="absolute bottom-4 right-4">
+            <Badge className="bg-black/70 text-white">
+              <IndianRupee className="w-3 h-3 mr-1" />
+              {course.price.toLocaleString()}
+            </Badge>
+          </div>
         </div>
 
         <CardHeader className="space-y-3">
-          {/* Category */}
-          <Badge variant="outline" className="w-fit text-xs">
-            {course.category}
-          </Badge>
+          {/* Category and Subject */}
+          <div className="flex items-center space-x-2">
+            <Badge variant="outline" className="text-xs">
+              {course.subject}
+            </Badge>
+            <Badge variant="secondary" className="text-xs">
+              {course.grade}
+            </Badge>
+          </div>
 
           {/* Title */}
           <CardTitle className="text-xl font-semibold group-hover:text-primary transition-colors">
             {course.title}
           </CardTitle>
+
+          {/* Instructor */}
+          <p className="text-sm text-muted-foreground">
+            by {course.instructor}
+          </p>
         </CardHeader>
 
         <CardContent className="space-y-4">
           {/* Description */}
-          <CardDescription className="text-muted-foreground leading-relaxed">
+          <CardDescription className="text-muted-foreground leading-relaxed line-clamp-3">
             {course.description}
           </CardDescription>
 
-          {/* Stats */}
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1">
-                <Clock className="w-4 h-4" />
-                <span>{course.duration}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Users className="w-4 h-4" />
-                <span>{course.students.toLocaleString()}</span>
-              </div>
+          {/* Curriculum Preview */}
+          <div>
+            <p className="text-sm font-medium mb-2 flex items-center">
+              <BookOpen className="w-4 h-4 mr-1" />
+              What you'll learn:
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {course.curriculum.slice(0, 3).map((item, idx) => (
+                <Badge key={idx} variant="outline" className="text-xs">
+                  {item}
+                </Badge>
+              ))}
+              {course.curriculum.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{course.curriculum.length - 3} more
+                </Badge>
+              )}
             </div>
+          </div>
 
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center space-x-1">
+              <Clock className="w-4 h-4" />
+              <span>{course.duration}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Users className="w-4 h-4" />
+              <span>{course.students.toLocaleString()}</span>
+            </div>
             <div className="flex items-center space-x-1">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               <span className="font-medium">{course.rating}</span>
             </div>
           </div>
 
-          {/* CTA Button */}
-          <Button className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white">
-            Watch Now →
-          </Button>
+          {/* Action Buttons */}
+          <div className="space-y-2">
+            {course.enrolled ? (
+              <Button
+                className={`w-full bg-gradient-to-r ${course.gradient} hover:opacity-90 text-white`}
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Continue Learning
+              </Button>
+            ) : (
+              <>
+                <Button
+                  onClick={() => onEnroll && onEnroll(course.id, course.title)}
+                  disabled={enrolling || !isAuthenticated}
+                  className={`w-full bg-gradient-to-r ${course.gradient} hover:opacity-90 text-white`}
+                >
+                  {enrolling ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Enrolling...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4 mr-2" />
+                      {isAuthenticated ? "Enroll Now" : "Sign in to Enroll"}
+                    </>
+                  )}
+                </Button>
+
+                {!isAuthenticated && (
+                  <p className="text-xs text-center text-muted-foreground">
+                    Free preview available • Full access after enrollment
+                  </p>
+                )}
+              </>
+            )}
+          </div>
         </CardContent>
       </Card>
     </motion.div>

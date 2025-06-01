@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CourseCard } from "@/components/course/CourseCard";
 import {
   Search,
@@ -10,8 +11,12 @@ import {
   GraduationCap,
   School,
   University,
+  Loader2,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useCourseStore } from "@/store/courseStore";
+import { useAuth } from "@/contexts/AuthContext";
+import api from "@/lib/api";
 
 const categories = [
   "All",
@@ -106,6 +111,7 @@ const subjectsByCategory = {
   ],
 };
 
+// Extended course data
 const allCourses = [
   // K-5 Primary
   {
@@ -122,6 +128,16 @@ const allCourses = [
     subject: "Mathematics",
     grade: "Class 3",
     gradient: "from-yellow-500 via-orange-500 to-red-500",
+    instructor: "Ms. Priya Sharma",
+    price: 999,
+    curriculum: [
+      "Basic Numbers",
+      "Addition & Subtraction",
+      "Multiplication Tables",
+      "Division Basics",
+      "Word Problems",
+    ],
+    enrolled: false,
   },
   {
     id: "2",
@@ -137,26 +153,21 @@ const allCourses = [
     subject: "English",
     grade: "Class 5",
     gradient: "from-blue-500 via-purple-500 to-pink-500",
-  },
-  {
-    id: "3",
-    title: "मेरी हिंदी - कक्षा 4 (My Hindi - Class 4)",
-    description:
-      "हिंदी भाषा सीखने का मजेदार तरीका। कहानियों, कविताओं और व्याकरण के साथ।",
-    image: "/course-hindi-kids.jpg",
-    duration: "2.5 hours",
-    students: 22100,
-    rating: 4.8,
-    level: "Beginner" as const,
-    category: "K-5 Primary",
-    subject: "Hindi",
-    grade: "Class 4",
-    gradient: "from-green-500 via-teal-500 to-cyan-500",
+    instructor: "Mr. John Smith",
+    price: 1299,
+    curriculum: [
+      "Reading Comprehension",
+      "Grammar Basics",
+      "Creative Writing",
+      "Vocabulary Building",
+      "Story Telling",
+    ],
+    enrolled: false,
   },
 
   // Middle School
   {
-    id: "4",
+    id: "3",
     title: "NCERT Class 8 Science - Complete Course",
     description:
       "Physics, Chemistry, and Biology concepts explained with experiments and real-world examples. Perfect for CBSE students.",
@@ -169,26 +180,22 @@ const allCourses = [
     subject: "Science",
     grade: "Class 8",
     gradient: "from-green-500 via-teal-500 to-cyan-500",
-  },
-  {
-    id: "5",
-    title: "Class 7 Mathematics - Algebra & Geometry",
-    description:
-      "Introduction to algebraic expressions, equations, and geometric shapes. Build strong mathematical foundations.",
-    image: "/course-math-7.jpg",
-    duration: "8 hours",
-    students: 28900,
-    rating: 4.7,
-    level: "Intermediate" as const,
-    category: "6-8 Middle School",
-    subject: "Mathematics",
-    grade: "Class 7",
-    gradient: "from-purple-500 via-indigo-500 to-blue-500",
+    instructor: "Dr. Rajesh Kumar",
+    price: 2499,
+    curriculum: [
+      "Force & Pressure",
+      "Friction",
+      "Sound",
+      "Chemical Effects",
+      "Light",
+      "Stars & Solar System",
+    ],
+    enrolled: true,
   },
 
   // High School
   {
-    id: "6",
+    id: "4",
     title: "IIT-JEE Physics - Mechanics Complete",
     description:
       "Master mechanics for JEE Main & Advanced with detailed theory, problem-solving techniques, and previous year questions.",
@@ -201,121 +208,50 @@ const allCourses = [
     subject: "Physics",
     grade: "Class 11-12",
     gradient: "from-purple-500 via-blue-500 to-indigo-500",
-  },
-  {
-    id: "7",
-    title: "CBSE Class 12 Chemistry - Organic Chemistry",
-    description:
-      "Complete organic chemistry with reaction mechanisms, named reactions, and NEET preparation. All chapters covered.",
-    image: "/course-chemistry-12.jpg",
-    duration: "18 hours",
-    students: 38900,
-    rating: 4.8,
-    level: "Advanced" as const,
-    category: "9-12 High School",
-    subject: "Chemistry",
-    grade: "Class 12",
-    gradient: "from-orange-500 via-red-500 to-pink-500",
-  },
-  {
-    id: "8",
-    title: "NEET Biology - Human Physiology",
-    description:
-      "Complete human physiology for NEET aspirants with diagrams, mnemonics, and practice questions.",
-    image: "/course-biology-neet.jpg",
-    duration: "15 hours",
-    students: 31200,
-    rating: 4.8,
-    level: "Advanced" as const,
-    category: "9-12 High School",
-    subject: "Biology",
-    grade: "Class 11-12",
-    gradient: "from-emerald-500 via-green-500 to-teal-500",
-  },
-
-  // Undergraduate
-  {
-    id: "9",
-    title: "Engineering Mathematics - Calculus & Linear Algebra",
-    description:
-      "Essential mathematics for engineering students with practical applications, solved examples, and engineering problems.",
-    image: "/course-engg-math.jpg",
-    duration: "35 hours",
-    students: 23450,
-    rating: 4.7,
-    level: "Advanced" as const,
-    category: "Undergraduate",
-    subject: "Mathematics",
-    grade: "1st Year Engineering",
-    gradient: "from-violet-500 via-purple-500 to-fuchsia-500",
-  },
-  {
-    id: "10",
-    title: "MBBS Anatomy - Complete Human Body Systems",
-    description:
-      "Comprehensive anatomy course for medical students with 3D models, clinical correlations, and examination preparation.",
-    image: "/course-anatomy.jpg",
-    duration: "60 hours",
-    students: 12300,
-    rating: 4.9,
-    level: "Advanced" as const,
-    category: "Undergraduate",
-    subject: "Medicine",
-    grade: "1st Year MBBS",
-    gradient: "from-emerald-500 via-teal-500 to-cyan-500",
-  },
-  {
-    id: "11",
-    title: "Computer Science - Data Structures & Algorithms",
-    description:
-      "Complete DSA course for computer science students with coding practice, interview preparation, and real projects.",
-    image: "/course-dsa.jpg",
-    duration: "40 hours",
-    students: 56780,
-    rating: 4.9,
-    level: "Advanced" as const,
-    category: "Undergraduate",
-    subject: "Computer Science",
-    grade: "2nd Year CSE",
-    gradient: "from-blue-500 via-indigo-500 to-purple-500",
+    instructor: "Prof. A.K. Singh (IIT Delhi)",
+    price: 4999,
+    curriculum: [
+      "Kinematics",
+      "Laws of Motion",
+      "Work Energy Power",
+      "Circular Motion",
+      "Rotational Mechanics",
+    ],
+    enrolled: false,
   },
 
   // Professional Skills
   {
-    id: "12",
-    title: "Full Stack Web Development - MERN Stack",
+    id: "5",
+    title: "Complete Python Programming - Beginner to Expert",
     description:
-      "Complete web development course from basics to advanced with real projects, deployment, and industry best practices.",
-    image: "/course-webdev.jpg",
-    duration: "45 hours",
+      "Master Python from basics to advanced concepts with real projects, data structures, and web development.",
+    image: "/course-python.jpg",
+    duration: "40 hours",
     students: 67890,
     rating: 4.8,
-    level: "Intermediate" as const,
+    level: "Beginner" as const,
     category: "Professional Skills",
     subject: "Programming",
     grade: "Professional",
-    gradient: "from-blue-500 via-indigo-500 to-purple-500",
-  },
-  {
-    id: "13",
-    title: "Digital Marketing Mastery - SEO to Social Media",
-    description:
-      "Complete digital marketing course covering SEO, social media, content marketing, PPC, and analytics.",
-    image: "/course-digital-marketing.jpg",
-    duration: "30 hours",
-    students: 43210,
-    rating: 4.7,
-    level: "Beginner" as const,
-    category: "Professional Skills",
-    subject: "Marketing",
-    grade: "Professional",
-    gradient: "from-pink-500 via-rose-500 to-red-500",
+    gradient: "from-green-500 via-teal-500 to-cyan-500",
+    instructor: "Sarah Wilson (Ex-Google)",
+    price: 5999,
+    curriculum: [
+      "Python Basics",
+      "Data Structures",
+      "OOP",
+      "File Handling",
+      "Web Development",
+      "APIs",
+    ],
+    enrolled: true,
   },
 
   // Life Skills
   {
-    id: "14",
-    title: "Traditional Indian Cooking - Regional Cuisines",
+    id: "6",
+    title: "Traditional Indian Cooking Masterclass",
     description:
       "Learn authentic Indian recipes from different regions with traditional techniques, spices, and cultural stories.",
     image: "/course-cooking.jpg",
@@ -327,94 +263,121 @@ const allCourses = [
     subject: "Cooking",
     grade: "All Ages",
     gradient: "from-red-500 via-orange-500 to-yellow-500",
-  },
-  {
-    id: "15",
-    title: "Spanish for Beginners - Conversational Spanish",
-    description:
-      "Learn Spanish from scratch with native speakers, interactive exercises, and cultural immersion.",
-    image: "/course-spanish.jpg",
-    duration: "20 hours",
-    students: 31240,
-    rating: 4.8,
-    level: "Beginner" as const,
-    category: "Life Skills",
-    subject: "Languages",
-    grade: "All Ages",
-    gradient: "from-pink-500 via-rose-500 to-red-500",
-  },
-  {
-    id: "16",
-    title: "Yoga & Meditation - Complete Wellness",
-    description:
-      "Ancient Indian practices for modern wellness. Learn asanas, pranayama, and meditation techniques.",
-    image: "/course-yoga.jpg",
-    duration: "12 hours",
-    students: 24580,
-    rating: 4.9,
-    level: "Beginner" as const,
-    category: "Life Skills",
-    subject: "Health & Fitness",
-    grade: "All Ages",
-    gradient: "from-emerald-500 via-green-500 to-teal-500",
-  },
-
-  // Graduate Level
-  {
-    id: "17",
-    title: "PhD Research Methodology",
-    description:
-      "Comprehensive guide to research methods, data analysis, thesis writing, and academic publishing.",
-    image: "/course-research.jpg",
-    duration: "25 hours",
-    students: 8900,
-    rating: 4.8,
-    level: "Advanced" as const,
-    category: "Graduate",
-    subject: "Research",
-    grade: "PhD",
-    gradient: "from-violet-500 via-purple-500 to-fuchsia-500",
+    instructor: "Chef Meera Patel",
+    price: 2999,
+    curriculum: [
+      "Spice Knowledge",
+      "North Indian Cuisine",
+      "South Indian Dishes",
+      "Street Food",
+      "Desserts",
+    ],
+    enrolled: false,
   },
 ];
 
 export default function Courses() {
+  const { user, isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedSubject, setSelectedSubject] = useState("All");
   const [filteredCourses, setFilteredCourses] = useState(allCourses);
+  const [loading, setLoading] = useState(false);
+  const [enrolling, setEnrolling] = useState<string | null>(null);
+  const [enrollmentMessage, setEnrollmentMessage] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
-  React.useEffect(() => {
-    let filtered = allCourses;
+  useEffect(() => {
+    loadCourses();
+  }, [selectedCategory, selectedSubject, searchQuery]);
 
-    // Filter by category
-    if (selectedCategory !== "All") {
-      filtered = filtered.filter(
-        (course) => course.category === selectedCategory,
-      );
+  const loadCourses = async () => {
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      let filtered = allCourses;
+
+      // Filter by category
+      if (selectedCategory !== "All") {
+        filtered = filtered.filter(
+          (course) => course.category === selectedCategory,
+        );
+      }
+
+      // Filter by subject
+      if (selectedSubject !== "All") {
+        filtered = filtered.filter(
+          (course) => course.subject === selectedSubject,
+        );
+      }
+
+      // Filter by search query
+      if (searchQuery) {
+        filtered = filtered.filter(
+          (course) =>
+            course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            course.description
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            course.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            course.grade.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            course.instructor.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
+      }
+
+      setFilteredCourses(filtered);
+    } catch (error) {
+      console.error("Failed to load courses:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEnrollInCourse = async (courseId: string, courseName: string) => {
+    if (!isAuthenticated) {
+      setEnrollmentMessage({
+        type: "error",
+        message: "Please log in to enroll in courses",
+      });
+      return;
     }
 
-    // Filter by subject
-    if (selectedSubject !== "All") {
-      filtered = filtered.filter(
-        (course) => course.subject === selectedSubject,
-      );
-    }
+    setEnrolling(courseId);
+    try {
+      const result = await api.enrollInCourse(courseId);
+      if (result.success) {
+        setEnrollmentMessage({
+          type: "success",
+          message: `Successfully enrolled in "${courseName}"!`,
+        });
 
-    // Filter by search query
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (course) =>
-          course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          course.description
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          course.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          course.grade.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
+        // Update course enrollment status
+        setFilteredCourses((prev) =>
+          prev.map((course) =>
+            course.id === courseId ? { ...course, enrolled: true } : course,
+          ),
+        );
+      } else {
+        setEnrollmentMessage({
+          type: "error",
+          message: result.error || "Failed to enroll in course",
+        });
+      }
+    } catch (error) {
+      setEnrollmentMessage({
+        type: "error",
+        message: "An error occurred while enrolling",
+      });
+    } finally {
+      setEnrolling(null);
+      // Clear message after 3 seconds
+      setTimeout(() => setEnrollmentMessage(null), 3000);
     }
-
-    setFilteredCourses(filtered);
-  }, [searchQuery, selectedCategory, selectedSubject]);
+  };
 
   const getSubjects = () => {
     if (selectedCategory === "All") {
@@ -470,6 +433,25 @@ export default function Courses() {
           </p>
         </motion.div>
 
+        {/* Enrollment Message */}
+        {enrollmentMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <Alert
+              className={
+                enrollmentMessage.type === "success"
+                  ? "border-green-200 bg-green-50 text-green-800"
+                  : "border-red-200 bg-red-50 text-red-800"
+              }
+            >
+              <AlertDescription>{enrollmentMessage.message}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+
         {/* Grade Level Categories */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -496,6 +478,7 @@ export default function Courses() {
                       ? "bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 text-white"
                       : ""
                   }`}
+                  disabled={loading}
                 >
                   <IconComponent className="w-4 h-4" />
                   <span>{category}</span>
@@ -516,10 +499,11 @@ export default function Courses() {
           <div className="relative max-w-md mx-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search courses, subjects, grades..."
+              placeholder="Search courses, subjects, instructors..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
+              disabled={loading}
             />
           </div>
 
@@ -536,6 +520,7 @@ export default function Courses() {
                     ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
                     : ""
                 }
+                disabled={loading}
               >
                 {subject}
               </Button>
@@ -543,40 +528,59 @@ export default function Courses() {
           </div>
         </motion.div>
 
-        {/* Results Count */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex items-center justify-between mb-8"
-        >
-          <p className="text-muted-foreground">
-            Showing {filteredCourses.length} course
-            {filteredCourses.length !== 1 ? "s" : ""}
-            {selectedCategory !== "All" && ` in ${selectedCategory}`}
-            {selectedSubject !== "All" && ` for ${selectedSubject}`}
-          </p>
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-8">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading courses...</p>
+          </div>
+        )}
 
-          <Button variant="outline" size="sm">
-            <SlidersHorizontal className="w-4 h-4 mr-2" />
-            More Filters
-          </Button>
-        </motion.div>
+        {/* Results Count */}
+        {!loading && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="flex items-center justify-between mb-8"
+          >
+            <p className="text-muted-foreground">
+              Showing {filteredCourses.length} course
+              {filteredCourses.length !== 1 ? "s" : ""}
+              {selectedCategory !== "All" && ` in ${selectedCategory}`}
+              {selectedSubject !== "All" && ` for ${selectedSubject}`}
+            </p>
+
+            <Button variant="outline" size="sm">
+              <SlidersHorizontal className="w-4 h-4 mr-2" />
+              More Filters
+            </Button>
+          </motion.div>
+        )}
 
         {/* Course Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          {filteredCourses.map((course, index) => (
-            <CourseCard key={course.id} course={course} index={index} />
-          ))}
-        </motion.div>
+        {!loading && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            {filteredCourses.map((course, index) => (
+              <EnhancedCourseCard
+                key={course.id}
+                course={course}
+                index={index}
+                onEnroll={handleEnrollInCourse}
+                enrolling={enrolling === course.id}
+                isAuthenticated={isAuthenticated}
+              />
+            ))}
+          </motion.div>
+        )}
 
         {/* No Results */}
-        {filteredCourses.length === 0 && (
+        {!loading && filteredCourses.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -603,36 +607,71 @@ export default function Courses() {
         )}
 
         {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="mt-16 text-center"
-        >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div>
-              <div className="text-3xl font-bold text-orange-500">500K+</div>
-              <div className="text-sm text-muted-foreground">Total Courses</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-pink-500">50+</div>
-              <div className="text-sm text-muted-foreground">
-                Subjects Covered
+        {!loading && filteredCourses.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="mt-16 text-center"
+          >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div>
+                <div className="text-3xl font-bold text-orange-500">500K+</div>
+                <div className="text-sm text-muted-foreground">
+                  Total Courses
+                </div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-pink-500">50+</div>
+                <div className="text-sm text-muted-foreground">
+                  Subjects Covered
+                </div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-violet-500">K-PhD</div>
+                <div className="text-sm text-muted-foreground">
+                  All Grade Levels
+                </div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-blue-500">195</div>
+                <div className="text-sm text-muted-foreground">Countries</div>
               </div>
             </div>
-            <div>
-              <div className="text-3xl font-bold text-violet-500">K-PhD</div>
-              <div className="text-sm text-muted-foreground">
-                All Grade Levels
-              </div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-blue-500">195</div>
-              <div className="text-sm text-muted-foreground">Countries</div>
-            </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
       </div>
     </div>
+  );
+}
+
+// Enhanced Course Card Component
+function EnhancedCourseCard({
+  course,
+  index,
+  onEnroll,
+  enrolling,
+  isAuthenticated,
+}: {
+  course: any;
+  index: number;
+  onEnroll: (id: string, name: string) => void;
+  enrolling: boolean;
+  isAuthenticated: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 0.1 * index }}
+    >
+      <CourseCard
+        course={course}
+        index={index}
+        onEnroll={onEnroll}
+        enrolling={enrolling}
+        isAuthenticated={isAuthenticated}
+      />
+    </motion.div>
   );
 }
