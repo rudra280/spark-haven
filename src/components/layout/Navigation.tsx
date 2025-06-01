@@ -10,11 +10,11 @@ export function Navigation() {
   const location = useLocation();
 
   const navigation = [
-    { name: "Discover", href: "/courses" },
+    { name: "Courses", href: "/courses" },
+    { name: "Notes", href: "/study-materials" },
+    { name: "AI Videos", href: "/ai-videos" },
     { name: "EduReels", href: "/edu-reels" },
-    { name: "Upload", href: "/upload" },
-    { name: "Tutors", href: "/tutors" },
-    { name: "Pricing", href: "/pricing" },
+    { name: "Tutors", href: "/local-tutors" },
   ];
 
   const isActive = (path: string) => location.pathname === path;

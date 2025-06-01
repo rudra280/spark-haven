@@ -3,16 +3,20 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
+import { HelpChatbot } from "@/components/chatbot/HelpChatbot";
 import { Toaster } from "@/components/ui/sonner";
 
 // Pages
 import Index from "@/pages/Index";
 import Courses from "@/pages/Courses";
+import StudyMaterials from "@/pages/StudyMaterials";
+import AIVideoHub from "@/pages/AIVideoHub";
 import AITutor from "@/pages/AITutor";
 import VideoStudio from "@/pages/VideoStudio";
 import VideoUpload from "@/pages/VideoUpload";
 import EduReels from "@/pages/EduReels";
 import Tutors from "@/pages/Tutors";
+import LocalTutors from "@/pages/LocalTutors";
 import TutorBooking from "@/pages/TutorBooking";
 import Dashboard from "@/pages/Dashboard";
 import LearningPaths from "@/pages/LearningPaths";
@@ -38,6 +42,9 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/discover" element={<Courses />} />
+              <Route path="/study-materials" element={<StudyMaterials />} />
+              <Route path="/notes" element={<StudyMaterials />} />
+              <Route path="/ai-videos" element={<AIVideoHub />} />
               <Route path="/edu-reels" element={<EduReels />} />
               <Route path="/upload" element={<VideoUpload />} />
               <Route path="/features" element={<LearningPaths />} />
@@ -45,6 +52,7 @@ function App() {
               <Route path="/ai-tutor" element={<AITutor />} />
               <Route path="/video-studio" element={<VideoStudio />} />
               <Route path="/tutors" element={<Tutors />} />
+              <Route path="/local-tutors" element={<LocalTutors />} />
               <Route path="/tutoring" element={<Tutors />} />
               <Route path="/book-tutor" element={<TutorBooking />} />
               <Route path="/dashboard" element={<Dashboard />} />
@@ -55,6 +63,7 @@ function App() {
             </Routes>
           </main>
           <Footer />
+          <HelpChatbot />
         </div>
         <Toaster />
       </BrowserRouter>
