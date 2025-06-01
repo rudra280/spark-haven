@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { HelpChatbot } from "@/components/chatbot/HelpChatbot";
@@ -36,40 +37,42 @@ function App() {
       enableSystem
       disableTransitionOnChange
     >
-      <BrowserRouter>
-        <div className="min-h-screen flex flex-col">
-          <Navigation />
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/courses" element={<Courses />} />
-              <Route path="/discover" element={<Courses />} />
-              <Route path="/study-materials" element={<StudyMaterials />} />
-              <Route path="/notes" element={<StudyMaterials />} />
-              <Route path="/ai-videos" element={<AIVideoHub />} />
-              <Route path="/edu-reels" element={<EduReels />} />
-              <Route path="/upload" element={<VideoUpload />} />
-              <Route path="/features" element={<LearningPaths />} />
-              <Route path="/learning-paths" element={<LearningPaths />} />
-              <Route path="/ai-tutor" element={<AITutor />} />
-              <Route path="/video-studio" element={<VideoStudio />} />
-              <Route path="/tutors" element={<Tutors />} />
-              <Route path="/local-tutors" element={<LocalTutors />} />
-              <Route path="/connect" element={<StudentTeacherConnect />} />
-              <Route path="/tutoring" element={<Tutors />} />
-              <Route path="/book-tutor" element={<TutorBooking />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          <Footer />
-          <HelpChatbot />
-        </div>
-        <Toaster />
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <div className="min-h-screen flex flex-col">
+            <Navigation />
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/courses" element={<Courses />} />
+                <Route path="/discover" element={<Courses />} />
+                <Route path="/study-materials" element={<StudyMaterials />} />
+                <Route path="/notes" element={<StudyMaterials />} />
+                <Route path="/ai-videos" element={<AIVideoHub />} />
+                <Route path="/edu-reels" element={<EduReels />} />
+                <Route path="/upload" element={<VideoUpload />} />
+                <Route path="/features" element={<LearningPaths />} />
+                <Route path="/learning-paths" element={<LearningPaths />} />
+                <Route path="/ai-tutor" element={<AITutor />} />
+                <Route path="/video-studio" element={<VideoStudio />} />
+                <Route path="/tutors" element={<Tutors />} />
+                <Route path="/local-tutors" element={<LocalTutors />} />
+                <Route path="/connect" element={<StudentTeacherConnect />} />
+                <Route path="/tutoring" element={<Tutors />} />
+                <Route path="/book-tutor" element={<TutorBooking />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Footer />
+            <HelpChatbot />
+          </div>
+          <Toaster />
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

@@ -10,21 +10,50 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Eye, EyeOff, Mail, Lock, Github } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Eye, EyeOff, Mail, Lock, Github, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
+  const navigate = useNavigate();
+  const { login, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Login attempt:", formData);
+    setError("");
+
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    const result = await login(formData.email, formData.password);
+
+    if (result.success) {
+      navigate("/dashboard");
+    } else {
+      setError(result.error || "Login failed");
+    }
+  };
+
+  // Demo login function
+  const handleDemoLogin = async () => {
+    setError("");
+    const result = await login("john@example.com", "password123");
+
+    if (result.success) {
+      navigate("/dashboard");
+    } else {
+      setError("Demo login failed");
+    }
   };
 
   return (
@@ -39,21 +68,27 @@ export default function Login() {
           <CardHeader className="space-y-1 text-center">
             {/* Logo */}
             <div className="flex items-center justify-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">F</span>
+              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold">🌍</span>
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-cyan-500 to-purple-500 bg-clip-text text-transparent">
-                FUSION
+              <span className="text-2xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent">
+                LEARNVERSE
               </span>
             </div>
 
             <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
             <CardDescription>
-              Sign in to your account to continue learning
+              Sign in to continue your learning journey
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
+            {error && (
+              <Alert className="border-red-200 bg-red-50 text-red-800">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
               <div className="space-y-2">
@@ -70,6 +105,7 @@ export default function Login() {
                     }
                     className="pl-10"
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -78,12 +114,18 @@ export default function Login() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm text-primary hover:underline"
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-sm text-primary hover:underline p-0 h-auto"
+                    onClick={() =>
+                      alert(
+                        "Password reset functionality would be implemented here",
+                      )
+                    }
                   >
                     Forgot password?
-                  </Link>
+                  </Button>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -97,6 +139,7 @@ export default function Login() {
                     }
                     className="pl-10 pr-10"
                     required
+                    disabled={loading}
                   />
                   <Button
                     type="button"
@@ -104,6 +147,7 @@ export default function Login() {
                     size="icon"
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={loading}
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -117,11 +161,30 @@ export default function Login() {
               {/* Sign In Button */}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 hover:opacity-90 text-white"
               >
-                Sign In
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
             </form>
+
+            {/* Demo Login */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleDemoLogin}
+              disabled={loading}
+              className="w-full"
+            >
+              🚀 Try Demo Login (john@example.com)
+            </Button>
 
             {/* Divider */}
             <div className="relative">
@@ -137,7 +200,11 @@ export default function Login() {
 
             {/* Social Login */}
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline">
+              <Button
+                variant="outline"
+                onClick={() => alert("Google OAuth would be implemented here")}
+                disabled={loading}
+              >
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                   <path
                     fill="currentColor"
@@ -158,7 +225,11 @@ export default function Login() {
                 </svg>
                 Google
               </Button>
-              <Button variant="outline">
+              <Button
+                variant="outline"
+                onClick={() => alert("GitHub OAuth would be implemented here")}
+                disabled={loading}
+              >
                 <Github className="w-4 h-4 mr-2" />
                 GitHub
               </Button>
@@ -175,6 +246,19 @@ export default function Login() {
               >
                 Sign up
               </Link>
+            </div>
+
+            {/* Demo Credentials Info */}
+            <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+              <p className="text-xs text-blue-700 dark:text-blue-300 font-medium">
+                Demo Credentials:
+              </p>
+              <p className="text-xs text-blue-600 dark:text-blue-400">
+                Email: john@example.com
+              </p>
+              <p className="text-xs text-blue-600 dark:text-blue-400">
+                Password: password123
+              </p>
             </div>
           </CardContent>
         </Card>
