@@ -20,48 +20,51 @@ import { motion } from "framer-motion";
 const features = [
   {
     icon: BookOpen,
-    title: "Interactive Flashcards",
+    title: "Universal Knowledge Base",
     description:
-      "Short, beautifully animated lessons for quick mastery of key concepts.",
-    badge: "INTERACTIVE LEARNING",
-    gradient: "from-blue-500 to-cyan-500",
-  },
-  {
-    icon: Brain,
-    title: "Smart AI Tutors",
-    description:
-      "Interactive quizzes and flashcards to reinforce your learning path.",
-    badge: "SMART AI TUTORS",
-    gradient: "from-purple-500 to-pink-500",
-  },
-  {
-    icon: Zap,
-    title: "Fast AI",
-    description:
-      "Personalized AI-generated recommendations and feedback. Chat with smart AI tutors instantly.",
-    badge: "FAST AI",
-    gradient: "from-green-500 to-teal-500",
+      "Every subject imaginable - from quantum physics to traditional cooking, ancient history to modern AI.",
+    badge: "🌍 ALL SUBJECTS",
+    gradient: "from-orange-500 to-pink-500",
   },
   {
     icon: Video,
-    title: "Adaptive Learning Paths",
-    description: "Personalized pathways tailored to your goals and progress.",
-    badge: "ADAPTIVE LEARNING PATHS",
-    gradient: "from-orange-500 to-red-500",
+    title: "EduReels & Shorts",
+    description:
+      "Quick bite-sized learning like TikTok. Master complex topics in 60 seconds or less!",
+    badge: "📱 VIRAL LEARNING",
+    gradient: "from-pink-500 to-violet-500",
   },
   {
     icon: Users,
-    title: "Live Human Tutors",
-    description: "Book expert human tutors for in-depth, live coaching.",
-    badge: "LIVE HUMAN TUTORS",
-    gradient: "from-indigo-500 to-purple-500",
+    title: "Global Creator Network",
+    description:
+      "Anyone can upload and teach! Share knowledge from every corner of the world.",
+    badge: "🎥 UPLOAD & SHARE",
+    gradient: "from-violet-500 to-blue-500",
+  },
+  {
+    icon: Brain,
+    title: "AI + Human Tutors",
+    description:
+      "Get instant AI help or book sessions with certified human experts from 195+ countries.",
+    badge: "🤖 HYBRID TUTORING",
+    gradient: "from-blue-500 to-emerald-500",
   },
   {
     icon: MessageSquare,
-    title: "Interactive Content",
-    description: "Chemists, AI-generated videos bring every topic to life.",
-    badge: "INTERACTIVE CONTENT",
-    gradient: "from-pink-500 to-rose-500",
+    title: "Cultural Learning Exchange",
+    description:
+      "Learn languages, traditions, crafts, and wisdom from indigenous communities worldwide.",
+    badge: "🌏 CULTURAL EXCHANGE",
+    gradient: "from-emerald-500 to-teal-500",
+  },
+  {
+    icon: Zap,
+    title: "Real-time Translation",
+    description:
+      "AI-powered translation lets you learn from content in any language, instantly.",
+    badge: "🗣️ UNIVERSAL ACCESS",
+    gradient: "from-teal-500 to-orange-500",
   },
 ];
 
@@ -78,13 +81,13 @@ export function FeatureCards() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-cyan-500 to-purple-500 bg-clip-text text-transparent">
-              Everything you need to learn in style
+            <span className="bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent">
+              Learn Everything, Everywhere, From Everyone 🌍
             </span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            A beautiful, intuitive platform with AI-powered tools. Built for
-            modern learners, teams, and creators.
+            The world's first truly universal learning platform. Every subject,
+            every culture, every skill - accessible to everyone, everywhere.
           </p>
         </motion.div>
 

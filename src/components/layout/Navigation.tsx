@@ -10,9 +10,10 @@ export function Navigation() {
   const location = useLocation();
 
   const navigation = [
-    { name: "Features", href: "/features" },
     { name: "Discover", href: "/courses" },
-    { name: "Tutoring", href: "/tutors" },
+    { name: "EduReels", href: "/edu-reels" },
+    { name: "Upload", href: "/upload" },
+    { name: "Tutors", href: "/tutors" },
     { name: "Pricing", href: "/pricing" },
   ];
 
@@ -24,11 +25,11 @@ export function Navigation() {
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">F</span>
+            <div className="w-8 h-8 bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">🌍</span>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-cyan-500 to-purple-500 bg-clip-text text-transparent">
-              FUSION
+            <span className="text-xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent">
+              LEARNVERSE
             </span>
           </Link>
 
@@ -58,9 +59,9 @@ export function Navigation() {
             <Link to="/register">
               <Button
                 size="sm"
-                className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
+                className="bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 hover:opacity-90 shadow-lg shadow-orange-500/25"
               >
-                Sign Up
+                🚀 Join Global Learning
               </Button>
             </Link>
           </div>

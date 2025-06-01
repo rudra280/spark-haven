@@ -27,9 +27,9 @@ export function HeroSection() {
             transition={{ delay: 0.2, duration: 0.5 }}
             className="inline-flex items-center mb-6"
           >
-            <Badge className="bg-gradient-to-r from-cyan-500 to-purple-500 text-white border-0 px-4 py-2">
+            <Badge className="bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 text-white border-0 px-4 py-2">
               <Sparkles className="w-4 h-4 mr-2" />
-              AI-Powered Learning Platform
+              🌍 Global Knowledge Platform - Every Subject, Everywhere
             </Badge>
           </motion.div>
 
@@ -40,9 +40,9 @@ export function HeroSection() {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
           >
-            <span className="block">Elevate your skills with</span>
-            <span className="block bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              AI Micro-Learning
+            <span className="block">Master Everything with</span>
+            <span className="block bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent">
+              Universal Learning
             </span>
           </motion.h1>
 
@@ -53,8 +53,9 @@ export function HeroSection() {
             transition={{ delay: 0.4, duration: 0.6 }}
             className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 leading-relaxed"
           >
-            Real-world lessons, interactive quizzes, curated learning paths, and
-            1-on-1 tutors. Everything you need, reinvented for you.
+            From quantum physics to traditional cooking, ancient history to
+            modern AI - Learn ANYTHING from global experts. Upload, share, and
+            discover knowledge in every subject! 🌍✨
           </motion.p>
 
           {/* CTA Buttons */}
@@ -66,9 +67,9 @@ export function HeroSection() {
           >
             <Button
               size="lg"
-              className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white px-8 py-6 text-lg font-semibold"
+              className="bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 hover:opacity-90 text-white px-8 py-6 text-lg font-semibold shadow-2xl shadow-orange-500/25"
             >
-              Try It Free
+              🚀 Start Learning Everything
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
 
@@ -89,35 +90,45 @@ export function HeroSection() {
             transition={{ delay: 0.6, duration: 0.8 }}
             className="relative max-w-4xl mx-auto"
           >
-            <div className="relative bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-2xl p-8 backdrop-blur-sm border border-white/10">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="relative bg-gradient-to-r from-orange-500/10 via-pink-500/10 to-violet-500/10 rounded-2xl p-8 backdrop-blur-sm border border-white/10">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                    <span className="text-white font-bold">AI</span>
+                  <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                    <span className="text-white font-bold">🌍</span>
                   </div>
-                  <h3 className="font-semibold mb-2">Smart Learning</h3>
+                  <h3 className="font-semibold mb-2">Every Subject</h3>
                   <p className="text-sm text-muted-foreground">
-                    AI-powered content recommendations
+                    From quantum physics to cooking
                   </p>
                 </div>
 
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                    <span className="text-white font-bold">1:1</span>
+                  <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-violet-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                    <span className="text-white font-bold">📱</span>
                   </div>
-                  <h3 className="font-semibold mb-2">Personal Tutors</h3>
+                  <h3 className="font-semibold mb-2">EduReels</h3>
                   <p className="text-sm text-muted-foreground">
-                    Connect with expert human tutors
+                    Quick learning like TikTok
                   </p>
                 </div>
 
                 <div className="text-center">
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                    <span className="text-white font-bold">∞</span>
+                  <div className="w-12 h-12 bg-gradient-to-r from-violet-500 to-blue-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                    <span className="text-white font-bold">🎥</span>
                   </div>
-                  <h3 className="font-semibold mb-2">Unlimited Access</h3>
+                  <h3 className="font-semibold mb-2">Upload & Share</h3>
                   <p className="text-sm text-muted-foreground">
-                    Access all courses and materials
+                    Teach the world anything
+                  </p>
+                </div>
+
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                    <span className="text-white font-bold">🤖</span>
+                  </div>
+                  <h3 className="font-semibold mb-2">AI + Human</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Best of both worlds
                   </p>
                 </div>
               </div>

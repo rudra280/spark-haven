@@ -10,6 +10,8 @@ import Index from "@/pages/Index";
 import Courses from "@/pages/Courses";
 import AITutor from "@/pages/AITutor";
 import VideoStudio from "@/pages/VideoStudio";
+import VideoUpload from "@/pages/VideoUpload";
+import EduReels from "@/pages/EduReels";
 import Tutors from "@/pages/Tutors";
 import TutorBooking from "@/pages/TutorBooking";
 import Dashboard from "@/pages/Dashboard";
@@ -36,6 +38,8 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/discover" element={<Courses />} />
+              <Route path="/edu-reels" element={<EduReels />} />
+              <Route path="/upload" element={<VideoUpload />} />
               <Route path="/features" element={<LearningPaths />} />
               <Route path="/learning-paths" element={<LearningPaths />} />
               <Route path="/ai-tutor" element={<AITutor />} />
