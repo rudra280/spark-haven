@@ -8,7 +8,16 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, Star, Play } from "lucide-react";
+import {
+  Clock,
+  Users,
+  Star,
+  Play,
+  CheckCircle,
+  Loader2,
+  BookOpen,
+  IndianRupee,
+} from "lucide-react";
 import { motion } from "framer-motion";
 
 interface Course {
@@ -21,15 +30,30 @@ interface Course {
   rating: number;
   level: "Beginner" | "Intermediate" | "Advanced";
   category: string;
+  subject: string;
+  grade: string;
   gradient: string;
+  instructor: string;
+  price: number;
+  curriculum: string[];
+  enrolled: boolean;
 }
 
 interface CourseCardProps {
   course: Course;
   index?: number;
+  onEnroll?: (courseId: string, courseName: string) => void;
+  enrolling?: boolean;
+  isAuthenticated?: boolean;
 }
 
-export function CourseCard({ course, index = 0 }: CourseCardProps) {
+export function CourseCard({
+  course,
+  index = 0,
+  onEnroll,
+  enrolling = false,
+  isAuthenticated = false,
+}: CourseCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

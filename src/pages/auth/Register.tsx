@@ -11,12 +11,18 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Mail, Lock, User, Github } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Eye, EyeOff, Mail, Lock, User, Github, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Register() {
+  const navigate = useNavigate();
+  const { register, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -24,10 +30,40 @@ export default function Register() {
     agreeToTerms: false,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle registration logic here
-    console.log("Registration attempt:", formData);
+    setError("");
+    setSuccess("");
+
+    if (!formData.name || !formData.email || !formData.password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    if (!formData.agreeToTerms) {
+      setError("Please agree to the terms and conditions");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
+    const result = await register({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+    });
+
+    if (result.success) {
+      setSuccess("Account created successfully! Redirecting to dashboard...");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
+    } else {
+      setError(result.error || "Registration failed");
+    }
   };
 
   return (
@@ -42,11 +78,11 @@ export default function Register() {
           <CardHeader className="space-y-1 text-center">
             {/* Logo */}
             <div className="flex items-center justify-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">F</span>
+              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold">🌍</span>
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-cyan-500 to-purple-500 bg-clip-text text-transparent">
-                FUSION
+              <span className="text-2xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent">
+                LEARNVERSE
               </span>
             </div>
 
@@ -54,11 +90,23 @@ export default function Register() {
               Create your account
             </CardTitle>
             <CardDescription>
-              Join thousands of learners and start your journey today
+              Join millions of learners and start your journey today
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
+            {error && (
+              <Alert className="border-red-200 bg-red-50 text-red-800">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {success && (
+              <Alert className="border-green-200 bg-green-50 text-green-800">
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Name */}
               <div className="space-y-2">
@@ -75,6 +123,7 @@ export default function Register() {
                     }
                     className="pl-10"
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -94,6 +143,7 @@ export default function Register() {
                     }
                     className="pl-10"
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -113,6 +163,7 @@ export default function Register() {
                     }
                     className="pl-10 pr-10"
                     required
+                    disabled={loading}
                   />
                   <Button
                     type="button"
@@ -120,6 +171,7 @@ export default function Register() {
                     size="icon"
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={loading}
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -128,6 +180,9 @@ export default function Register() {
                     )}
                   </Button>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Password must be at least 6 characters long
+                </p>
               </div>
 
               {/* Terms Agreement */}
@@ -141,6 +196,7 @@ export default function Register() {
                       agreeToTerms: checked as boolean,
                     })
                   }
+                  disabled={loading}
                 />
                 <Label htmlFor="terms" className="text-sm">
                   I agree to the{" "}
@@ -157,10 +213,17 @@ export default function Register() {
               {/* Sign Up Button */}
               <Button
                 type="submit"
-                disabled={!formData.agreeToTerms}
-                className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white"
+                disabled={!formData.agreeToTerms || loading}
+                className="w-full bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 hover:opacity-90 text-white"
               >
-                Create Account
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
               </Button>
             </form>
 
@@ -178,7 +241,11 @@ export default function Register() {
 
             {/* Social Login */}
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline">
+              <Button
+                variant="outline"
+                onClick={() => alert("Google OAuth would be implemented here")}
+                disabled={loading}
+              >
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                   <path
                     fill="currentColor"
@@ -199,7 +266,11 @@ export default function Register() {
                 </svg>
                 Google
               </Button>
-              <Button variant="outline">
+              <Button
+                variant="outline"
+                onClick={() => alert("GitHub OAuth would be implemented here")}
+                disabled={loading}
+              >
                 <Github className="w-4 h-4 mr-2" />
                 GitHub
               </Button>
@@ -216,6 +287,16 @@ export default function Register() {
               >
                 Sign in
               </Link>
+            </div>
+
+            {/* Benefits */}
+            <div className="text-center p-3 bg-gradient-to-r from-orange-50 to-violet-50 dark:from-orange-950/20 dark:to-violet-950/20 rounded-lg">
+              <p className="text-xs font-medium mb-1">
+                🎉 Join 50M+ learners worldwide!
+              </p>
+              <p className="text-xs text-muted-foreground">
+                ✓ Free courses ✓ AI tutoring ✓ Global community ✓ Certificates
+              </p>
             </div>
           </CardContent>
         </Card>
