@@ -129,7 +129,7 @@ export function TutorSupport() {
                   </div>
                 </div>
 
-                <Link to="/tutors">
+                <Link to="/book-tutor">
                   <Button
                     variant="outline"
                     className="w-full border-purple-200 hover:bg-purple-50 dark:border-purple-800 dark:hover:bg-purple-950"

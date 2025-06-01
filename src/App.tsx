@@ -11,6 +11,9 @@ import Courses from "@/pages/Courses";
 import AITutor from "@/pages/AITutor";
 import VideoStudio from "@/pages/VideoStudio";
 import Tutors from "@/pages/Tutors";
+import TutorBooking from "@/pages/TutorBooking";
+import Dashboard from "@/pages/Dashboard";
+import LearningPaths from "@/pages/LearningPaths";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import NotFound from "@/pages/NotFound";
@@ -33,11 +36,14 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/discover" element={<Courses />} />
-              <Route path="/features" element={<Courses />} />
+              <Route path="/features" element={<LearningPaths />} />
+              <Route path="/learning-paths" element={<LearningPaths />} />
               <Route path="/ai-tutor" element={<AITutor />} />
               <Route path="/video-studio" element={<VideoStudio />} />
               <Route path="/tutors" element={<Tutors />} />
               <Route path="/tutoring" element={<Tutors />} />
+              <Route path="/book-tutor" element={<TutorBooking />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/pricing" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
