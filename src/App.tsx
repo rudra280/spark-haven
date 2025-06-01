@@ -17,6 +17,7 @@ import VideoUpload from "@/pages/VideoUpload";
 import EduReels from "@/pages/EduReels";
 import Tutors from "@/pages/Tutors";
 import LocalTutors from "@/pages/LocalTutors";
+import StudentTeacherConnect from "@/pages/StudentTeacherConnect";
 import TutorBooking from "@/pages/TutorBooking";
 import Dashboard from "@/pages/Dashboard";
 import LearningPaths from "@/pages/LearningPaths";
@@ -53,6 +54,7 @@ function App() {
               <Route path="/video-studio" element={<VideoStudio />} />
               <Route path="/tutors" element={<Tutors />} />
               <Route path="/local-tutors" element={<LocalTutors />} />
+              <Route path="/connect" element={<StudentTeacherConnect />} />
               <Route path="/tutoring" element={<Tutors />} />
               <Route path="/book-tutor" element={<TutorBooking />} />
               <Route path="/dashboard" element={<Dashboard />} />
