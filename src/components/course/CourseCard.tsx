@@ -135,24 +135,26 @@ export function CourseCard({
           </CardDescription>
 
           {/* Curriculum Preview */}
-          <div>
-            <p className="text-sm font-medium mb-2 flex items-center">
-              <BookOpen className="w-4 h-4 mr-1" />
-              What you'll learn:
-            </p>
-            <div className="flex flex-wrap gap-1">
-              {course.curriculum.slice(0, 3).map((item, idx) => (
-                <Badge key={idx} variant="outline" className="text-xs">
-                  {item}
-                </Badge>
-              ))}
-              {course.curriculum.length > 3 && (
-                <Badge variant="outline" className="text-xs">
-                  +{course.curriculum.length - 3} more
-                </Badge>
-              )}
+          {course.curriculum && course.curriculum.length > 0 && (
+            <div>
+              <p className="text-sm font-medium mb-2 flex items-center">
+                <BookOpen className="w-4 h-4 mr-1" />
+                What you'll learn:
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {course.curriculum.slice(0, 3).map((item, idx) => (
+                  <Badge key={idx} variant="outline" className="text-xs">
+                    {item}
+                  </Badge>
+                ))}
+                {course.curriculum.length > 3 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{course.curriculum.length - 3} more
+                  </Badge>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground">
