@@ -37,6 +37,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { PageHeader } from "@/components/ui/back-navigation";
 
 // Academic Levels
 const academicLevels = {
