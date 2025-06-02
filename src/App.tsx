@@ -182,10 +182,10 @@ function AppContent() {
   const { isLoading: authLoading } = useAuth();
 
   useEffect(() => {
-    // Simulate initial app loading
+    // Simulate initial app loading - much faster
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
-    }, 3000);
+    }, 1000); // Reduced from 3000ms to 1000ms
 
     return () => clearTimeout(timer);
   }, []);
