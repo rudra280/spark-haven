@@ -122,6 +122,40 @@ export default function Register() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      const result = await oauthService.signInWithGoogle();
+      if (result.success) {
+        setSuccess("Google sign-up successful! Welcome to LEARNVERSE! 🎉");
+        setTimeout(() => navigate("/dashboard"), 1000);
+      } else {
+        setError(result.error || "Google sign-up failed");
+      }
+    } catch (error) {
+      setError("Google sign-up failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGitHubSignIn = async () => {
+    setIsLoading(true);
+    try {
+      const result = await oauthService.signInWithGitHub();
+      if (result.success) {
+        setSuccess("GitHub sign-up successful! Welcome to LEARNVERSE! 🎉");
+        setTimeout(() => navigate("/dashboard"), 1000);
+      } else {
+        setError(result.error || "GitHub sign-up failed");
+      }
+    } catch (error) {
+      setError("GitHub sign-up failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Back Navigation */}
