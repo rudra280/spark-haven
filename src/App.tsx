@@ -329,8 +329,8 @@ function AppContent() {
                   }
                 />
 
-                {/* Fallback */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                {/* 404 Page */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </motion.div>
           )}
