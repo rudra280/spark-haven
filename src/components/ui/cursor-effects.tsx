@@ -100,7 +100,17 @@ export function CursorEffects({ children }: CursorEffectsProps) {
 }
 
 // Magnetic Button Effect Component
-export function MagneticButton({ children, className = "", ...props }: any) {
+export function MagneticButton({
+  children,
+  className = "",
+  asChild,
+  ...props
+}: {
+  children: React.ReactNode;
+  className?: string;
+  asChild?: boolean;
+  [key: string]: any;
+}) {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -128,11 +138,23 @@ export function MagneticButton({ children, className = "", ...props }: any) {
     };
   }, []);
 
+  // Filter out non-DOM props
+  const { asChild: _, ...domProps } = props;
+
+  // If asChild is true, clone the child element and add our props
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children, {
+      ref: buttonRef,
+      className: `magnetic-button transition-transform duration-300 ${className} ${children.props.className || ""}`,
+      ...domProps,
+    });
+  }
+
   return (
     <button
       ref={buttonRef}
       className={`magnetic-button transition-transform duration-300 ${className}`}
-      {...props}
+      {...domProps}
     >
       {children}
     </button>
