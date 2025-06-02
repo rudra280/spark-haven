@@ -6,16 +6,18 @@ import {
   Navigate,
 } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { CursorEffects } from "@/components/ui/cursor-effects";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
+import { CursorEffects } from "@/components/ui/cursor-effects";
 
 // Page Imports
 import Index from "@/pages/Index";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import Dashboard from "@/pages/Dashboard";
+import CreatorDashboard from "@/pages/CreatorDashboard";
+import InstitutionDashboard from "@/pages/InstitutionDashboard";
 import Courses from "@/pages/Courses";
 import StudyMaterials from "@/pages/StudyMaterials";
 import AIVideoHub from "@/pages/AIVideoHub";
@@ -28,95 +30,48 @@ import TutorBooking from "@/pages/TutorBooking";
 import Pricing from "@/pages/Pricing";
 import NotFound from "@/pages/NotFound";
 
-// Professional Loading Screen Component
-function LoadingScreen() {
+// Quick Loading Component (No more stuck at 0%)
+function QuickLoader() {
   const [progress, setProgress] = useState(0);
-  const [loadingText, setLoadingText] = useState("Initializing LEARNVERSE...");
 
   useEffect(() => {
-    const texts = [
-      "Initializing LEARNVERSE...",
-      "Loading AI Engine...",
-      "Connecting to Knowledge Base...",
-      "Preparing Your Experience...",
-      "Almost Ready!",
-    ];
-
-    let currentTextIndex = 0;
-    const progressInterval = setInterval(() => {
+    // Fast, realistic loading
+    const interval = setInterval(() => {
       setProgress((prev) => {
-        const newProgress = prev + Math.random() * 15;
-        if (newProgress >= 100) {
-          clearInterval(progressInterval);
+        if (prev >= 100) {
+          clearInterval(interval);
           return 100;
         }
-
-        // Update loading text based on progress
-        const textIndex = Math.floor((newProgress / 100) * texts.length);
-        if (textIndex !== currentTextIndex && textIndex < texts.length) {
-          currentTextIndex = textIndex;
-          setLoadingText(texts[textIndex]);
-        }
-
-        return newProgress;
+        return prev + 25; // 25% increments for fast loading
       });
-    }, 200);
+    }, 200); // Every 200ms
 
-    return () => clearInterval(progressInterval);
+    return () => clearInterval(interval);
   }, []);
+
+  if (progress >= 100) return null;
 
   return (
     <motion.div
       className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 0.5 }}
     >
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 via-pink-500/20 to-violet-500/20 bg-[length:400%_400%] animate-gradient" />
-
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
-
-      <div className="relative z-10 text-center">
-        {/* Logo */}
+      <div className="text-center">
         <motion.div
-          className="w-24 h-24 mx-auto mb-8 bg-gradient-to-br from-orange-500 via-pink-500 to-violet-500 rounded-3xl flex items-center justify-center"
-          animate={{
-            scale: [1, 1.1, 1],
-            rotate: [0, 360],
-          }}
-          transition={{
-            scale: { duration: 2, repeat: Infinity },
-            rotate: { duration: 4, repeat: Infinity, ease: "linear" },
-          }}
+          className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-orange-500 via-pink-500 to-violet-500 rounded-2xl flex items-center justify-center"
+          animate={{ scale: [1, 1.1, 1], rotate: [0, 180, 360] }}
+          transition={{ duration: 2, repeat: Infinity }}
         >
-          <span className="text-3xl font-bold text-white">🌍</span>
+          <span className="text-2xl">🌍</span>
         </motion.div>
 
-        {/* Brand Name */}
-        <motion.h1
-          className="text-4xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent mb-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent mb-4">
           LEARNVERSE
-        </motion.h1>
+        </h1>
 
-        {/* Loading Text */}
-        <motion.p
-          className="text-white/70 mb-8 text-lg"
-          key={loadingText}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          {loadingText}
-        </motion.p>
-
-        {/* Progress Bar */}
-        <div className="w-80 h-2 bg-white/10 rounded-full overflow-hidden mx-auto mb-4">
+        <div className="w-64 h-2 bg-white/10 rounded-full overflow-hidden mx-auto mb-2">
           <motion.div
             className="h-full bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500"
             initial={{ width: 0 }}
@@ -125,68 +80,55 @@ function LoadingScreen() {
           />
         </div>
 
-        {/* Progress Percentage */}
-        <motion.p
-          className="text-white/50 text-sm"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          {Math.floor(progress)}%
-        </motion.p>
-
-        {/* Floating Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                y: [0, -20, 0],
-                opacity: [0.3, 1, 0.3],
-                scale: [1, 1.2, 1],
-              }}
-              transition={{
-                duration: 2 + Math.random() * 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-              }}
-            />
-          ))}
-        </div>
+        <p className="text-white/70 text-sm">{progress}% Complete</p>
       </div>
     </motion.div>
   );
 }
 
-// Protected Route Component
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+// Protected Route with Role-based Redirection
+function ProtectedRoute({
+  children,
+  requiredRole,
+}: {
+  children: React.ReactNode;
+  requiredRole?: "student" | "creator" | "institution";
+}) {
+  const { isAuthenticated, user, isLoading } = useAuth();
 
   if (isLoading) {
-    return <LoadingScreen />;
+    return <QuickLoader />;
   }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
+  // Role-based dashboard routing
+  if (requiredRole && user?.role !== requiredRole) {
+    switch (user?.role) {
+      case "creator":
+        return <Navigate to="/creator-dashboard" replace />;
+      case "institution":
+        return <Navigate to="/institution-dashboard" replace />;
+      default:
+        return <Navigate to="/dashboard" replace />;
+    }
+  }
+
   return <>{children}</>;
 }
 
-// Main App Content Component
+// Main App Content
 function AppContent() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const { isLoading: authLoading } = useAuth();
 
   useEffect(() => {
-    // Simulate initial app loading - much faster
+    // Very fast initial loading
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
-    }, 1000); // Reduced from 3000ms to 1000ms
+    }, 800); // Reduced to 800ms for faster loading
 
     return () => clearTimeout(timer);
   }, []);
@@ -195,11 +137,8 @@ function AppContent() {
     <Router>
       <CursorEffects>
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
-          {/* Progress Indicator */}
-          <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 origin-left scale-x-0 progress-indicator" />
-
           <AnimatePresence mode="wait">
-            {(isInitialLoading || authLoading) && <LoadingScreen />}
+            {(isInitialLoading || authLoading) && <QuickLoader />}
           </AnimatePresence>
 
           {!isInitialLoading && !authLoading && (
@@ -207,7 +146,7 @@ function AppContent() {
               className="page-transition"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.5 }}
             >
               <Routes>
                 {/* Public Routes */}
@@ -221,8 +160,10 @@ function AppContent() {
                     </>
                   }
                 />
+
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+
                 <Route
                   path="/courses"
                   element={
@@ -233,6 +174,7 @@ function AppContent() {
                     </>
                   }
                 />
+
                 <Route
                   path="/pricing"
                   element={
@@ -247,17 +189,43 @@ function AppContent() {
                 {/* Special Routes (No Navigation) */}
                 <Route path="/reels" element={<EduReels />} />
 
-                {/* Protected Routes */}
+                {/* Student Dashboard */}
                 <Route
                   path="/dashboard"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute requiredRole="student">
                       <Navigation />
                       <Dashboard />
                       <Footer />
                     </ProtectedRoute>
                   }
                 />
+
+                {/* Creator Dashboard */}
+                <Route
+                  path="/creator-dashboard"
+                  element={
+                    <ProtectedRoute requiredRole="creator">
+                      <Navigation />
+                      <CreatorDashboard />
+                      <Footer />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Institution Dashboard */}
+                <Route
+                  path="/institution-dashboard"
+                  element={
+                    <ProtectedRoute requiredRole="institution">
+                      <Navigation />
+                      <InstitutionDashboard />
+                      <Footer />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Protected Routes */}
                 <Route
                   path="/study-materials"
                   element={
@@ -268,6 +236,7 @@ function AppContent() {
                     </ProtectedRoute>
                   }
                 />
+
                 <Route
                   path="/ai-video-hub"
                   element={
@@ -278,6 +247,7 @@ function AppContent() {
                     </ProtectedRoute>
                   }
                 />
+
                 <Route
                   path="/video-upload"
                   element={
@@ -288,6 +258,7 @@ function AppContent() {
                     </ProtectedRoute>
                   }
                 />
+
                 <Route
                   path="/local-tutors"
                   element={
@@ -298,6 +269,7 @@ function AppContent() {
                     </ProtectedRoute>
                   }
                 />
+
                 <Route
                   path="/student-teacher-connect"
                   element={
@@ -308,6 +280,7 @@ function AppContent() {
                     </ProtectedRoute>
                   }
                 />
+
                 <Route
                   path="/ai-tutor"
                   element={
@@ -318,6 +291,7 @@ function AppContent() {
                     </ProtectedRoute>
                   }
                 />
+
                 <Route
                   path="/tutor-booking"
                   element={
