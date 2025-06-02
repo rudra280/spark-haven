@@ -5,38 +5,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { api } from "@/lib/api";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  plan: "free" | "pro" | "ultimate";
-  avatar: string;
-  verified: boolean;
-  createdAt: string;
-  profile: {
-    bio: string;
-    location: string;
-    website: string;
-    skills: string[];
-    achievements: string[];
-    totalWatchTime: number;
-    coursesCompleted: number;
-    certificates: number;
-  };
-  subscription: {
-    plan: string;
-    status: "active" | "inactive" | "cancelled";
-    validUntil: string | null;
-  };
-  preferences: {
-    language: string;
-    notifications: boolean;
-    theme: "light" | "dark";
-    autoplay: boolean;
-  };
-}
+import { realAuth, User } from "@/lib/realAuth";
 
 interface AuthContextType {
   user: User | null;
@@ -50,8 +19,10 @@ interface AuthContextType {
     name: string;
     email: string;
     password: string;
-    plan?: "free" | "pro" | "ultimate";
+    role: "student" | "creator" | "institution";
   }) => Promise<{ success: boolean; error?: string }>;
+  signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+  signInWithGitHub: () => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateProfile: (updates: Partial<User["profile"]>) => Promise<boolean>;
   upgradePlan: (plan: "pro" | "ultimate") => Promise<boolean>;
@@ -73,20 +44,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const initializeAuth = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("auth_token");
-      const userData = localStorage.getItem("current_user");
-
-      if (token && userData) {
-        const parsedUser = JSON.parse(userData);
-
-        // Validate token (in real app, verify with server)
-        if (isValidToken(token)) {
-          setUser(parsedUser);
-          setIsAuthenticated(true);
-        } else {
-          // Token expired, clear auth
-          logout();
-        }
+      // Check if user is already authenticated
+      const currentUser = realAuth.getCurrentUser();
+      if (currentUser && realAuth.isAuthenticated()) {
+        setUser(currentUser);
+        setIsAuthenticated(true);
+        console.log(
+          "✅ User authenticated:",
+          currentUser.name,
+          `(${currentUser.role})`,
+        );
+      } else {
+        console.log("❌ No authenticated user found");
       }
     } catch (error) {
       console.error("Auth initialization error:", error);
@@ -103,17 +72,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
 
     try {
-      const result = await api.login(email, password);
+      console.log("🔐 Attempting login for:", email);
+      const result = await realAuth.login(email, password);
 
       if (result.success && result.user) {
         setUser(result.user);
         setIsAuthenticated(true);
-
+        console.log(
+          "✅ Login successful:",
+          result.user.name,
+          `(${result.user.role})`,
+        );
         return { success: true };
       } else {
+        console.log("❌ Login failed:", result.error);
         return { success: false, error: result.error || "Login failed" };
       }
     } catch (error) {
+      console.error("Login error:", error);
       return { success: false, error: "Network error. Please try again." };
     } finally {
       setIsLoading(false);
@@ -124,34 +100,119 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     name: string;
     email: string;
     password: string;
-    plan?: "free" | "pro" | "ultimate";
+    role: "student" | "creator" | "institution";
   }): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
 
     try {
-      const result = await api.register(userData);
+      console.log(
+        "📝 Attempting registration for:",
+        userData.email,
+        `as ${userData.role}`,
+      );
+      const result = await realAuth.register(userData);
 
       if (result.success && result.user) {
         setUser(result.user);
         setIsAuthenticated(true);
-
+        console.log(
+          "✅ Registration successful:",
+          result.user.name,
+          `(${result.user.role})`,
+        );
         return { success: true };
       } else {
+        console.log("❌ Registration failed:", result.error);
         return { success: false, error: result.error || "Registration failed" };
       }
     } catch (error) {
+      console.error("Registration error:", error);
       return { success: false, error: "Network error. Please try again." };
     } finally {
       setIsLoading(false);
     }
   };
 
+  const signInWithGoogle = async (): Promise<{
+    success: boolean;
+    error?: string;
+  }> => {
+    setIsLoading(true);
+
+    try {
+      console.log("🔗 Attempting Google OAuth...");
+      const result = await realAuth.signInWithGoogle();
+
+      if (result.success && result.user) {
+        setUser(result.user);
+        setIsAuthenticated(true);
+        console.log(
+          "✅ Google OAuth successful:",
+          result.user.name,
+          `(${result.user.role})`,
+        );
+        return { success: true };
+      } else {
+        console.log("❌ Google OAuth failed:", result.error);
+        return {
+          success: false,
+          error: result.error || "Google sign-in failed",
+        };
+      }
+    } catch (error) {
+      console.error("Google OAuth error:", error);
+      return {
+        success: false,
+        error: "Google sign-in failed. Please try again.",
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signInWithGitHub = async (): Promise<{
+    success: boolean;
+    error?: string;
+  }> => {
+    setIsLoading(true);
+
+    try {
+      console.log("🔗 Attempting GitHub OAuth...");
+      const result = await realAuth.signInWithGitHub();
+
+      if (result.success && result.user) {
+        setUser(result.user);
+        setIsAuthenticated(true);
+        console.log(
+          "✅ GitHub OAuth successful:",
+          result.user.name,
+          `(${result.user.role})`,
+        );
+        return { success: true };
+      } else {
+        console.log("❌ GitHub OAuth failed:", result.error);
+        return {
+          success: false,
+          error: result.error || "GitHub sign-in failed",
+        };
+      }
+    } catch (error) {
+      console.error("GitHub OAuth error:", error);
+      return {
+        success: false,
+        error: "GitHub sign-in failed. Please try again.",
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
+    console.log("🚪 User logging out...");
+    realAuth.logout();
     setUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("current_user");
-    api.logout();
+    console.log("✅ Logout successful");
   };
 
   const updateProfile = async (
@@ -166,8 +227,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
 
       setUser(updatedUser);
-      localStorage.setItem("current_user", JSON.stringify(updatedUser));
+      localStorage.setItem("learnverse_user_data", JSON.stringify(updatedUser));
 
+      console.log("✅ Profile updated successfully");
       return true;
     } catch (error) {
       console.error("Profile update error:", error);
@@ -179,34 +241,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return false;
 
     try {
-      const paymentResult = await api.processPayment({
-        amount: plan === "pro" ? 1499 : 2999,
-        currency: "INR",
-        method: "upi",
-        planId: plan,
-      });
+      // Simulate payment processing
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      if (paymentResult.success) {
-        const updatedUser = {
-          ...user,
+      const updatedUser = {
+        ...user,
+        subscription: {
+          ...user.subscription,
           plan,
-          subscription: {
-            ...user.subscription,
-            plan,
-            status: "active" as const,
-            validUntil: new Date(
-              Date.now() + 30 * 24 * 60 * 60 * 1000,
-            ).toISOString(),
-          },
-        };
+          status: "active" as const,
+          validUntil: new Date(
+            Date.now() + 30 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+        },
+        permissions: {
+          ...user.permissions,
+          hasPremiumFeatures: true,
+          hasAIAccess: true,
+        },
+      };
 
-        setUser(updatedUser);
-        localStorage.setItem("current_user", JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      localStorage.setItem("learnverse_user_data", JSON.stringify(updatedUser));
 
-        return true;
-      }
-
-      return false;
+      console.log("✅ Plan upgraded to:", plan);
+      return true;
     } catch (error) {
       console.error("Plan upgrade error:", error);
       return false;
@@ -214,23 +273,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshUser = async (): Promise<void> => {
-    // Refresh user data from localStorage/server
-    const userData = localStorage.getItem("current_user");
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-  };
-
-  // Helper functions
-  const isValidToken = (token: string): boolean => {
-    try {
-      const parts = token.split(".");
-      if (parts.length !== 3) return false;
-
-      const payload = JSON.parse(atob(parts[1]));
-      return payload.exp > Date.now();
-    } catch {
-      return false;
+    const currentUser = realAuth.getCurrentUser();
+    if (currentUser) {
+      setUser(currentUser);
     }
   };
 
@@ -240,6 +285,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     login,
     register,
+    signInWithGoogle,
+    signInWithGitHub,
     logout,
     updateProfile,
     upgradePlan,
