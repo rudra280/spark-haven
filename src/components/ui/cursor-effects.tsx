@@ -26,14 +26,22 @@ export function CursorEffects({ children }: CursorEffectsProps) {
     };
 
     const handleMouseEnter = (e: Event) => {
-      const target = e.target as HTMLElement;
+      const target = e.target;
+      // Check if target is an HTMLElement and has the matches method
       if (
-        target.matches('button, a, [role="button"], input, textarea, select')
+        target &&
+        typeof target === "object" &&
+        "matches" in target &&
+        typeof (target as HTMLElement).matches === "function"
       ) {
-        setIsPointer(true);
+        const element = target as HTMLElement;
+        if (
+          element.matches('button, a, [role="button"], input, textarea, select')
+        ) {
+          setIsPointer(true);
+        }
       }
     };
-
     const handleMouseLeave = () => {
       setIsPointer(false);
     };
