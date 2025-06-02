@@ -17,6 +17,7 @@ import { motion } from "framer-motion";
 import { useCourseStore } from "@/store/courseStore";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/lib/api";
+import { PageHeader } from "@/components/ui/back-navigation";
 
 const categories = [
   "All",
