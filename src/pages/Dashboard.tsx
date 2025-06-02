@@ -192,7 +192,29 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen pt-20 pb-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* Page Header with Back Navigation */}
+        <PageHeader
+          title={`Welcome back, ${user?.name?.split(" ")[0]}! 👋`}
+          subtitle="Ready to continue your learning journey?"
+          className="mb-8"
+        >
+          <div className="flex flex-wrap gap-4 mt-4">
+            <Link to="/tutor-booking">
+              <Button variant="outline">
+                <Calendar className="w-4 h-4 mr-2" />
+                Schedule Session
+              </Button>
+            </Link>
+            <Link to="/ai-tutor">
+              <Button className="bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500">
+                <Zap className="w-4 h-4 mr-2" />
+                Quick AI Help
+              </Button>
+            </Link>
+          </div>
+        </PageHeader>
+
+        {/* Original Header Section (keeping the additional content) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -200,16 +222,6 @@ export default function Dashboard() {
           className="mb-8"
         >
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold">
-                <span className="bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent">
-                  Welcome back, {user?.name?.split(" ")[0]}! 👋
-                </span>
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                Ready to continue your learning journey?
-              </p>
-            </div>
             <div className="hidden md:flex items-center space-x-4">
               <Link to="/book-tutor">
                 <Button variant="outline">
