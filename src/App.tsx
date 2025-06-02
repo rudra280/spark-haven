@@ -26,6 +26,7 @@ import StudentTeacherConnect from "@/pages/StudentTeacherConnect";
 import AITutor from "@/pages/AITutor";
 import TutorBooking from "@/pages/TutorBooking";
 import Pricing from "@/pages/Pricing";
+import NotFound from "@/pages/NotFound";
 
 // Professional Loading Screen Component
 function LoadingScreen() {
