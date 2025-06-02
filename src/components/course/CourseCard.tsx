@@ -101,7 +101,7 @@ export function CourseCard({
           <div className="absolute bottom-4 right-4">
             <Badge className="bg-black/70 text-white">
               <IndianRupee className="w-3 h-3 mr-1" />
-              {course.price.toLocaleString()}
+              {(course.price || 0).toLocaleString()}
             </Badge>
           </div>
         </div>
