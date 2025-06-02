@@ -30,6 +30,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { MagneticButton } from "@/components/ui/cursor-effects";
 import { QuickBackButton } from "@/components/ui/back-navigation";
 import { oauthService } from "@/lib/oauth";
+import { PageRouter } from "@/components/layout/PageRouter";
 
 interface FloatingParticle {
   id: number;
