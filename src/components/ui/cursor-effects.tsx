@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
 
 interface CursorEffectsProps {
   children: React.ReactNode;
@@ -18,19 +17,12 @@ export function CursorEffects({ children }: CursorEffectsProps) {
     if (!cursor || !follower) return;
 
     const moveCursor = (e: MouseEvent) => {
-      gsap.to(cursor, {
-        x: e.clientX,
-        y: e.clientY,
-        duration: 0.1,
-        ease: "power2.out",
-      });
-
-      gsap.to(follower, {
-        x: e.clientX,
-        y: e.clientY,
-        duration: 0.3,
-        ease: "power2.out",
-      });
+      if (cursor) {
+        cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      }
+      if (follower) {
+        follower.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      }
     };
 
     const handleMouseEnter = (e: Event) => {
@@ -39,59 +31,19 @@ export function CursorEffects({ children }: CursorEffectsProps) {
         target.matches('button, a, [role="button"], input, textarea, select')
       ) {
         setIsPointer(true);
-        gsap.to(cursor, {
-          scale: 0.5,
-          duration: 0.2,
-          ease: "power2.out",
-        });
-        gsap.to(follower, {
-          scale: 2,
-          duration: 0.2,
-          ease: "power2.out",
-        });
       }
     };
 
     const handleMouseLeave = () => {
       setIsPointer(false);
-      gsap.to(cursor, {
-        scale: 1,
-        duration: 0.2,
-        ease: "power2.out",
-      });
-      gsap.to(follower, {
-        scale: 1,
-        duration: 0.2,
-        ease: "power2.out",
-      });
     };
 
     const handleMouseDown = () => {
       setIsClicking(true);
-      gsap.to(cursor, {
-        scale: 0.8,
-        duration: 0.1,
-        ease: "power2.out",
-      });
-      gsap.to(follower, {
-        scale: 0.8,
-        duration: 0.1,
-        ease: "power2.out",
-      });
     };
 
     const handleMouseUp = () => {
       setIsClicking(false);
-      gsap.to(cursor, {
-        scale: isPointer ? 0.5 : 1,
-        duration: 0.1,
-        ease: "power2.out",
-      });
-      gsap.to(follower, {
-        scale: isPointer ? 2 : 1,
-        duration: 0.1,
-        ease: "power2.out",
-      });
     };
 
     document.addEventListener("mousemove", moveCursor);
@@ -114,8 +66,8 @@ export function CursorEffects({ children }: CursorEffectsProps) {
       {/* Main Cursor */}
       <div
         ref={cursorRef}
-        className={`fixed top-0 left-0 w-4 h-4 bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 rounded-full pointer-events-none z-[9999] mix-blend-difference transform -translate-x-1/2 -translate-y-1/2 ${
-          isClicking ? "animate-pulse" : ""
+        className={`fixed top-0 left-0 w-4 h-4 bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 rounded-full pointer-events-none z-[9999] mix-blend-difference transform -translate-x-1/2 -translate-y-1/2 transition-all duration-100 ${
+          isClicking ? "scale-75" : isPointer ? "scale-50" : "scale-100"
         }`}
         style={{ willChange: "transform" }}
       />
@@ -123,8 +75,10 @@ export function CursorEffects({ children }: CursorEffectsProps) {
       {/* Follower */}
       <div
         ref={followerRef}
-        className={`fixed top-0 left-0 w-8 h-8 border-2 border-gradient-to-r from-orange-500 via-pink-500 to-violet-500 rounded-full pointer-events-none z-[9998] transform -translate-x-1/2 -translate-y-1/2 ${
-          isPointer ? "border-opacity-100" : "border-opacity-50"
+        className={`fixed top-0 left-0 w-8 h-8 border-2 border-gradient-to-r from-orange-500 via-pink-500 to-violet-500 rounded-full pointer-events-none z-[9998] transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
+          isPointer
+            ? "scale-200 border-opacity-100"
+            : "scale-100 border-opacity-50"
         }`}
         style={{
           willChange: "transform",
@@ -150,21 +104,11 @@ export function MagneticButton({ children, className = "", ...props }: any) {
       const x = e.clientX - rect.left - rect.width / 2;
       const y = e.clientY - rect.top - rect.height / 2;
 
-      gsap.to(button, {
-        x: x * 0.3,
-        y: y * 0.3,
-        duration: 0.3,
-        ease: "power2.out",
-      });
+      button.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
     };
 
     const handleMouseLeave = () => {
-      gsap.to(button, {
-        x: 0,
-        y: 0,
-        duration: 0.5,
-        ease: "elastic.out(1, 0.3)",
-      });
+      button.style.transform = "translate(0px, 0px)";
     };
 
     button.addEventListener("mousemove", handleMouseMove);
@@ -179,7 +123,7 @@ export function MagneticButton({ children, className = "", ...props }: any) {
   return (
     <button
       ref={buttonRef}
-      className={`magnetic-button ${className}`}
+      className={`magnetic-button transition-transform duration-300 ${className}`}
       {...props}
     >
       {children}
@@ -207,9 +151,7 @@ export function ParallaxText({
       const scrolled = window.pageYOffset;
       const rate = scrolled * -speed;
 
-      gsap.set(text, {
-        y: rate,
-      });
+      text.style.transform = `translateY(${rate}px)`;
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -234,27 +176,17 @@ export function RevealAnimation({
   className?: string;
 }) {
   const elementRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const element = elementRef.current;
     if (!element) return;
 
-    gsap.set(element, {
-      y: 100,
-      opacity: 0,
-    });
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            gsap.to(element, {
-              y: 0,
-              opacity: 1,
-              duration: 1,
-              delay,
-              ease: "power3.out",
-            });
+            setTimeout(() => setIsVisible(true), delay * 1000);
             observer.unobserve(element);
           }
         });
@@ -268,7 +200,12 @@ export function RevealAnimation({
   }, [delay]);
 
   return (
-    <div ref={elementRef} className={`reveal-animation ${className}`}>
+    <div
+      ref={elementRef}
+      className={`reveal-animation transition-all duration-1000 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-24"
+      } ${className}`}
+    >
       {children}
     </div>
   );
