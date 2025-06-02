@@ -30,6 +30,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import api from "@/lib/api";
+import { PageHeader } from "@/components/ui/back-navigation";
 
 interface UserStats {
   totalHours: number;
