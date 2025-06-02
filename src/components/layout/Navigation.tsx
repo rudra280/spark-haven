@@ -1,8 +1,33 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { gsap } from "gsap";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Menu,
+  X,
+  User,
+  Settings,
+  LogOut,
+  Crown,
+  Zap,
+  BookOpen,
+  Video,
+  Users,
+  Brain,
+  Upload,
+  Calendar,
+  MapPin,
+  CreditCard,
+  Bell,
+  Search,
+  Globe,
+  Sparkles,
+  ChevronDown,
+  Star,
+  TrendingUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,278 +36,517 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Menu, X, User, LogOut, BookOpen, Settings } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { MagneticButton } from "@/components/ui/cursor-effects";
+
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+  description: string;
+  premium?: boolean;
+  new?: boolean;
+  hot?: boolean;
+}
+
+const navigationItems: NavItem[] = [
+  {
+    name: "Courses",
+    href: "/courses",
+    icon: BookOpen,
+    description: "Explore our vast course library",
+  },
+  {
+    name: "AI Video Hub",
+    href: "/ai-video-hub",
+    icon: Video,
+    description: "Generate and manage AI videos",
+    premium: true,
+  },
+  {
+    name: "EduReels",
+    href: "/reels",
+    icon: TrendingUp,
+    description: "Short educational content",
+    hot: true,
+  },
+  {
+    name: "Study Materials",
+    href: "/study-materials",
+    icon: Brain,
+    description: "Premium study resources",
+    premium: true,
+  },
+  {
+    name: "Local Tutors",
+    href: "/local-tutors",
+    icon: MapPin,
+    description: "Find tutors near you",
+  },
+  {
+    name: "AI Tutor",
+    href: "/ai-tutor",
+    icon: Zap,
+    description: "Chat with AI assistant",
+    new: true,
+  },
+  {
+    name: "Upload",
+    href: "/video-upload",
+    icon: Upload,
+    description: "Share your knowledge",
+  },
+];
 
 export function Navigation() {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
+  const [notifications, setNotifications] = useState(3);
+
   const { user, isAuthenticated, logout } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const navRef = useRef<HTMLElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-  const navigation = [
-    { name: "Courses", href: "/courses" },
-    { name: "Notes", href: "/study-materials" },
-    { name: "AI Videos", href: "/ai-videos" },
-    { name: "EduReels", href: "/edu-reels" },
-    { name: "Tutors", href: "/local-tutors" },
-    { name: "Pricing", href: "/pricing" },
-  ];
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
 
-  const isActive = (path: string) => location.pathname === path;
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    // Animate navigation on scroll
+    if (navRef.current) {
+      gsap.to(navRef.current, {
+        backdropFilter: isScrolled ? "blur(20px)" : "blur(0px)",
+        backgroundColor: isScrolled
+          ? "rgba(15, 23, 42, 0.8)"
+          : "rgba(15, 23, 42, 0.1)",
+        duration: 0.3,
+        ease: "power2.out",
+      });
+    }
+  }, [isScrolled]);
+
+  useEffect(() => {
+    // Mobile menu animation
+    if (mobileMenuRef.current) {
+      if (isOpen) {
+        gsap.fromTo(
+          mobileMenuRef.current,
+          { opacity: 0, y: -20 },
+          { opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.7)" },
+        );
+      }
+    }
+  }, [isOpen]);
 
   const handleLogout = () => {
     logout();
-    setIsOpen(false);
+    navigate("/");
   };
 
-  const getPlanBadge = (plan: string) => {
-    switch (plan?.toLowerCase()) {
+  const isActive = (path: string) => location.pathname === path;
+
+  const getPlanColor = (plan: string) => {
+    switch (plan) {
       case "pro":
-        return (
-          <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100 text-xs">
-            Pro
-          </Badge>
-        );
+        return "from-blue-500 to-cyan-500";
       case "ultimate":
-        return (
-          <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100 text-xs">
-            Ultimate
-          </Badge>
-        );
+        return "from-purple-500 to-pink-500";
       default:
-        return (
-          <Badge variant="secondary" className="text-xs">
-            Free
-          </Badge>
-        );
+        return "from-gray-500 to-gray-600";
     }
   };
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b">
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">🌍</span>
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent">
-              LEARNVERSE
-            </span>
-          </Link>
+    <motion.nav
+      ref={navRef}
+      className="fixed top-0 left-0 right-0 z-40 border-b border-white/10"
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.6, ease: "power3.out" }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo and Brand */}
+          <motion.div
+            className="flex items-center space-x-3"
+            whileHover={{ scale: 1.02 }}
+          >
+            <Link to="/" className="flex items-center space-x-3 group">
+              {/* New Professional Logo */}
+              <div className="relative">
+                <motion.div
+                  className="w-10 h-10 bg-gradient-to-br from-orange-500 via-pink-500 to-violet-500 rounded-xl flex items-center justify-center"
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.8, ease: "back.out(1.7)" }}
+                >
+                  <Globe className="w-6 h-6 text-white" />
+                </motion.div>
+
+                {/* Glowing Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-pink-500 to-violet-500 rounded-xl blur-lg opacity-30 -z-10 group-hover:opacity-50 transition-opacity" />
+              </div>
+
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent">
+                  LEARNVERSE
+                </h1>
+                <p className="text-xs text-white/60 -mt-1">
+                  Learn Everything, Everywhere
+                </p>
+              </div>
+            </Link>
+          </motion.div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navigation.map((item) => (
-              <Link
+          <div className="hidden lg:flex items-center space-x-1">
+            {navigationItems.map((item) => (
+              <motion.div
                 key={item.name}
-                to={item.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  isActive(item.href) ? "text-primary" : "text-muted-foreground"
-                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {item.name}
-              </Link>
+                <Link
+                  to={item.href}
+                  className={`relative px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group ${
+                    isActive(item.href)
+                      ? "text-white bg-gradient-to-r from-orange-500/20 via-pink-500/20 to-violet-500/20"
+                      : "text-white/70 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <item.icon className="w-4 h-4" />
+                    <span>{item.name}</span>
+
+                    {/* Badges */}
+                    {item.premium && (
+                      <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-1.5 py-0.5">
+                        <Crown className="w-3 h-3 mr-1" />
+                        PRO
+                      </Badge>
+                    )}
+                    {item.new && (
+                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-1.5 py-0.5">
+                        NEW
+                      </Badge>
+                    )}
+                    {item.hot && (
+                      <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs px-1.5 py-0.5 animate-pulse">
+                        🔥 HOT
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Active indicator */}
+                  {isActive(item.href) && (
+                    <motion.div
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500"
+                      layoutId="activeIndicator"
+                      initial={false}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 30,
+                      }}
+                    />
+                  )}
+                </Link>
+              </motion.div>
             ))}
           </div>
 
-          {/* Desktop Actions */}
+          {/* Search Bar */}
           <div className="hidden md:flex items-center space-x-4">
-            <ThemeToggle />
-
-            {isAuthenticated && user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="relative h-10 w-10 rounded-full"
-                  >
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-gradient-to-r from-orange-500 to-violet-500 text-white">
-                        {user.name
-                          ?.split(" ")
-                          .map((n) => n[0])
-                          .join("") || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        {user.name}
-                      </p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {user.email}
-                      </p>
-                      <div className="pt-1">{getPlanBadge(user.plan)}</div>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard" className="cursor-pointer">
-                      <BookOpen className="mr-2 h-4 w-4" />
-                      <span>Dashboard</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile" className="cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/settings" className="cursor-pointer">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    className="cursor-pointer"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <>
-                <Link to="/login">
-                  <Button variant="ghost" size="sm">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link to="/register">
-                  <Button
-                    size="sm"
-                    className="bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 hover:opacity-90 shadow-lg shadow-orange-500/25"
-                  >
-                    🚀 Join Global Learning
-                  </Button>
-                </Link>
-              </>
-            )}
+            <AnimatePresence>
+              {showSearch ? (
+                <motion.div
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: 200, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  className="relative"
+                >
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
+                  <Input
+                    type="text"
+                    placeholder="Search courses..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-pink-400"
+                    onBlur={() => !searchQuery && setShowSearch(false)}
+                    autoFocus
+                  />
+                </motion.div>
+              ) : (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="text-white/70 hover:text-white hover:bg-white/10"
+                  onClick={() => setShowSearch(true)}
+                >
+                  <Search className="w-4 h-4" />
+                </Button>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center space-x-2">
-            <ThemeToggle />
+          {/* Right Side */}
+          <div className="flex items-center space-x-3">
+            {isAuthenticated && user ? (
+              <>
+                {/* Notifications */}
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="relative text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <Bell className="w-4 h-4" />
+                  {notifications > 0 && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center text-xs text-white"
+                    >
+                      {notifications}
+                    </motion.div>
+                  )}
+                </Button>
+
+                {/* User Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="relative h-10 px-2 text-white/70 hover:text-white hover:bg-white/10"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Avatar className="h-8 w-8 user-avatar">
+                          <AvatarImage src={user.avatar} alt={user.name} />
+                          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-violet-500 text-white">
+                            {user.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="hidden sm:block text-left">
+                          <p className="text-sm font-medium">{user.name}</p>
+                          <p className="text-xs text-white/50 capitalize">
+                            {user.plan} Plan
+                          </p>
+                        </div>
+                        <ChevronDown className="w-4 h-4" />
+                      </div>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-64 bg-slate-800/95 backdrop-blur-xl border-white/20"
+                  >
+                    <DropdownMenuLabel>
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={user.avatar} alt={user.name} />
+                          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-violet-500 text-white">
+                            {user.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-white font-medium">{user.name}</p>
+                          <p className="text-white/60 text-sm">{user.email}</p>
+                          <Badge
+                            className={`mt-1 bg-gradient-to-r ${getPlanColor(user.plan)} text-white text-xs`}
+                          >
+                            {user.plan.toUpperCase()} PLAN
+                          </Badge>
+                        </div>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="border-white/20" />
+
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/dashboard"
+                        className="flex items-center space-x-2 text-white hover:bg-white/10"
+                      >
+                        <User className="w-4 h-4" />
+                        <span>Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/profile"
+                        className="flex items-center space-x-2 text-white hover:bg-white/10"
+                      >
+                        <Settings className="w-4 h-4" />
+                        <span>Profile Settings</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {user.plan === "free" && (
+                      <DropdownMenuItem asChild>
+                        <Link
+                          to="/pricing"
+                          className="flex items-center space-x-2 text-orange-400 hover:bg-orange-500/10"
+                        >
+                          <Crown className="w-4 h-4" />
+                          <span>Upgrade Plan</span>
+                          <Sparkles className="w-3 h-3 ml-auto" />
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenuSeparator className="border-white/20" />
+
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="text-red-400 hover:bg-red-500/10"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      <span>Sign Out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <Link to="/login">Sign In</Link>
+                </Button>
+                <MagneticButton
+                  size="sm"
+                  asChild
+                  className="bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 hover:opacity-90 text-white"
+                >
+                  <Link to="/register">Get Started</Link>
+                </MagneticButton>
+              </div>
+            )}
+
+            {/* Mobile Menu Button */}
             <Button
-              variant="ghost"
               size="icon"
+              variant="ghost"
+              className="lg:hidden text-white/70 hover:text-white hover:bg-white/10"
               onClick={() => setIsOpen(!isOpen)}
             >
               {isOpen ? (
-                <X className="h-5 w-5" />
+                <X className="w-5 h-5" />
               ) : (
-                <Menu className="h-5 w-5" />
+                <Menu className="w-5 h-5" />
               )}
             </Button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Navigation */}
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden"
-            >
-              <div className="px-2 pt-2 pb-3 space-y-1 bg-background border-t">
-                {/* User info for mobile */}
-                {isAuthenticated && user && (
-                  <div className="px-3 py-2 border-b mb-2">
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-gradient-to-r from-orange-500 to-violet-500 text-white">
-                          {user.name
-                            ?.split(" ")
-                            .map((n) => n[0])
-                            .join("") || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{user.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {user.email}
-                        </p>
-                        {getPlanBadge(user.plan)}
-                      </div>
-                    </div>
-                  </div>
-                )}
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            ref={mobileMenuRef}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="lg:hidden bg-slate-900/95 backdrop-blur-xl border-t border-white/10"
+          >
+            <div className="px-4 py-6 space-y-3">
+              {/* Mobile Search */}
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
+                <Input
+                  type="text"
+                  placeholder="Search courses..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                />
+              </div>
 
-                {/* Navigation items */}
-                {navigation.map((item) => (
+              {/* Mobile Navigation Items */}
+              {navigationItems.map((item) => (
+                <motion.div
+                  key={item.name}
+                  whileHover={{ x: 5 }}
+                  whileTap={{ scale: 0.98 }}
+                >
                   <Link
-                    key={item.name}
                     to={item.href}
-                    className={`block px-3 py-2 rounded-md text-base font-medium ${
+                    className={`flex items-center justify-between p-3 rounded-lg transition-all ${
                       isActive(item.href)
-                        ? "text-primary bg-primary/10"
-                        : "text-muted-foreground hover:text-primary hover:bg-primary/5"
+                        ? "bg-gradient-to-r from-orange-500/20 via-pink-500/20 to-violet-500/20 text-white"
+                        : "text-white/70 hover:text-white hover:bg-white/10"
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
-                    {item.name}
-                  </Link>
-                ))}
+                    <div className="flex items-center space-x-3">
+                      <item.icon className="w-5 h-5" />
+                      <div>
+                        <p className="font-medium">{item.name}</p>
+                        <p className="text-xs text-white/50">
+                          {item.description}
+                        </p>
+                      </div>
+                    </div>
 
-                {/* Auth actions for mobile */}
-                {isAuthenticated && user ? (
-                  <div className="pt-2 border-t">
-                    <Link
-                      to="/dashboard"
-                      className="block px-3 py-2 rounded-md text-base font-medium text-muted-foreground hover:text-primary hover:bg-primary/5"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      Dashboard
+                    <div className="flex items-center space-x-1">
+                      {item.premium && (
+                        <Crown className="w-4 h-4 text-purple-400" />
+                      )}
+                      {item.new && (
+                        <Badge className="bg-green-500 text-white text-xs">
+                          NEW
+                        </Badge>
+                      )}
+                      {item.hot && (
+                        <Badge className="bg-red-500 text-white text-xs animate-pulse">
+                          🔥
+                        </Badge>
+                      )}
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+
+              {!isAuthenticated && (
+                <div className="pt-4 border-t border-white/10 space-y-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                    className="w-full border-white/20 text-white hover:bg-white/10"
+                  >
+                    <Link to="/login" onClick={() => setIsOpen(false)}>
+                      Sign In
                     </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-muted-foreground hover:text-primary hover:bg-primary/5"
-                    >
-                      Sign Out
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex space-x-2 px-3 py-2 pt-4 border-t">
-                    <Link
-                      to="/login"
-                      className="flex-1"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Button variant="outline" size="sm" className="w-full">
-                        Sign In
-                      </Button>
+                  </Button>
+                  <Button
+                    size="sm"
+                    asChild
+                    className="w-full bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 hover:opacity-90 text-white"
+                  >
+                    <Link to="/register" onClick={() => setIsOpen(false)}>
+                      Get Started
                     </Link>
-                    <Link
-                      to="/register"
-                      className="flex-1"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Button
-                        size="sm"
-                        className="w-full bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500"
-                      >
-                        Sign Up
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
-    </header>
+                  </Button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.nav>
   );
 }
