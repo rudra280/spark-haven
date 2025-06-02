@@ -29,6 +29,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { MagneticButton } from "@/components/ui/cursor-effects";
 import { QuickBackButton } from "@/components/ui/back-navigation";
+import { oauthService } from "@/lib/oauth";
 
 interface FloatingParticle {
   id: number;
