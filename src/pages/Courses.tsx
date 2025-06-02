@@ -415,24 +415,12 @@ export default function Courses() {
   return (
     <div className="min-h-screen pt-20 pb-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent">
-              🎓 Every Subject, Every Grade, Everywhere!
-            </span>
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            From kindergarten to PhD, traditional crafts to quantum physics -
-            discover courses for every learning journey! 🌍 K-5 to Graduate
-            level, all subjects covered!
-          </p>
-        </motion.div>
+        {/* Page Header with Back Navigation */}
+        <PageHeader
+          title="🎓 Every Subject, Every Grade, Everywhere!"
+          subtitle="From kindergarten to PhD, traditional crafts to quantum physics - discover courses for every learning journey! 🌍 K-5 to Graduate level, all subjects covered!"
+          className="mb-12 text-center"
+        />
 
         {/* Enrollment Message */}
         {enrollmentMessage && (
