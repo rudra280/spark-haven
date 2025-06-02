@@ -14,6 +14,7 @@ import {
   Zap,
   CheckCircle,
   AlertCircle,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,9 +29,6 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { MagneticButton } from "@/components/ui/cursor-effects";
-import { QuickBackButton } from "@/components/ui/back-navigation";
-import { oauthService } from "@/lib/oauth";
-import { PageRouter } from "@/components/layout/PageRouter";
 
 interface FloatingParticle {
   id: number;
@@ -50,7 +48,7 @@ export default function Login() {
   const [success, setSuccess] = useState("");
   const [particles, setParticles] = useState<FloatingParticle[]>([]);
 
-  const { login } = useAuth();
+  const { login, signInWithGoogle, signInWithGitHub } = useAuth();
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
 
@@ -115,11 +113,12 @@ export default function Login() {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
+    setError("");
     try {
-      const result = await oauthService.signInWithGoogle();
+      const result = await signInWithGoogle();
       if (result.success) {
         setSuccess("Google sign-in successful! Welcome to LEARNVERSE! 🎉");
-        setTimeout(() => navigate("/dashboard"), 1000);
+        setTimeout(() => navigate("/dashboard"), 1500);
       } else {
         setError(result.error || "Google sign-in failed");
       }
@@ -132,11 +131,12 @@ export default function Login() {
 
   const handleGitHubSignIn = async () => {
     setIsLoading(true);
+    setError("");
     try {
-      const result = await oauthService.signInWithGitHub();
+      const result = await signInWithGitHub();
       if (result.success) {
         setSuccess("GitHub sign-in successful! Welcome to LEARNVERSE! 🎉");
-        setTimeout(() => navigate("/dashboard"), 1000);
+        setTimeout(() => navigate("/dashboard"), 1500);
       } else {
         setError(result.error || "GitHub sign-in failed");
       }
@@ -149,8 +149,22 @@ export default function Login() {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Back Navigation */}
-      <QuickBackButton />
+      {/* Back Button */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="absolute top-6 left-6 z-50"
+      >
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-white/70 hover:text-white hover:bg-white/10"
+          onClick={() => navigate("/")}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Home
+        </Button>
+      </motion.div>
 
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 via-pink-500/20 to-violet-500/20 bg-[length:400%_400%] animate-gradient" />
@@ -201,7 +215,7 @@ export default function Login() {
                   Welcome Back
                 </CardTitle>
                 <CardDescription className="text-white/70 mt-2">
-                  Continue your learning journey with LEARNVERSE
+                  Sign in to continue your learning journey
                 </CardDescription>
               </div>
 
@@ -231,7 +245,7 @@ export default function Login() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white text-sm font-medium">
-                      Try Demo Account
+                      Quick Demo Login
                     </p>
                     <p className="text-white/70 text-xs">
                       demo@learnverse.ai / demo123
@@ -247,6 +261,27 @@ export default function Login() {
                   </Button>
                 </div>
               </motion.div>
+
+              {/* OAuth Buttons - Primary Options */}
+              <div className="space-y-3">
+                <Button
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
+                  className="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold py-3 transition-all duration-300"
+                >
+                  <Chrome className="w-5 h-5 mr-3" />
+                  {isLoading ? "Connecting..." : "Continue with Google"}
+                </Button>
+
+                <Button
+                  onClick={handleGitHubSignIn}
+                  disabled={isLoading}
+                  className="w-full bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 transition-all duration-300"
+                >
+                  <Github className="w-5 h-5 mr-3" />
+                  {isLoading ? "Connecting..." : "Continue with GitHub"}
+                </Button>
+              </div>
 
               {/* Alert Messages */}
               <AnimatePresence>
@@ -281,7 +316,19 @@ export default function Login() {
                 )}
               </AnimatePresence>
 
-              {/* Login Form */}
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/20" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-slate-900 text-white/70">
+                    Or continue with email
+                  </span>
+                </div>
+              </div>
+
+              {/* Email/Password Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Email Field */}
                 <div className="space-y-2">
@@ -373,40 +420,6 @@ export default function Login() {
                 </MagneticButton>
               </form>
 
-              {/* Divider */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/20" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-slate-900 text-white/70">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-
-              {/* Social Login */}
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  variant="outline"
-                  className="border-white/20 bg-white/5 text-white hover:bg-white/10"
-                  onClick={handleGitHubSignIn}
-                  disabled={isLoading}
-                >
-                  <Github className="w-4 h-4 mr-2" />
-                  Github
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-white/20 bg-white/5 text-white hover:bg-white/10"
-                  onClick={handleGoogleSignIn}
-                  disabled={isLoading}
-                >
-                  <Chrome className="w-4 h-4 mr-2" />
-                  Google
-                </Button>
-              </div>
-
               {/* Sign Up Link */}
               <div className="text-center">
                 <span className="text-white/70">Don't have an account? </span>
@@ -417,18 +430,18 @@ export default function Login() {
                   Sign up for free
                 </Link>
               </div>
+
+              {/* Professional Note */}
+              <div className="text-center text-xs text-white/50 border-t border-white/10 pt-4">
+                <p>
+                  🔒 Professional OAuth integration like YouTube & Instagram
+                </p>
+                <p>
+                  ✨ Choose Student, Creator, or Institution role during sign-up
+                </p>
+              </div>
             </CardContent>
           </Card>
-        </motion.div>
-
-        {/* Page Navigation Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-12 max-w-6xl mx-auto"
-        >
-          <PageRouter currentPage="/login" category="main" />
         </motion.div>
       </div>
     </div>
