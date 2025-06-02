@@ -6,8 +6,6 @@ import {
   Navigate,
 } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CursorEffects } from "@/components/ui/cursor-effects";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Navigation } from "@/components/layout/Navigation";
@@ -28,9 +26,6 @@ import StudentTeacherConnect from "@/pages/StudentTeacherConnect";
 import AITutor from "@/pages/AITutor";
 import TutorBooking from "@/pages/TutorBooking";
 import Pricing from "@/pages/Pricing";
-
-// Register GSAP plugins
-gsap.registerPlugin(ScrollTrigger);
 
 // Professional Loading Screen Component
 function LoadingScreen() {
@@ -193,35 +188,6 @@ function AppContent() {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    // Initialize GSAP animations
-    gsap.fromTo(
-      ".page-transition",
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
-    );
-
-    // Smooth scroll configuration
-    gsap.config({
-      force3D: true,
-    });
-
-    // Page transition animations
-    ScrollTrigger.create({
-      trigger: "body",
-      start: "top top",
-      end: "bottom bottom",
-      onUpdate: (self) => {
-        const progress = self.progress;
-        gsap.to(".progress-indicator", {
-          scaleX: progress,
-          duration: 0.1,
-          ease: "none",
-        });
-      },
-    });
   }, []);
 
   return (
