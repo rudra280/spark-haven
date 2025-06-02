@@ -424,6 +424,8 @@ export default function Register() {
                 <Button
                   variant="outline"
                   className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+                  onClick={handleGitHubSignIn}
+                  disabled={isLoading}
                 >
                   <Github className="w-4 h-4 mr-2" />
                   Github
@@ -431,6 +433,8 @@ export default function Register() {
                 <Button
                   variant="outline"
                   className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
                 >
                   <Chrome className="w-4 h-4 mr-2" />
                   Google
