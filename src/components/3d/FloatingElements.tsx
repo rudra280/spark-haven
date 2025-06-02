@@ -1,94 +1,92 @@
-import React, { useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import * as THREE from "three";
 
-// Floating 3D sphere component
-function FloatingSphere({
-  position,
-  color,
-  size = 1,
-}: {
-  position: [number, number, number];
+interface FloatingElement {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
   color: string;
-  size?: number;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null!);
+  duration: number;
+  delay: number;
+}
 
-  useFrame((state) => {
-    const time = state.clock.getElapsedTime();
-    meshRef.current.position.y = position[1] + Math.sin(time * 0.5) * 0.2;
-    meshRef.current.rotation.x = Math.sin(time * 0.3) * 0.1;
-    meshRef.current.rotation.y = Math.cos(time * 0.2) * 0.1;
-  });
+export function FloatingElements() {
+  const [elements, setElements] = useState<FloatingElement[]>([]);
+
+  useEffect(() => {
+    const newElements: FloatingElement[] = [];
+    for (let i = 0; i < 15; i++) {
+      newElements.push({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: Math.random() * 60 + 20,
+        color: ["#f97316", "#ec4899", "#8b5cf6", "#06b6d4"][
+          Math.floor(Math.random() * 4)
+        ],
+        duration: Math.random() * 3 + 2,
+        delay: Math.random() * 2,
+      });
+    }
+    setElements(newElements);
+  }, []);
 
   return (
-    <mesh ref={meshRef} position={position}>
-      <sphereGeometry args={[size, 32, 32]} />
-      <meshStandardMaterial color={color} transparent opacity={0.7} />
-    </mesh>
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {elements.map((element) => (
+        <motion.div
+          key={element.id}
+          className="absolute rounded-full opacity-20 blur-sm"
+          style={{
+            left: `${element.x}%`,
+            top: `${element.y}%`,
+            width: element.size,
+            height: element.size,
+            backgroundColor: element.color,
+          }}
+          animate={{
+            y: [0, -20, 0],
+            x: [0, 10, 0],
+            scale: [1, 1.1, 1],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{
+            duration: element.duration,
+            repeat: Infinity,
+            delay: element.delay,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
   );
 }
 
-// Floating 3D cube component
-function FloatingCube({
-  position,
-  color,
-  size = 1,
-}: {
-  position: [number, number, number];
-  color: string;
-  size?: number;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null!);
-
-  useFrame((state) => {
-    const time = state.clock.getElapsedTime();
-    meshRef.current.position.y = position[1] + Math.cos(time * 0.4) * 0.15;
-    meshRef.current.rotation.x = time * 0.2;
-    meshRef.current.rotation.y = time * 0.3;
-  });
-
+// Simple Geometric Shapes Component
+export function GeometricShapes() {
   return (
-    <mesh ref={meshRef} position={position}>
-      <boxGeometry args={[size, size, size]} />
-      <meshStandardMaterial color={color} transparent opacity={0.6} />
-    </mesh>
-  );
-}
-
-// 3D Scene with floating elements
-function Scene() {
-  return (
-    <>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} />
-      <FloatingSphere position={[-3, 0, -2]} color="#06b6d4" size={0.8} />
-      <FloatingSphere position={[3, 1, -1]} color="#8b5cf6" size={0.6} />
-      <FloatingCube position={[2, -1, -2]} color="#f59e0b" size={0.7} />
-      <FloatingCube position={[-2, 2, -3]} color="#ef4444" size={0.5} />
-      <FloatingSphere position={[0, -2, -1]} color="#10b981" size={0.9} />
-    </>
-  );
-}
-
-// Main floating elements component
-export function FloatingElements({ className = "" }: { className?: string }) {
-  return (
-    <div
-      className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}
-    >
-      {/* 3D Canvas */}
-      <Canvas camera={{ position: [0, 0, 5], fov: 60 }}>
-        <Scene />
-      </Canvas>
-
-      {/* 2D Floating elements with Framer Motion */}
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Triangle */}
       <motion.div
-        className="absolute top-20 left-10 w-4 h-4 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full opacity-60"
+        className="absolute top-20 left-10 w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-b-[35px] border-b-orange-500/30"
         animate={{
-          y: [0, -20, 0],
-          x: [0, 10, 0],
+          rotate: [0, 360],
+          scale: [1, 1.2, 1],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      />
+
+      {/* Circle */}
+      <motion.div
+        className="absolute top-40 right-20 w-16 h-16 rounded-full bg-pink-500/20"
+        animate={{
+          scale: [1, 1.3, 1],
+          opacity: [0.2, 0.5, 0.2],
         }}
         transition={{
           duration: 4,
@@ -97,44 +95,86 @@ export function FloatingElements({ className = "" }: { className?: string }) {
         }}
       />
 
+      {/* Square */}
       <motion.div
-        className="absolute top-40 right-20 w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full opacity-50"
+        className="absolute bottom-20 left-1/4 w-12 h-12 bg-violet-500/25"
         animate={{
-          y: [0, 30, 0],
-          x: [0, -15, 0],
-        }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-
-      <motion.div
-        className="absolute bottom-40 left-20 w-3 h-3 bg-gradient-to-r from-green-400 to-blue-500 rounded-full opacity-70"
-        animate={{
-          y: [0, -25, 0],
+          rotate: [0, 45, 0],
           x: [0, 20, 0],
         }}
         transition={{
-          duration: 3.5,
+          duration: 6,
           repeat: Infinity,
           ease: "easeInOut",
         }}
       />
 
+      {/* Hexagon */}
       <motion.div
-        className="absolute top-60 right-10 w-5 h-5 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full opacity-60"
+        className="absolute top-1/3 right-1/3 w-8 h-8 bg-cyan-500/20 transform rotate-45"
+        style={{
+          clipPath:
+            "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+        }}
         animate={{
-          y: [0, 20, 0],
-          x: [0, -10, 0],
+          rotate: [45, 405],
+          scale: [1, 1.4, 1],
         }}
         transition={{
-          duration: 4.5,
+          duration: 10,
           repeat: Infinity,
-          ease: "easeInOut",
+          ease: "linear",
         }}
       />
+    </div>
+  );
+}
+
+// Animated Background Particles
+export function BackgroundParticles({ count = 30 }: { count?: number }) {
+  const [particles, setParticles] = useState<FloatingElement[]>([]);
+
+  useEffect(() => {
+    const newParticles: FloatingElement[] = [];
+    for (let i = 0; i < count; i++) {
+      newParticles.push({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: Math.random() * 4 + 1,
+        color: "#ffffff",
+        duration: Math.random() * 20 + 10,
+        delay: Math.random() * 5,
+      });
+    }
+    setParticles(newParticles);
+  }, [count]);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles.map((particle) => (
+        <motion.div
+          key={particle.id}
+          className="absolute rounded-full bg-white opacity-30"
+          style={{
+            left: `${particle.x}%`,
+            top: `${particle.y}%`,
+            width: particle.size,
+            height: particle.size,
+          }}
+          animate={{
+            y: [0, -100],
+            opacity: [0, 0.6, 0],
+            scale: [0.5, 1, 0.5],
+          }}
+          transition={{
+            duration: particle.duration,
+            repeat: Infinity,
+            delay: particle.delay,
+            ease: "linear",
+          }}
+        />
+      ))}
     </div>
   );
 }
