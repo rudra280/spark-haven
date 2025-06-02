@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Sparkles,
   Video,
@@ -37,8 +38,15 @@ import {
   Star,
   Share2,
   Download,
+  Loader2,
+  CheckCircle,
+  X,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import api from "@/lib/api";
+import { AIVideoPlayer } from "@/components/video/AIVideoPlayer";
+import { PageHeader } from "@/components/ui/back-navigation";
 
 const gradeOptions = [
   "Primary School (K-5)",
@@ -99,6 +107,8 @@ const aiGeneratedVideos = [
       "AI-generated animated explanation of photosynthesis with stunning visuals and clear narration.",
     generatedAt: "2 hours ago",
     prompt: "Explain photosynthesis for middle school students with animations",
+    videoUrl:
+      "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
   },
   {
     id: "2",
@@ -114,6 +124,8 @@ const aiGeneratedVideos = [
       "Step-by-step AI tutorial on solving quadratic equations with visual examples.",
     generatedAt: "4 hours ago",
     prompt: "Teach quadratic equations step by step for high school students",
+    videoUrl:
+      "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
   },
   {
     id: "3",
@@ -129,6 +141,8 @@ const aiGeneratedVideos = [
       "Comprehensive AI-generated documentary about the French Revolution with historical accuracy.",
     generatedAt: "6 hours ago",
     prompt: "Create a documentary about the French Revolution for high school",
+    videoUrl:
+      "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
   },
 ];
 
@@ -144,6 +158,8 @@ const userUploadedVideos = [
     thumbnail:
       "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=400",
     verified: true,
+    videoUrl:
+      "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
   },
   {
     id: "5",
@@ -156,15 +172,21 @@ const userUploadedVideos = [
     thumbnail:
       "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400",
     verified: true,
+    videoUrl:
+      "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
   },
 ];
 
 export default function AIVideoHub() {
+  const { isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState("ai-generate");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
-  const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
+  const [generatedVideo, setGeneratedVideo] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedVideo, setSelectedVideo] = useState<any>(null);
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState("");
 
   const [aiPrompt, setAIPrompt] = useState({
     topic: "",
@@ -177,28 +199,78 @@ export default function AIVideoHub() {
   });
 
   const handleAIGeneration = async () => {
-    if (!aiPrompt.topic || !aiPrompt.subject || !aiPrompt.grade) return;
+    if (!aiPrompt.topic || !aiPrompt.subject || !aiPrompt.grade) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      alert("Please log in to generate AI videos");
+      return;
+    }
 
     setIsGenerating(true);
     setGenerationProgress(0);
+    setGenerationStatus("Initializing AI video generation...");
 
-    // Simulate AI video generation process
+    // Simulate AI video generation process with realistic steps
     const steps = [
-      { step: "Analyzing topic...", progress: 10 },
-      { step: "Generating script...", progress: 25 },
-      { step: "Creating visuals...", progress: 45 },
-      { step: "Adding narration...", progress: 65 },
-      { step: "Rendering video...", progress: 85 },
-      { step: "Finalizing...", progress: 100 },
+      { step: "Analyzing your topic...", progress: 10 },
+      { step: "Generating educational script...", progress: 25 },
+      { step: "Creating visual elements...", progress: 45 },
+      { step: "Adding AI narration...", progress: 65 },
+      { step: "Rendering HD video...", progress: 85 },
+      { step: "Finalizing your custom video...", progress: 100 },
     ];
 
     for (const stepData of steps) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setGenerationStatus(stepData.step);
+      await new Promise((resolve) => setTimeout(resolve, 1200));
       setGenerationProgress(stepData.progress);
     }
 
-    setGeneratedVideo("ai-generated-video-id");
+    // Create the generated video
+    const newVideo = {
+      id: `ai_${Date.now()}`,
+      title: `${aiPrompt.topic} - AI Generated`,
+      subject: aiPrompt.subject,
+      grade: aiPrompt.grade,
+      duration: aiPrompt.duration,
+      views: "0",
+      rating: 0,
+      thumbnail:
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400",
+      description: `AI-generated educational video about ${aiPrompt.topic} tailored for ${aiPrompt.grade} students.`,
+      generatedAt: "Just now",
+      prompt: `${aiPrompt.topic} for ${aiPrompt.grade}`,
+      videoUrl:
+        "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+      style: aiPrompt.style,
+      language: aiPrompt.language,
+    };
+
+    setGeneratedVideo(newVideo);
     setIsGenerating(false);
+
+    // Save to API
+    try {
+      await api.generateAIVideo(aiPrompt);
+    } catch (error) {
+      console.error("Failed to save generated video:", error);
+    }
+  };
+
+  const handleVideoPlay = (video: any) => {
+    setSelectedVideo(video);
+    setShowVideoPlayer(true);
+  };
+
+  const handleDownloadVideo = (video: any) => {
+    // Simulate video download
+    const link = document.createElement("a");
+    link.href = video.videoUrl;
+    link.download = `${video.title}.mp4`;
+    link.click();
   };
 
   const filteredAIVideos = aiGeneratedVideos.filter(
@@ -234,9 +306,9 @@ export default function AIVideoHub() {
             </h1>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            🤖 AI-Generated Educational Videos + User Uploads - The Perfect
-            Combination! Generate custom videos instantly or browse
-            human-created content! 🎥✨
+            🤖 Create Custom Educational Videos with AI + Browse Human-Created
+            Content! Generate personalized videos instantly or explore our vast
+            library! 🎥✨
           </p>
 
           {/* Stats */}
@@ -308,7 +380,9 @@ export default function AIVideoHub() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="topic">What do you want to learn?</Label>
+                      <Label htmlFor="topic">
+                        What do you want to learn? *
+                      </Label>
                       <Input
                         id="topic"
                         placeholder="e.g., How does photosynthesis work?"
@@ -321,7 +395,7 @@ export default function AIVideoHub() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Subject</Label>
+                        <Label>Subject *</Label>
                         <Select
                           value={aiPrompt.subject}
                           onValueChange={(value) =>
@@ -342,7 +416,7 @@ export default function AIVideoHub() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>Grade Level</Label>
+                        <Label>Grade Level *</Label>
                         <Select
                           value={aiPrompt.grade}
                           onValueChange={(value) =>
@@ -414,13 +488,26 @@ export default function AIVideoHub() {
                       </div>
                     </div>
 
+                    {!isAuthenticated && (
+                      <Alert className="border-orange-200 bg-orange-50 text-orange-800">
+                        <AlertDescription>
+                          Please{" "}
+                          <a href="/login" className="underline">
+                            sign in
+                          </a>{" "}
+                          to generate AI videos
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
                     <Button
                       onClick={handleAIGeneration}
                       disabled={
                         isGenerating ||
                         !aiPrompt.topic ||
                         !aiPrompt.subject ||
-                        !aiPrompt.grade
+                        !aiPrompt.grade ||
+                        !isAuthenticated
                       }
                       className="w-full bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 hover:opacity-90"
                       size="lg"
@@ -441,10 +528,13 @@ export default function AIVideoHub() {
                     {isGenerating && (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                          <span>Creating your personalized video...</span>
+                          <span>{generationStatus}</span>
                           <span>{generationProgress}%</span>
                         </div>
                         <Progress value={generationProgress} className="h-2" />
+                        <p className="text-xs text-muted-foreground text-center">
+                          ⏰ This usually takes 2-3 minutes
+                        </p>
                       </div>
                     )}
                   </CardContent>
@@ -467,26 +557,53 @@ export default function AIVideoHub() {
                             AI is creating your video...
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            This may take 2-3 minutes
+                            {generationStatus}
                           </p>
                         </div>
                       </div>
                     ) : generatedVideo ? (
                       <div className="space-y-4">
-                        <div className="aspect-video bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-lg flex items-center justify-center">
-                          <Button
-                            size="icon"
-                            variant="secondary"
-                            className="w-16 h-16 rounded-full"
+                        <div className="aspect-video bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-lg relative overflow-hidden">
+                          <video
+                            className="w-full h-full object-cover"
+                            poster={generatedVideo.thumbnail}
+                            controls
                           >
-                            <Play className="w-8 h-8" />
-                          </Button>
+                            <source
+                              src={generatedVideo.videoUrl}
+                              type="video/mp4"
+                            />
+                            Your browser does not support the video tag.
+                          </video>
                         </div>
+
+                        <div className="space-y-2">
+                          <h3 className="font-semibold">
+                            {generatedVideo.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {generatedVideo.description}
+                          </p>
+                          <div className="flex items-center space-x-2">
+                            <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Generated Successfully!
+                            </Badge>
+                            <Badge variant="outline">
+                              {generatedVideo.subject}
+                            </Badge>
+                            <Badge variant="outline">
+                              {generatedVideo.grade}
+                            </Badge>
+                          </div>
+                        </div>
+
                         <div className="flex space-x-2">
                           <Button
                             variant="outline"
                             size="sm"
                             className="flex-1"
+                            onClick={() => handleDownloadVideo(generatedVideo)}
                           >
                             <Download className="w-4 h-4 mr-2" />
                             Download
@@ -499,11 +616,6 @@ export default function AIVideoHub() {
                             <Share2 className="w-4 h-4 mr-2" />
                             Share
                           </Button>
-                        </div>
-                        <div className="text-center">
-                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-                            ✨ AI Generated Successfully!
-                          </Badge>
                         </div>
                       </div>
                     ) : (
@@ -538,66 +650,25 @@ export default function AIVideoHub() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Include generated video if exists */}
+                {generatedVideo && (
+                  <VideoCard
+                    video={generatedVideo}
+                    onPlay={handleVideoPlay}
+                    onDownload={handleDownloadVideo}
+                    isAI={true}
+                  />
+                )}
+
                 {filteredAIVideos.map((video, index) => (
-                  <motion.div
+                  <VideoCard
                     key={video.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.1 * index }}
-                  >
-                    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-background/50 backdrop-blur-sm group">
-                      <div className="relative">
-                        <div
-                          className="aspect-video bg-cover bg-center"
-                          style={{ backgroundImage: `url(${video.thumbnail})` }}
-                        >
-                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                          <Button
-                            size="icon"
-                            variant="secondary"
-                            className="absolute inset-0 m-auto w-12 h-12 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Play className="w-6 h-6" />
-                          </Button>
-                        </div>
-                        <Badge className="absolute top-2 left-2 bg-violet-500 text-white">
-                          🤖 AI Generated
-                        </Badge>
-                        <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                          {video.duration}
-                        </div>
-                      </div>
-
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold mb-2 line-clamp-2">
-                          {video.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                          {video.description}
-                        </p>
-
-                        <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-                          <span>
-                            {video.subject} • {video.grade}
-                          </span>
-                          <span>{video.generatedAt}</span>
-                        </div>
-
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-1">
-                              <Eye className="w-3 h-3" />
-                              <span>{video.views}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                              <span>{video.rating}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
+                    video={video}
+                    index={index}
+                    onPlay={handleVideoPlay}
+                    onDownload={handleDownloadVideo}
+                    isAI={true}
+                  />
                 ))}
               </div>
             </TabsContent>
@@ -617,63 +688,14 @@ export default function AIVideoHub() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredUserVideos.map((video, index) => (
-                  <motion.div
+                  <VideoCard
                     key={video.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.1 * index }}
-                  >
-                    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-background/50 backdrop-blur-sm group">
-                      <div className="relative">
-                        <div
-                          className="aspect-video bg-cover bg-center"
-                          style={{ backgroundImage: `url(${video.thumbnail})` }}
-                        >
-                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                          <Button
-                            size="icon"
-                            variant="secondary"
-                            className="absolute inset-0 m-auto w-12 h-12 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Play className="w-6 h-6" />
-                          </Button>
-                        </div>
-                        {video.verified && (
-                          <Badge className="absolute top-2 left-2 bg-green-500 text-white">
-                            ✓ Verified
-                          </Badge>
-                        )}
-                        <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                          {video.duration}
-                        </div>
-                      </div>
-
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold mb-2 line-clamp-2">
-                          {video.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-3">
-                          by {video.creator}
-                        </p>
-
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-1">
-                              <Eye className="w-3 h-3" />
-                              <span>{video.views}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                              <span>{video.rating}</span>
-                            </div>
-                          </div>
-                          <Badge variant="outline" className="text-xs">
-                            {video.subject}
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
+                    video={video}
+                    index={index}
+                    onPlay={handleVideoPlay}
+                    onDownload={handleDownloadVideo}
+                    isAI={false}
+                  />
                 ))}
               </div>
 
@@ -696,7 +718,133 @@ export default function AIVideoHub() {
             </TabsContent>
           </Tabs>
         </motion.div>
+
+        {/* Video Player Modal */}
+        {showVideoPlayer && selectedVideo && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <div className="w-full max-w-4xl bg-background rounded-lg overflow-hidden">
+              <div className="flex items-center justify-between p-4 border-b">
+                <h3 className="font-semibold">{selectedVideo.title}</h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowVideoPlayer(false)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="aspect-video">
+                <video
+                  className="w-full h-full"
+                  controls
+                  autoPlay
+                  poster={selectedVideo.thumbnail}
+                >
+                  <source src={selectedVideo.videoUrl} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <div className="p-4">
+                <p className="text-sm text-muted-foreground">
+                  {selectedVideo.description}
+                </p>
+                <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
+                  <span>{selectedVideo.views} views</span>
+                  <span>⭐ {selectedVideo.rating}</span>
+                  <span>{selectedVideo.duration}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+// Video Card Component
+function VideoCard({
+  video,
+  index = 0,
+  onPlay,
+  onDownload,
+  isAI,
+}: {
+  video: any;
+  index?: number;
+  onPlay: (video: any) => void;
+  onDownload: (video: any) => void;
+  isAI: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 0.1 * index }}
+    >
+      <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-background/50 backdrop-blur-sm group">
+        <div className="relative">
+          <div
+            className="aspect-video bg-cover bg-center cursor-pointer"
+            style={{ backgroundImage: `url(${video.thumbnail})` }}
+            onClick={() => onPlay(video)}
+          >
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+            <Button
+              size="icon"
+              variant="secondary"
+              className="absolute inset-0 m-auto w-12 h-12 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <Play className="w-6 h-6" />
+            </Button>
+          </div>
+
+          <Badge
+            className={`absolute top-2 left-2 ${isAI ? "bg-violet-500 text-white" : "bg-green-500 text-white"}`}
+          >
+            {isAI ? "🤖 AI Generated" : "✓ Verified"}
+          </Badge>
+
+          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+            {video.duration}
+          </div>
+        </div>
+
+        <CardContent className="p-4">
+          <h3 className="font-semibold mb-2 line-clamp-2">{video.title}</h3>
+          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+            {video.description || `by ${video.creator}`}
+          </p>
+
+          <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
+            <span>
+              {video.subject} • {video.grade || "All Levels"}
+            </span>
+            <span>{video.generatedAt || "User Upload"}</span>
+          </div>
+
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-1">
+                <Eye className="w-3 h-3" />
+                <span>{video.views}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                <span>{video.rating}</span>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onDownload(video)}
+            >
+              <Download className="w-3 h-3 mr-1" />
+              Save
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
