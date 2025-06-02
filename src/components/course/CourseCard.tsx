@@ -26,15 +26,15 @@ interface Course {
   description: string;
   image: string;
   duration: string;
-  students: number;
-  rating: number;
+  students?: number;
+  rating?: number;
   level: "Beginner" | "Intermediate" | "Advanced";
   category: string;
   subject: string;
   grade: string;
   gradient: string;
   instructor: string;
-  price: number;
+  price?: number;
   curriculum: string[];
   enrolled: boolean;
 }
