@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { gsap } from "gsap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Menu,
@@ -110,8 +109,6 @@ export function Navigation() {
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const navRef = useRef<HTMLElement>(null);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -121,33 +118,6 @@ export function Navigation() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  useEffect(() => {
-    // Animate navigation on scroll
-    if (navRef.current) {
-      gsap.to(navRef.current, {
-        backdropFilter: isScrolled ? "blur(20px)" : "blur(0px)",
-        backgroundColor: isScrolled
-          ? "rgba(15, 23, 42, 0.8)"
-          : "rgba(15, 23, 42, 0.1)",
-        duration: 0.3,
-        ease: "power2.out",
-      });
-    }
-  }, [isScrolled]);
-
-  useEffect(() => {
-    // Mobile menu animation
-    if (mobileMenuRef.current) {
-      if (isOpen) {
-        gsap.fromTo(
-          mobileMenuRef.current,
-          { opacity: 0, y: -20 },
-          { opacity: 1, y: 0, duration: 0.3, ease: "back.out(1.7)" },
-        );
-      }
-    }
-  }, [isOpen]);
 
   const handleLogout = () => {
     logout();
@@ -169,11 +139,14 @@ export function Navigation() {
 
   return (
     <motion.nav
-      ref={navRef}
-      className="fixed top-0 left-0 right-0 z-40 border-b border-white/10"
+      className={`fixed top-0 left-0 right-0 z-40 border-b border-white/10 transition-all duration-300 ${
+        isScrolled
+          ? "backdrop-blur-xl bg-slate-900/80"
+          : "backdrop-blur-sm bg-slate-900/10"
+      }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: "power3.out" }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -188,7 +161,7 @@ export function Navigation() {
                 <motion.div
                   className="w-10 h-10 bg-gradient-to-br from-orange-500 via-pink-500 to-violet-500 rounded-xl flex items-center justify-center"
                   whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.8, ease: "back.out(1.7)" }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
                 >
                   <Globe className="w-6 h-6 text-white" />
                 </motion.div>
@@ -456,7 +429,6 @@ export function Navigation() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            ref={mobileMenuRef}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
