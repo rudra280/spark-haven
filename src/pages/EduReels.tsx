@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { gsap } from "gsap";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Play,
   Pause,
@@ -16,10 +16,28 @@ import {
   Verified,
   TrendingUp,
   Eye,
+  ArrowLeft,
+  Home,
+  Search,
+  Plus,
+  User,
+  Settings,
+  Download,
+  Copy,
+  Flag,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface EduReel {
   id: string;
@@ -207,6 +225,7 @@ function ReelCard({
   const [isMuted, setIsMuted] = useState(true);
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
+  const [following, setFollowing] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -233,6 +252,10 @@ function ReelCard({
   const handleLike = () => {
     setLiked(!liked);
     onLike();
+  };
+
+  const handleFollow = () => {
+    setFollowing(!following);
   };
 
   const formatNumber = (num: number) => {
@@ -323,9 +346,14 @@ function ReelCard({
               </div>
               <Button
                 size="sm"
-                className="bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 text-white border-0 hover:opacity-90"
+                onClick={handleFollow}
+                className={`${
+                  following
+                    ? "bg-gray-600 text-white"
+                    : "bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 text-white"
+                } border-0 hover:opacity-90`}
               >
-                Follow
+                {following ? "Following" : "Follow"}
               </Button>
             </div>
 
@@ -422,14 +450,35 @@ function ReelCard({
               className="flex flex-col items-center"
               whileTap={{ scale: 0.9 }}
             >
-              <Button
-                size="icon"
-                variant="ghost"
-                className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm"
-                onClick={onShare}
-              >
-                <Share2 className="w-6 h-6 text-white" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm"
+                  >
+                    <Share2 className="w-6 h-6 text-white" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="bg-slate-800/95 backdrop-blur-xl border-white/20"
+                >
+                  <DropdownMenuItem className="text-white hover:bg-white/10">
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy Link
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-white hover:bg-white/10">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="border-white/20" />
+                  <DropdownMenuItem className="text-red-400 hover:bg-red-500/10">
+                    <Flag className="w-4 h-4 mr-2" />
+                    Report
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <span className="text-white text-xs mt-1">
                 {formatNumber(reel.shares)}
               </span>
@@ -451,14 +500,13 @@ function ReelCard({
               </Button>
             </motion.div>
 
-            {/* More Options */}
-            <Button
-              size="icon"
-              variant="ghost"
-              className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm"
-            >
-              <MoreVertical className="w-6 h-6 text-white" />
-            </Button>
+            {/* Creator Profile */}
+            <motion.div whileTap={{ scale: 0.9 }}>
+              <Avatar className="w-12 h-12 border-2 border-white">
+                <AvatarImage src={reel.creator.avatar} />
+                <AvatarFallback>{reel.creator.name[0]}</AvatarFallback>
+              </Avatar>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -475,9 +523,12 @@ function ReelCard({
 
 export default function EduReels() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showNavigation, setShowNavigation] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef(0);
   const isScrolling = useRef(false);
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     const container = containerRef.current;
@@ -535,14 +586,18 @@ export default function EduReels() {
       isScrolling.current = true;
       setCurrentIndex(newIndex);
 
-      gsap.to(container, {
-        y: -newIndex * window.innerHeight,
-        duration: 0.8,
-        ease: "power3.out",
-        onComplete: () => {
+      if (container) {
+        container.style.transform = `translateY(-${newIndex * 100}vh)`;
+        container.style.transition =
+          "transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+
+        setTimeout(() => {
           isScrolling.current = false;
-        },
-      });
+          if (container) {
+            container.style.transition = "";
+          }
+        }, 600);
+      }
     };
 
     container.addEventListener("wheel", handleWheel, { passive: false });
@@ -560,10 +615,17 @@ export default function EduReels() {
         navigateToReel(currentIndex - 1);
       } else if (e.key === "ArrowDown" && currentIndex < mockReels.length - 1) {
         navigateToReel(currentIndex + 1);
+      } else if (e.key === "Escape") {
+        navigate("/");
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
+
+    // Auto-hide navigation after 3 seconds
+    const hideNavTimer = setTimeout(() => {
+      setShowNavigation(false);
+    }, 3000);
 
     return () => {
       container.removeEventListener("wheel", handleWheel);
@@ -571,8 +633,9 @@ export default function EduReels() {
       container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleTouchEnd);
       document.removeEventListener("keydown", handleKeyDown);
+      clearTimeout(hideNavTimer);
     };
-  }, [currentIndex]);
+  }, [currentIndex, navigate]);
 
   const handleLike = () => {
     // Add haptic feedback
@@ -599,7 +662,98 @@ export default function EduReels() {
 
   return (
     <div className="relative h-screen overflow-hidden bg-black">
-      <div ref={containerRef} className="relative">
+      {/* Top Navigation Bar */}
+      <AnimatePresence>
+        {showNavigation && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-xl border-b border-white/10"
+            onMouseEnter={() => setShowNavigation(true)}
+          >
+            <div className="flex items-center justify-between p-4">
+              {/* Left - Back Button */}
+              <div className="flex items-center space-x-4">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="text-white hover:bg-white/10"
+                  onClick={() => navigate("/")}
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-orange-500 via-pink-500 to-violet-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm">🌍</span>
+                  </div>
+                  <span className="text-white font-semibold">EduReels</span>
+                </div>
+              </div>
+
+              {/* Center - Search */}
+              <div className="flex-1 max-w-md mx-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
+                  <input
+                    type="text"
+                    placeholder="Search reels..."
+                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-full text-white placeholder:text-white/50 focus:outline-none focus:border-white/40"
+                  />
+                </div>
+              </div>
+
+              {/* Right - Navigation & User */}
+              <div className="flex items-center space-x-2">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="text-white hover:bg-white/10"
+                  onClick={() => navigate("/")}
+                >
+                  <Home className="w-5 h-5" />
+                </Button>
+
+                {isAuthenticated ? (
+                  <>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="text-white hover:bg-white/10"
+                      onClick={() => navigate("/video-upload")}
+                    >
+                      <Plus className="w-5 h-5" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="text-white hover:bg-white/10"
+                      onClick={() => navigate("/dashboard")}
+                    >
+                      <User className="w-5 h-5" />
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 text-white"
+                    onClick={() => navigate("/login")}
+                  >
+                    Sign In
+                  </Button>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Reels Container */}
+      <div
+        ref={containerRef}
+        className="relative"
+        style={{ transform: `translateY(-${currentIndex * 100}vh)` }}
+      >
         {mockReels.map((reel, index) => (
           <ReelCard
             key={reel.id}
@@ -615,48 +769,61 @@ export default function EduReels() {
       {/* Progress Indicator */}
       <div className="fixed left-2 top-1/2 transform -translate-y-1/2 flex flex-col space-y-1 z-50">
         {mockReels.map((_, index) => (
-          <div
+          <button
             key={index}
+            onClick={() => setCurrentIndex(index)}
             className={`w-1 h-8 rounded-full transition-all duration-300 ${
               index === currentIndex
                 ? "bg-gradient-to-b from-orange-500 via-pink-500 to-violet-500"
-                : "bg-white/30"
+                : "bg-white/30 hover:bg-white/50"
             }`}
           />
         ))}
       </div>
 
-      {/* Mini Player Controls (when not active) */}
+      {/* Show Navigation Button */}
+      {!showNavigation && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={() => setShowNavigation(true)}
+          className="fixed top-4 left-4 z-40 w-10 h-10 bg-black/50 backdrop-blur-xl rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+        >
+          <Settings className="w-5 h-5" />
+        </motion.button>
+      )}
+
+      {/* Bottom Quick Actions */}
+      <div className="fixed bottom-4 right-4 z-40 flex flex-col space-y-2">
+        <Button
+          size="icon"
+          className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 text-white shadow-lg hover:opacity-90"
+          onClick={() => navigate("/video-upload")}
+        >
+          <Plus className="w-6 h-6" />
+        </Button>
+
+        <Button
+          size="icon"
+          variant="ghost"
+          className="w-12 h-12 rounded-full bg-black/50 backdrop-blur-xl text-white hover:bg-black/70"
+          onClick={() => navigate("/")}
+        >
+          <Home className="w-6 h-6" />
+        </Button>
+      </div>
+
+      {/* Instructions Overlay */}
       <AnimatePresence>
-        {currentIndex > 0 && (
+        {currentIndex === 0 && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed bottom-20 left-4 right-4 bg-black/80 backdrop-blur-lg rounded-2xl p-3 border border-white/20"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ delay: 2, duration: 1 }}
+            className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-40 bg-black/80 backdrop-blur-xl rounded-full px-6 py-3 text-white text-sm"
           >
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-lg overflow-hidden">
-                <img
-                  src={mockReels[currentIndex].thumbnail}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex-1">
-                <h4 className="text-white text-sm font-medium truncate">
-                  {mockReels[currentIndex].title}
-                </h4>
-                <p className="text-white/60 text-xs truncate">
-                  {mockReels[currentIndex].creator.name}
-                </p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button size="sm" variant="ghost" className="text-white">
-                  <Play className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+            Swipe up/down or use arrow keys to navigate
           </motion.div>
         )}
       </AnimatePresence>
