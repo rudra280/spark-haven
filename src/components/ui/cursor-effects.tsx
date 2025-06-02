@@ -17,33 +17,59 @@ export function CursorEffects({ children }: CursorEffectsProps) {
     if (!cursor || !follower) return;
 
     const moveCursor = (e: MouseEvent) => {
-      if (cursor) {
-        cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-      }
-      if (follower) {
-        follower.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      try {
+        if (cursor) {
+          cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+        }
+        if (follower) {
+          follower.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+        }
+      } catch (error) {
+        // Silently handle cursor movement errors
       }
     };
 
     const handleMouseEnter = (e: Event) => {
-      const target = e.target;
-      // Check if target is an HTMLElement and has the matches method
-      if (
-        target &&
-        typeof target === "object" &&
-        "matches" in target &&
-        typeof (target as HTMLElement).matches === "function"
-      ) {
-        const element = target as HTMLElement;
+      try {
+        const target = e.target;
+        // More robust checking for HTMLElement with matches method
         if (
-          element.matches('button, a, [role="button"], input, textarea, select')
+          target &&
+          target instanceof Element &&
+          typeof target.matches === "function"
         ) {
-          setIsPointer(true);
+          if (
+            target.matches(
+              'button, a, [role="button"], input, textarea, select, [data-magnetic]',
+            )
+          ) {
+            setIsPointer(true);
+          }
         }
+      } catch (error) {
+        // Silently handle mouse enter errors
       }
     };
-    const handleMouseLeave = () => {
-      setIsPointer(false);
+
+    const handleMouseLeave = (e: Event) => {
+      try {
+        const target = e.target;
+        if (
+          target &&
+          target instanceof Element &&
+          typeof target.matches === "function"
+        ) {
+          if (
+            target.matches(
+              'button, a, [role="button"], input, textarea, select, [data-magnetic]',
+            )
+          ) {
+            setIsPointer(false);
+          }
+        }
+      } catch (error) {
+        // Silently handle mouse leave errors
+      }
     };
 
     const handleMouseDown = () => {
@@ -54,11 +80,18 @@ export function CursorEffects({ children }: CursorEffectsProps) {
       setIsClicking(false);
     };
 
-    document.addEventListener("mousemove", moveCursor);
-    document.addEventListener("mouseenter", handleMouseEnter, true);
-    document.addEventListener("mouseleave", handleMouseLeave, true);
-    document.addEventListener("mousedown", handleMouseDown);
-    document.addEventListener("mouseup", handleMouseUp);
+    // Use more specific event listeners to avoid conflicts
+    document.addEventListener("mousemove", moveCursor, { passive: true });
+    document.addEventListener("mouseenter", handleMouseEnter, {
+      capture: true,
+      passive: true,
+    });
+    document.addEventListener("mouseleave", handleMouseLeave, {
+      capture: true,
+      passive: true,
+    });
+    document.addEventListener("mousedown", handleMouseDown, { passive: true });
+    document.addEventListener("mouseup", handleMouseUp, { passive: true });
 
     return () => {
       document.removeEventListener("mousemove", moveCursor);
@@ -67,7 +100,7 @@ export function CursorEffects({ children }: CursorEffectsProps) {
       document.removeEventListener("mousedown", handleMouseDown);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isPointer]);
+  }, []);
 
   return (
     <div className="cursor-container">
@@ -99,7 +132,7 @@ export function CursorEffects({ children }: CursorEffectsProps) {
   );
 }
 
-// Magnetic Button Effect Component
+// Magnetic Button Effect Component with proper prop handling
 export function MagneticButton({
   children,
   className = "",
@@ -118,15 +151,23 @@ export function MagneticButton({
     if (!button) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const rect = button.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
+      try {
+        const rect = button.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
 
-      button.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+        button.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+      } catch (error) {
+        // Silently handle magnetic effect errors
+      }
     };
 
     const handleMouseLeave = () => {
-      button.style.transform = "translate(0px, 0px)";
+      try {
+        button.style.transform = "translate(0px, 0px)";
+      } catch (error) {
+        // Silently handle reset errors
+      }
     };
 
     button.addEventListener("mousemove", handleMouseMove);
@@ -138,14 +179,20 @@ export function MagneticButton({
     };
   }, []);
 
-  // Filter out non-DOM props
-  const { asChild: _, ...domProps } = props;
+  // Filter out React-specific props that shouldn't be passed to DOM
+  const {
+    asChild: _asChild,
+    children: _children,
+    className: _className,
+    ...domProps
+  } = props;
 
   // If asChild is true, clone the child element and add our props
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children, {
       ref: buttonRef,
       className: `magnetic-button transition-transform duration-300 ${className} ${children.props.className || ""}`,
+      "data-magnetic": "true",
       ...domProps,
     });
   }
@@ -154,6 +201,7 @@ export function MagneticButton({
     <button
       ref={buttonRef}
       className={`magnetic-button transition-transform duration-300 ${className}`}
+      data-magnetic="true"
       {...domProps}
     >
       {children}
@@ -178,13 +226,17 @@ export function ParallaxText({
     if (!text) return;
 
     const handleScroll = () => {
-      const scrolled = window.pageYOffset;
-      const rate = scrolled * -speed;
+      try {
+        const scrolled = window.pageYOffset;
+        const rate = scrolled * -speed;
 
-      text.style.transform = `translateY(${rate}px)`;
+        text.style.transform = `translateY(${rate}px)`;
+      } catch (error) {
+        // Silently handle parallax errors
+      }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [speed]);
 
