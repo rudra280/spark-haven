@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { gsap } from "gsap";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Eye,
@@ -51,10 +50,6 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  // Demo credentials display
-  const [showDemoCredentials, setShowDemoCredentials] = useState(false);
 
   useEffect(() => {
     // Initialize floating particles
@@ -88,76 +83,23 @@ export default function Login() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    // Initial animation
-    if (formRef.current) {
-      gsap.fromTo(
-        formRef.current,
-        { opacity: 0, y: 50, rotationX: -15 },
-        { opacity: 1, y: 0, rotationX: 0, duration: 1, ease: "back.out(1.7)" },
-      );
-    }
-
-    // Background gradient animation
-    gsap.to(".gradient-bg", {
-      backgroundPosition: "200% 200%",
-      duration: 20,
-      ease: "none",
-      repeat: -1,
-    });
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
     setIsLoading(true);
 
-    // Add form submission animation
-    if (formRef.current) {
-      gsap.to(formRef.current, {
-        scale: 0.98,
-        duration: 0.2,
-        ease: "power2.out",
-      });
-    }
-
     try {
       const result = await login(email, password);
 
       if (result.success) {
         setSuccess("Login successful! Welcome back to LEARNVERSE! 🎉");
-
-        // Success animation
-        gsap.to(formRef.current, {
-          scale: 1.02,
-          duration: 0.5,
-          ease: "back.out(1.7)",
-          onComplete: () => {
-            setTimeout(() => navigate("/dashboard"), 1000);
-          },
-        });
-
-        // Trigger confetti effect
-        triggerConfetti();
+        setTimeout(() => navigate("/dashboard"), 1000);
       } else {
         setError(result.error || "Login failed");
-
-        // Error shake animation
-        gsap.to(formRef.current, {
-          x: -10,
-          duration: 0.1,
-          yoyo: true,
-          repeat: 5,
-          ease: "power2.inOut",
-          onComplete: () => {
-            gsap.set(formRef.current, { x: 0, scale: 1 });
-          },
-        });
       }
     } catch (err) {
       setError("Network error. Please check your connection.");
-      gsap.set(formRef.current, { scale: 1 });
     } finally {
       setIsLoading(false);
     }
@@ -166,45 +108,12 @@ export default function Login() {
   const fillDemoCredentials = () => {
     setEmail("demo@learnverse.ai");
     setPassword("demo123");
-
-    // Animation for filling credentials
-    gsap.fromTo(
-      ".demo-fill",
-      { scale: 1.1, opacity: 0.8 },
-      { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.7)" },
-    );
-  };
-
-  const triggerConfetti = () => {
-    // Create confetti particles
-    for (let i = 0; i < 30; i++) {
-      const confetti = document.createElement("div");
-      confetti.className = "fixed w-2 h-2 pointer-events-none z-50";
-      confetti.style.background = ["#f97316", "#ec4899", "#8b5cf6"][
-        Math.floor(Math.random() * 3)
-      ];
-      confetti.style.left = "50%";
-      confetti.style.top = "50%";
-      document.body.appendChild(confetti);
-
-      gsap.to(confetti, {
-        x: (Math.random() - 0.5) * 400,
-        y: (Math.random() - 0.5) * 400,
-        rotation: Math.random() * 360,
-        opacity: 0,
-        duration: 1 + Math.random(),
-        ease: "power2.out",
-        onComplete: () => {
-          document.body.removeChild(confetti);
-        },
-      });
-    }
   };
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Animated Background */}
-      <div className="gradient-bg absolute inset-0 bg-gradient-to-br from-orange-500/20 via-pink-500/20 to-violet-500/20 bg-[length:400%_400%]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 via-pink-500/20 to-violet-500/20 bg-[length:400%_400%] animate-gradient" />
 
       {/* Floating Particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -232,8 +141,9 @@ export default function Login() {
         <motion.div
           ref={formRef}
           className="login-form w-full max-w-md"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
             <CardHeader className="text-center space-y-4">
