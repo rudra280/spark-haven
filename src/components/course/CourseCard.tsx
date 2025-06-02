@@ -35,7 +35,7 @@ interface Course {
   gradient: string;
   instructor: string;
   price?: number;
-  curriculum: string[];
+  curriculum?: string[];
   enrolled: boolean;
 }
 
