@@ -15,6 +15,10 @@ import {
   CheckCircle,
   AlertCircle,
   User,
+  ArrowLeft,
+  GraduationCap,
+  Users,
+  Building,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,64 +33,22 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { MagneticButton } from "@/components/ui/cursor-effects";
-import { QuickBackButton } from "@/components/ui/back-navigation";
-import { oauthService } from "@/lib/oauth";
-
-interface FloatingParticle {
-  id: number;
-  x: number;
-  y: number;
-  size: number;
-  color: string;
-  speed: number;
-}
 
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState<"student" | "creator" | "institution">(
+    "student",
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [particles, setParticles] = useState<FloatingParticle[]>([]);
 
-  const { register } = useAuth();
+  const { register, signInWithGoogle, signInWithGitHub } = useAuth();
   const navigate = useNavigate();
-  const formRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Initialize floating particles
-    const newParticles: FloatingParticle[] = [];
-    for (let i = 0; i < 50; i++) {
-      newParticles.push({
-        id: i,
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        size: Math.random() * 3 + 1,
-        color: ["#f97316", "#ec4899", "#8b5cf6"][Math.floor(Math.random() * 3)],
-        speed: Math.random() * 0.5 + 0.1,
-      });
-    }
-    setParticles(newParticles);
-
-    // Animate particles
-    const animateParticles = () => {
-      setParticles((prev) =>
-        prev
-          .map((particle) => ({
-            ...particle,
-            y: particle.y - particle.speed,
-            x: particle.x + Math.sin(particle.y * 0.01) * 0.5,
-          }))
-          .filter((particle) => particle.y > -10),
-      );
-    };
-
-    const interval = setInterval(animateParticles, 16);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,11 +69,23 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      const result = await register({ name, email, password, plan: "free" });
+      const result = await register({ name, email, password, role });
 
       if (result.success) {
         setSuccess("Account created successfully! Welcome to LEARNVERSE! 🎉");
-        setTimeout(() => navigate("/dashboard"), 1000);
+        setTimeout(() => {
+          // Redirect based on role
+          switch (role) {
+            case "creator":
+              navigate("/creator-dashboard");
+              break;
+            case "institution":
+              navigate("/institution-dashboard");
+              break;
+            default:
+              navigate("/dashboard");
+          }
+        }, 1500);
       } else {
         setError(result.error || "Registration failed");
       }
@@ -124,11 +98,12 @@ export default function Register() {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
+    setError("");
     try {
-      const result = await oauthService.signInWithGoogle();
+      const result = await signInWithGoogle();
       if (result.success) {
         setSuccess("Google sign-up successful! Welcome to LEARNVERSE! 🎉");
-        setTimeout(() => navigate("/dashboard"), 1000);
+        setTimeout(() => navigate("/dashboard"), 1500);
       } else {
         setError(result.error || "Google sign-up failed");
       }
@@ -141,11 +116,12 @@ export default function Register() {
 
   const handleGitHubSignIn = async () => {
     setIsLoading(true);
+    setError("");
     try {
-      const result = await oauthService.signInWithGitHub();
+      const result = await signInWithGitHub();
       if (result.success) {
         setSuccess("GitHub sign-up successful! Welcome to LEARNVERSE! 🎉");
-        setTimeout(() => navigate("/dashboard"), 1000);
+        setTimeout(() => navigate("/dashboard"), 1500);
       } else {
         setError(result.error || "GitHub sign-up failed");
       }
@@ -156,31 +132,51 @@ export default function Register() {
     }
   };
 
+  const roleOptions = [
+    {
+      id: "student" as const,
+      title: "Student",
+      description: "Learn and explore courses",
+      icon: GraduationCap,
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      id: "creator" as const,
+      title: "Creator",
+      description: "Create and share content",
+      icon: Sparkles,
+      color: "from-purple-500 to-pink-500",
+    },
+    {
+      id: "institution" as const,
+      title: "Institution",
+      description: "Manage educational programs",
+      icon: Building,
+      color: "from-green-500 to-emerald-500",
+    },
+  ];
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Back Navigation */}
-      <QuickBackButton />
+      {/* Back Button */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="absolute top-6 left-6 z-50"
+      >
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-white/70 hover:text-white hover:bg-white/10"
+          onClick={() => navigate("/")}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Home
+        </Button>
+      </motion.div>
 
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 via-pink-500/20 to-violet-500/20 bg-[length:400%_400%] animate-gradient" />
-
-      {/* Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {particles.map((particle) => (
-          <div
-            key={particle.id}
-            className="absolute rounded-full opacity-30"
-            style={{
-              left: particle.x,
-              top: particle.y,
-              width: particle.size,
-              height: particle.size,
-              background: particle.color,
-              filter: "blur(1px)",
-            }}
-          />
-        ))}
-      </div>
 
       {/* Grid Background */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
@@ -188,7 +184,6 @@ export default function Register() {
       {/* Main Content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
         <motion.div
-          ref={formRef}
           className="register-form w-full max-w-md"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -210,28 +205,33 @@ export default function Register() {
                   Join LEARNVERSE
                 </CardTitle>
                 <CardDescription className="text-white/70 mt-2">
-                  Start your learning journey today
+                  Start your professional learning journey today
                 </CardDescription>
-              </div>
-
-              {/* Features Preview */}
-              <div className="flex justify-center space-x-4 text-white/60">
-                <div className="flex items-center space-x-1">
-                  <Shield className="w-4 h-4" />
-                  <span className="text-xs">Secure</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Zap className="w-4 h-4" />
-                  <span className="text-xs">Fast</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Sparkles className="w-4 h-4" />
-                  <span className="text-xs">AI-Powered</span>
-                </div>
               </div>
             </CardHeader>
 
             <CardContent className="space-y-6">
+              {/* OAuth Buttons - Primary Options */}
+              <div className="space-y-3">
+                <Button
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
+                  className="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold py-3 transition-all duration-300"
+                >
+                  <Chrome className="w-5 h-5 mr-3" />
+                  {isLoading ? "Connecting..." : "Continue with Google"}
+                </Button>
+
+                <Button
+                  onClick={handleGitHubSignIn}
+                  disabled={isLoading}
+                  className="w-full bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 transition-all duration-300"
+                >
+                  <Github className="w-5 h-5 mr-3" />
+                  {isLoading ? "Connecting..." : "Continue with GitHub"}
+                </Button>
+              </div>
+
               {/* Alert Messages */}
               <AnimatePresence>
                 {error && (
@@ -265,7 +265,59 @@ export default function Register() {
                 )}
               </AnimatePresence>
 
-              {/* Register Form */}
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/20" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-slate-900 text-white/70">
+                    Or create account with email
+                  </span>
+                </div>
+              </div>
+
+              {/* Role Selection */}
+              <div className="space-y-3">
+                <Label className="text-white/90">Choose Your Role</Label>
+                <div className="grid grid-cols-1 gap-3">
+                  {roleOptions.map((option) => (
+                    <motion.div
+                      key={option.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setRole(option.id)}
+                        className={`w-full p-4 rounded-lg border-2 transition-all duration-300 ${
+                          role === option.id
+                            ? "border-pink-400 bg-pink-500/10"
+                            : "border-white/20 bg-white/5 hover:border-white/40"
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div
+                            className={`w-10 h-10 rounded-lg bg-gradient-to-r ${option.color} flex items-center justify-center`}
+                          >
+                            <option.icon className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="text-left">
+                            <p className="text-white font-medium">
+                              {option.title}
+                            </p>
+                            <p className="text-white/60 text-sm">
+                              {option.description}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Registration Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Name Field */}
                 <div className="space-y-2">
@@ -407,40 +459,6 @@ export default function Register() {
                 </MagneticButton>
               </form>
 
-              {/* Divider */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/20" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-slate-900 text-white/70">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-
-              {/* Social Login */}
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  variant="outline"
-                  className="border-white/20 bg-white/5 text-white hover:bg-white/10"
-                  onClick={handleGitHubSignIn}
-                  disabled={isLoading}
-                >
-                  <Github className="w-4 h-4 mr-2" />
-                  Github
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-white/20 bg-white/5 text-white hover:bg-white/10"
-                  onClick={handleGoogleSignIn}
-                  disabled={isLoading}
-                >
-                  <Chrome className="w-4 h-4 mr-2" />
-                  Google
-                </Button>
-              </div>
-
               {/* Sign In Link */}
               <div className="text-center">
                 <span className="text-white/70">Already have an account? </span>
@@ -450,6 +468,12 @@ export default function Register() {
                 >
                   Sign in
                 </Link>
+              </div>
+
+              {/* Professional Note */}
+              <div className="text-center text-xs text-white/50 border-t border-white/10 pt-4">
+                <p>🔒 Professional OAuth like YouTube & Instagram</p>
+                <p>✨ Role-based dashboards: Student | Creator | Institution</p>
               </div>
             </CardContent>
           </Card>
