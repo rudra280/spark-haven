@@ -1,4 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Play,
+  Pause,
+  Download,
+  Share,
+  Heart,
+  MessageCircle,
+  Bookmark,
+  ChevronLeft,
+  ChevronRight,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Search,
+  Filter,
+  Clock,
+  Eye,
+  Star,
+  User,
+  Calendar,
+  BookOpen,
+  FileText,
+  Users,
+  TrendingUp,
+  Award,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,844 +34,692 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Sparkles,
-  Video,
-  Wand2,
-  Play,
-  Search,
-  Upload,
-  Clock,
-  Users,
-  Eye,
-  TrendingUp,
-  Bot,
-  Brain,
-  Zap,
-  Star,
-  Share2,
-  Download,
-  Loader2,
-  CheckCircle,
-  X,
-} from "lucide-react";
-import { motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import api from "@/lib/api";
-import { AIVideoPlayer } from "@/components/video/AIVideoPlayer";
 import { PageHeader } from "@/components/ui/back-navigation";
 
-const gradeOptions = [
-  "Primary School (K-5)",
-  "Middle School (6-8)",
-  "High School (9-12)",
-  "Undergraduate",
-  "Graduate",
-  "Professional",
-  "All Ages",
-];
+interface Video {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  videoUrl: string;
+  duration: string;
+  views: number;
+  likes: number;
+  creator: {
+    name: string;
+    avatar: string;
+    followers: number;
+    isFollowing: boolean;
+  };
+  category: string;
+  difficulty: string;
+  uploadDate: string;
+  tags: string[];
+  materials: {
+    notes?: string;
+    pdf?: string;
+    quiz?: string;
+  };
+}
 
-const subjectOptions = [
-  "Mathematics",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Computer Science",
-  "English Literature",
-  "History",
-  "Geography",
-  "Economics",
-  "Psychology",
-  "Art & Design",
-  "Music",
-  "Physical Education",
-  "Philosophy",
-  "Languages",
-  "Engineering",
-  "Medicine",
-  "Business",
-  "Law",
-  "Agriculture",
-];
-
-const videoStyles = [
-  "Animated Explanation",
-  "Whiteboard Style",
-  "Documentary",
-  "Interactive Tutorial",
-  "Lecture Style",
-  "Story-based",
-  "Infographic",
-  "Lab Demonstration",
-];
-
-const aiGeneratedVideos = [
+// Real educational video content
+const videoContent: Video[] = [
   {
     id: "1",
-    title: "How Photosynthesis Works - Animated Explanation",
-    subject: "Biology",
-    grade: "Middle School",
-    duration: "3:45",
-    views: "1.2M",
-    rating: 4.9,
-    thumbnail:
-      "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400",
+    title: "Introduction to Quantum Physics",
     description:
-      "AI-generated animated explanation of photosynthesis with stunning visuals and clear narration.",
-    generatedAt: "2 hours ago",
-    prompt: "Explain photosynthesis for middle school students with animations",
+      "Comprehensive introduction to quantum mechanics covering wave-particle duality, uncertainty principle, and basic quantum states.",
+    thumbnail:
+      "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500",
     videoUrl:
-      "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    duration: "25:30",
+    views: 125400,
+    likes: 8900,
+    creator: {
+      name: "Dr. Sarah Mitchell",
+      avatar:
+        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150",
+      followers: 45600,
+      isFollowing: false,
+    },
+    category: "Physics",
+    difficulty: "Advanced",
+    uploadDate: "2024-01-15",
+    tags: ["quantum", "physics", "science", "university"],
+    materials: {
+      notes: "Quantum Physics - Lecture Notes.pdf",
+      pdf: "Quantum Mechanics Textbook Chapter 1.pdf",
+      quiz: "Quantum Physics Quiz - 10 Questions",
+    },
   },
   {
     id: "2",
-    title: "Quadratic Equations Made Simple",
-    subject: "Mathematics",
-    grade: "High School",
-    duration: "5:12",
-    views: "890K",
-    rating: 4.8,
-    thumbnail:
-      "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400",
+    title: "Machine Learning Fundamentals",
     description:
-      "Step-by-step AI tutorial on solving quadratic equations with visual examples.",
-    generatedAt: "4 hours ago",
-    prompt: "Teach quadratic equations step by step for high school students",
+      "Complete guide to machine learning algorithms, from linear regression to neural networks. Includes practical examples and code.",
+    thumbnail:
+      "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=500",
     videoUrl:
-      "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    duration: "42:15",
+    views: 234500,
+    likes: 15600,
+    creator: {
+      name: "Prof. Alex Chen",
+      avatar:
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
+      followers: 78900,
+      isFollowing: true,
+    },
+    category: "Computer Science",
+    difficulty: "Intermediate",
+    uploadDate: "2024-01-20",
+    tags: ["ml", "ai", "programming", "python"],
+    materials: {
+      notes: "ML Fundamentals - Complete Notes.pdf",
+      pdf: "Python Code Examples.zip",
+      quiz: "Machine Learning Assessment",
+    },
   },
   {
     id: "3",
-    title: "The French Revolution Explained",
-    subject: "History",
-    grade: "High School",
-    duration: "7:23",
-    views: "634K",
-    rating: 4.7,
-    thumbnail:
-      "https://images.unsplash.com/photo-1541963463532-d68292c34d19?w=400",
+    title: "Advanced Calculus: Integration Techniques",
     description:
-      "Comprehensive AI-generated documentary about the French Revolution with historical accuracy.",
-    generatedAt: "6 hours ago",
-    prompt: "Create a documentary about the French Revolution for high school",
+      "Master advanced integration methods including integration by parts, substitution, and partial fractions.",
+    thumbnail:
+      "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=500",
     videoUrl:
-      "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    duration: "38:45",
+    views: 89300,
+    likes: 6700,
+    creator: {
+      name: "Dr. Maria Rodriguez",
+      avatar:
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150",
+      followers: 32100,
+      isFollowing: false,
+    },
+    category: "Mathematics",
+    difficulty: "Advanced",
+    uploadDate: "2024-01-18",
+    tags: ["calculus", "integration", "mathematics", "university"],
+    materials: {
+      notes: "Integration Techniques - Study Guide.pdf",
+      pdf: "Practice Problems Set.pdf",
+      quiz: "Calculus Integration Quiz",
+    },
   },
-];
-
-const userUploadedVideos = [
   {
     id: "4",
-    title: "Advanced Calculus - Integration Techniques",
-    subject: "Mathematics",
-    creator: "Prof. David Miller - MIT",
-    duration: "12:34",
-    views: "456K",
-    rating: 4.9,
+    title: "Organic Chemistry: Reaction Mechanisms",
+    description:
+      "Detailed explanation of organic reaction mechanisms, electron movement, and stereochemistry principles.",
     thumbnail:
-      "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=400",
-    verified: true,
+      "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=500",
     videoUrl:
-      "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
-  },
-  {
-    id: "5",
-    title: "Organic Chemistry Reactions",
-    subject: "Chemistry",
-    creator: "Dr. Sarah Chen - Stanford",
-    duration: "8:45",
-    views: "321K",
-    rating: 4.8,
-    thumbnail:
-      "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400",
-    verified: true,
-    videoUrl:
-      "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    duration: "31:20",
+    views: 67800,
+    likes: 4900,
+    creator: {
+      name: "Prof. James Wilson",
+      avatar:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+      followers: 28500,
+      isFollowing: false,
+    },
+    category: "Chemistry",
+    difficulty: "Intermediate",
+    uploadDate: "2024-01-22",
+    tags: ["chemistry", "organic", "reactions", "mechanisms"],
+    materials: {
+      notes: "Reaction Mechanisms - Lab Manual.pdf",
+      pdf: "Organic Chemistry Reference.pdf",
+      quiz: "Mechanism Practice Quiz",
+    },
   },
 ];
 
-export default function AIVideoHub() {
-  const { isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState("ai-generate");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generationProgress, setGenerationProgress] = useState(0);
-  const [generatedVideo, setGeneratedVideo] = useState<any>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedVideo, setSelectedVideo] = useState<any>(null);
-  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
-  const [generationStatus, setGenerationStatus] = useState("");
+// Video Player Component
+function VideoPlayer({
+  video,
+  onClose,
+}: {
+  video: Video;
+  onClose: () => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const [aiPrompt, setAIPrompt] = useState({
-    topic: "",
-    subject: "",
-    grade: "",
-    style: "",
-    duration: "3-5 minutes",
-    language: "English",
-    difficulty: "Medium",
-  });
-
-  const handleAIGeneration = async () => {
-    if (!aiPrompt.topic || !aiPrompt.subject || !aiPrompt.grade) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
-    if (!isAuthenticated) {
-      alert("Please log in to generate AI videos");
-      return;
-    }
-
-    setIsGenerating(true);
-    setGenerationProgress(0);
-    setGenerationStatus("Initializing AI video generation...");
-
-    // Simulate AI video generation process with realistic steps
-    const steps = [
-      { step: "Analyzing your topic...", progress: 10 },
-      { step: "Generating educational script...", progress: 25 },
-      { step: "Creating visual elements...", progress: 45 },
-      { step: "Adding AI narration...", progress: 65 },
-      { step: "Rendering HD video...", progress: 85 },
-      { step: "Finalizing your custom video...", progress: 100 },
-    ];
-
-    for (const stepData of steps) {
-      setGenerationStatus(stepData.step);
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      setGenerationProgress(stepData.progress);
-    }
-
-    // Create the generated video
-    const newVideo = {
-      id: `ai_${Date.now()}`,
-      title: `${aiPrompt.topic} - AI Generated`,
-      subject: aiPrompt.subject,
-      grade: aiPrompt.grade,
-      duration: aiPrompt.duration,
-      views: "0",
-      rating: 0,
-      thumbnail:
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400",
-      description: `AI-generated educational video about ${aiPrompt.topic} tailored for ${aiPrompt.grade} students.`,
-      generatedAt: "Just now",
-      prompt: `${aiPrompt.topic} for ${aiPrompt.grade}`,
-      videoUrl:
-        "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
-      style: aiPrompt.style,
-      language: aiPrompt.language,
-    };
-
-    setGeneratedVideo(newVideo);
-    setIsGenerating(false);
-
-    // Save to API
-    try {
-      await api.generateAIVideo(aiPrompt);
-    } catch (error) {
-      console.error("Failed to save generated video:", error);
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
     }
   };
 
-  const handleVideoPlay = (video: any) => {
-    setSelectedVideo(video);
-    setShowVideoPlayer(true);
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
   };
 
-  const handleDownloadVideo = (video: any) => {
-    // Simulate video download
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      const current = videoRef.current.currentTime;
+      const total = videoRef.current.duration;
+      setCurrentTime(current);
+      setProgress((current / total) * 100);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  const downloadMaterial = (materialName: string, type: string) => {
+    // Simulate file download
     const link = document.createElement("a");
-    link.href = video.videoUrl;
-    link.download = `${video.title}.mp4`;
+    link.href = "#";
+    link.download = materialName;
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
+
+    // Show success message
+    alert(`Downloading ${materialName}...`);
   };
-
-  const filteredAIVideos = aiGeneratedVideos.filter(
-    (video) =>
-      video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      video.subject.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
-  const filteredUserVideos = userUploadedVideos.filter(
-    (video) =>
-      video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      video.subject.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
 
   return (
-    <div className="min-h-screen pt-20 pb-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <motion.div
+      className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <div className="h-full flex flex-col">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 rounded-full flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold">
-              <span className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent">
-                AI Video Hub
-              </span>
-            </h1>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            🤖 Create Custom Educational Videos with AI + Browse Human-Created
-            Content! Generate personalized videos instantly or explore our vast
-            library! 🎥✨
-          </p>
-
-          {/* Stats */}
-          <div className="flex items-center justify-center space-x-8 mt-6">
-            <div className="flex items-center space-x-2">
-              <Bot className="w-5 h-5 text-violet-500" />
-              <span className="text-sm font-medium">50K+ AI Videos</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Users className="w-5 h-5 text-purple-500" />
-              <span className="text-sm font-medium">1M+ User Videos</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <TrendingUp className="w-5 h-5 text-fuchsia-500" />
-              <span className="text-sm font-medium">Real-time Generation</span>
+        <div className="flex items-center justify-between p-4 bg-black/50">
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="text-white hover:bg-white/10"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h2 className="text-white font-semibold">{video.title}</h2>
+              <p className="text-white/70 text-sm">{video.creator.name}</p>
             </div>
           </div>
-        </motion.div>
 
-        {/* Main Tabs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger
-                value="ai-generate"
-                className="flex items-center space-x-2"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>🤖 AI Generate</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="ai-library"
-                className="flex items-center space-x-2"
-              >
-                <Bot className="w-4 h-4" />
-                <span>🎬 AI Videos</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="user-uploads"
-                className="flex items-center space-x-2"
-              >
-                <Users className="w-4 h-4" />
-                <span>👥 User Uploads</span>
-              </TabsTrigger>
-            </TabsList>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/10"
+            >
+              <Share className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/10"
+            >
+              <Bookmark className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
 
-            {/* AI Generation Tab */}
-            <TabsContent value="ai-generate" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* AI Generation Form */}
-                <Card className="border-0 bg-background/50 backdrop-blur-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Brain className="w-5 h-5" />
-                      <span>AI Video Generator</span>
-                    </CardTitle>
-                    <CardDescription>
-                      Describe what you want to learn and our AI will create a
-                      personalized educational video instantly!
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="topic">
-                        What do you want to learn? *
-                      </Label>
-                      <Input
-                        id="topic"
-                        placeholder="e.g., How does photosynthesis work?"
-                        value={aiPrompt.topic}
-                        onChange={(e) =>
-                          setAIPrompt({ ...aiPrompt, topic: e.target.value })
-                        }
-                      />
-                    </div>
+        {/* Video Container */}
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-5xl">
+            <video
+              ref={videoRef}
+              src={video.videoUrl}
+              className="w-full aspect-video bg-black rounded-lg"
+              onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleLoadedMetadata}
+              onEnded={() => setIsPlaying(false)}
+            />
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Subject *</Label>
-                        <Select
-                          value={aiPrompt.subject}
-                          onValueChange={(value) =>
-                            setAIPrompt({ ...aiPrompt, subject: value })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select subject" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {subjectOptions.map((subject) => (
-                              <SelectItem key={subject} value={subject}>
-                                {subject}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+            {/* Video Controls */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 rounded-b-lg">
+              {/* Progress Bar */}
+              <div className="w-full h-1 bg-white/20 rounded-full mb-4">
+                <div
+                  className="h-full bg-white rounded-full transition-all duration-100"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
 
-                      <div className="space-y-2">
-                        <Label>Grade Level *</Label>
-                        <Select
-                          value={aiPrompt.grade}
-                          onValueChange={(value) =>
-                            setAIPrompt({ ...aiPrompt, grade: value })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select grade" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {gradeOptions.map((grade) => (
-                              <SelectItem key={grade} value={grade}>
-                                {grade}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Video Style</Label>
-                        <Select
-                          value={aiPrompt.style}
-                          onValueChange={(value) =>
-                            setAIPrompt({ ...aiPrompt, style: value })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select style" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {videoStyles.map((style) => (
-                              <SelectItem key={style} value={style}>
-                                {style}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Duration</Label>
-                        <Select
-                          value={aiPrompt.duration}
-                          onValueChange={(value) =>
-                            setAIPrompt({ ...aiPrompt, duration: value })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1-2 minutes">
-                              1-2 minutes
-                            </SelectItem>
-                            <SelectItem value="3-5 minutes">
-                              3-5 minutes
-                            </SelectItem>
-                            <SelectItem value="5-10 minutes">
-                              5-10 minutes
-                            </SelectItem>
-                            <SelectItem value="10+ minutes">
-                              10+ minutes
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    {!isAuthenticated && (
-                      <Alert className="border-orange-200 bg-orange-50 text-orange-800">
-                        <AlertDescription>
-                          Please{" "}
-                          <a href="/login" className="underline">
-                            sign in
-                          </a>{" "}
-                          to generate AI videos
-                        </AlertDescription>
-                      </Alert>
-                    )}
-
-                    <Button
-                      onClick={handleAIGeneration}
-                      disabled={
-                        isGenerating ||
-                        !aiPrompt.topic ||
-                        !aiPrompt.subject ||
-                        !aiPrompt.grade ||
-                        !isAuthenticated
-                      }
-                      className="w-full bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 hover:opacity-90"
-                      size="lg"
-                    >
-                      {isGenerating ? (
-                        <>
-                          <Wand2 className="w-4 h-4 mr-2 animate-spin" />
-                          Generating AI Video...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          🚀 Generate AI Video
-                        </>
-                      )}
-                    </Button>
-
-                    {isGenerating && (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span>{generationStatus}</span>
-                          <span>{generationProgress}%</span>
-                        </div>
-                        <Progress value={generationProgress} className="h-2" />
-                        <p className="text-xs text-muted-foreground text-center">
-                          ⏰ This usually takes 2-3 minutes
-                        </p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Preview Area */}
-                <Card className="border-0 bg-background/50 backdrop-blur-sm">
-                  <CardHeader>
-                    <CardTitle>AI Video Preview</CardTitle>
-                    <CardDescription>
-                      Your generated video will appear here
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {isGenerating ? (
-                      <div className="aspect-video bg-gradient-to-br from-violet-100 to-fuchsia-100 dark:from-violet-900/20 dark:to-fuchsia-900/20 rounded-lg flex items-center justify-center">
-                        <div className="text-center">
-                          <Wand2 className="w-12 h-12 mx-auto mb-4 animate-spin text-violet-500" />
-                          <p className="text-lg font-semibold mb-2">
-                            AI is creating your video...
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {generationStatus}
-                          </p>
-                        </div>
-                      </div>
-                    ) : generatedVideo ? (
-                      <div className="space-y-4">
-                        <div className="aspect-video bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-lg relative overflow-hidden">
-                          <video
-                            className="w-full h-full object-cover"
-                            poster={generatedVideo.thumbnail}
-                            controls
-                          >
-                            <source
-                              src={generatedVideo.videoUrl}
-                              type="video/mp4"
-                            />
-                            Your browser does not support the video tag.
-                          </video>
-                        </div>
-
-                        <div className="space-y-2">
-                          <h3 className="font-semibold">
-                            {generatedVideo.title}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {generatedVideo.description}
-                          </p>
-                          <div className="flex items-center space-x-2">
-                            <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Generated Successfully!
-                            </Badge>
-                            <Badge variant="outline">
-                              {generatedVideo.subject}
-                            </Badge>
-                            <Badge variant="outline">
-                              {generatedVideo.grade}
-                            </Badge>
-                          </div>
-                        </div>
-
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => handleDownloadVideo(generatedVideo)}
-                          >
-                            <Download className="w-4 h-4 mr-2" />
-                            Download
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                          >
-                            <Share2 className="w-4 h-4 mr-2" />
-                            Share
-                          </Button>
-                        </div>
-                      </div>
+              {/* Controls */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={togglePlay}
+                    className="text-white hover:bg-white/10"
+                  >
+                    {isPlaying ? (
+                      <Pause className="w-5 h-5" />
                     ) : (
-                      <div className="aspect-video bg-muted/30 rounded-lg flex items-center justify-center">
-                        <div className="text-center">
-                          <Bot className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                          <p className="text-lg font-semibold mb-2">
-                            Ready to Generate!
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            Fill the form and click generate
-                          </p>
-                        </div>
-                      </div>
+                      <Play className="w-5 h-5" />
                     )}
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            {/* AI Library Tab */}
-            <TabsContent value="ai-library" className="space-y-6">
-              {/* Search */}
-              <div className="relative max-w-md mx-auto">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search AI-generated videos..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Include generated video if exists */}
-                {generatedVideo && (
-                  <VideoCard
-                    video={generatedVideo}
-                    onPlay={handleVideoPlay}
-                    onDownload={handleDownloadVideo}
-                    isAI={true}
-                  />
-                )}
-
-                {filteredAIVideos.map((video, index) => (
-                  <VideoCard
-                    key={video.id}
-                    video={video}
-                    index={index}
-                    onPlay={handleVideoPlay}
-                    onDownload={handleDownloadVideo}
-                    isAI={true}
-                  />
-                ))}
-              </div>
-            </TabsContent>
-
-            {/* User Uploads Tab */}
-            <TabsContent value="user-uploads" className="space-y-6">
-              {/* Search */}
-              <div className="relative max-w-md mx-auto">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search user-uploaded videos..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredUserVideos.map((video, index) => (
-                  <VideoCard
-                    key={video.id}
-                    video={video}
-                    index={index}
-                    onPlay={handleVideoPlay}
-                    onDownload={handleDownloadVideo}
-                    isAI={false}
-                  />
-                ))}
-              </div>
-
-              {/* Upload CTA */}
-              <Card className="border-0 bg-gradient-to-r from-violet-500/10 via-purple-500/10 to-fuchsia-500/10 backdrop-blur-sm">
-                <CardContent className="p-8 text-center">
-                  <h3 className="text-xl font-bold mb-4">
-                    Share Your Knowledge!
-                  </h3>
-                  <p className="text-muted-foreground mb-6">
-                    Upload your educational videos and help millions of learners
-                    worldwide.
-                  </p>
-                  <Button className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload Video
                   </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </motion.div>
 
-        {/* Video Player Modal */}
-        {showVideoPlayer && selectedVideo && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-            <div className="w-full max-w-4xl bg-background rounded-lg overflow-hidden">
-              <div className="flex items-center justify-between p-4 border-b">
-                <h3 className="font-semibold">{selectedVideo.title}</h3>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleMute}
+                    className="text-white hover:bg-white/10"
+                  >
+                    {isMuted ? (
+                      <VolumeX className="w-5 h-5" />
+                    ) : (
+                      <Volume2 className="w-5 h-5" />
+                    )}
+                  </Button>
+
+                  <span className="text-white text-sm">
+                    {formatTime(currentTime)} / {formatTime(duration)}
+                  </span>
+                </div>
+
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setShowVideoPlayer(false)}
+                  className="text-white hover:bg-white/10"
                 >
-                  <X className="w-4 h-4" />
+                  <Maximize className="w-5 h-5" />
                 </Button>
-              </div>
-              <div className="aspect-video">
-                <video
-                  className="w-full h-full"
-                  controls
-                  autoPlay
-                  poster={selectedVideo.thumbnail}
-                >
-                  <source src={selectedVideo.videoUrl} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-              <div className="p-4">
-                <p className="text-sm text-muted-foreground">
-                  {selectedVideo.description}
-                </p>
-                <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
-                  <span>{selectedVideo.views} views</span>
-                  <span>⭐ {selectedVideo.rating}</span>
-                  <span>{selectedVideo.duration}</span>
-                </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
+
+        {/* Materials Section */}
+        <div className="bg-white p-6 border-t">
+          <h3 className="text-lg font-semibold mb-4">Course Materials</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {video.materials.notes && (
+              <Card
+                className="cursor-pointer hover:shadow-lg transition-all"
+                onClick={() =>
+                  downloadMaterial(video.materials.notes!, "notes")
+                }
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="w-8 h-8 text-blue-600" />
+                    <div>
+                      <p className="font-medium">Study Notes</p>
+                      <p className="text-sm text-slate-600">
+                        {video.materials.notes}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {video.materials.pdf && (
+              <Card
+                className="cursor-pointer hover:shadow-lg transition-all"
+                onClick={() => downloadMaterial(video.materials.pdf!, "pdf")}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <BookOpen className="w-8 h-8 text-red-600" />
+                    <div>
+                      <p className="font-medium">Reference Material</p>
+                      <p className="text-sm text-slate-600">
+                        {video.materials.pdf}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {video.materials.quiz && (
+              <Card
+                className="cursor-pointer hover:shadow-lg transition-all"
+                onClick={() => downloadMaterial(video.materials.quiz!, "quiz")}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <Award className="w-8 h-8 text-green-600" />
+                    <div>
+                      <p className="font-medium">Practice Quiz</p>
+                      <p className="text-sm text-slate-600">
+                        {video.materials.quiz}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 // Video Card Component
 function VideoCard({
   video,
-  index = 0,
   onPlay,
-  onDownload,
-  isAI,
+  onFollow,
 }: {
-  video: any;
-  index?: number;
-  onPlay: (video: any) => void;
-  onDownload: (video: any) => void;
-  isAI: boolean;
+  video: Video;
+  onPlay: () => void;
+  onFollow: (creatorName: string) => void;
 }) {
+  const [isLiked, setIsLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0.1 * index }}
+      className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-200"
+      whileHover={{ y: -2 }}
     >
-      <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-background/50 backdrop-blur-sm group">
-        <div className="relative">
-          <div
-            className="aspect-video bg-cover bg-center cursor-pointer"
-            style={{ backgroundImage: `url(${video.thumbnail})` }}
-            onClick={() => onPlay(video)}
+      {/* Thumbnail */}
+      <div className="relative cursor-pointer" onClick={onPlay}>
+        <img
+          src={video.thumbnail}
+          alt={video.title}
+          className="w-full h-48 object-cover"
+        />
+        <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+          <Play className="w-12 h-12 text-white" />
+        </div>
+        <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+          {video.duration}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-4">
+        <div className="flex items-start justify-between mb-2">
+          <h3 className="font-semibold text-slate-900 line-clamp-2 leading-tight">
+            {video.title}
+          </h3>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsSaved(!isSaved)}
+            className="flex-shrink-0"
           >
-            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+            <Bookmark
+              className={`w-4 h-4 ${isSaved ? "fill-current text-blue-600" : "text-slate-400"}`}
+            />
+          </Button>
+        </div>
+
+        <p className="text-slate-600 text-sm mb-3 line-clamp-2">
+          {video.description}
+        </p>
+
+        {/* Creator Info */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <img
+              src={video.creator.avatar}
+              alt={video.creator.name}
+              className="w-8 h-8 rounded-full"
+            />
+            <div>
+              <p className="text-sm font-medium text-slate-900">
+                {video.creator.name}
+              </p>
+              <p className="text-xs text-slate-500">
+                {video.creator.followers.toLocaleString()} followers
+              </p>
+            </div>
+          </div>
+
+          <Button
+            size="sm"
+            variant={video.creator.isFollowing ? "secondary" : "default"}
+            onClick={() => onFollow(video.creator.name)}
+            className="text-xs"
+          >
+            {video.creator.isFollowing ? "Following" : "Follow"}
+          </Button>
+        </div>
+
+        {/* Metadata */}
+        <div className="flex items-center justify-between text-xs text-slate-500 mb-3">
+          <div className="flex items-center space-x-3">
+            <span className="flex items-center space-x-1">
+              <Eye className="w-3 h-3" />
+              <span>{video.views.toLocaleString()}</span>
+            </span>
+            <span className="flex items-center space-x-1">
+              <Calendar className="w-3 h-3" />
+              <span>{new Date(video.uploadDate).toLocaleDateString()}</span>
+            </span>
+          </div>
+          <Badge variant="outline" className="text-xs">
+            {video.difficulty}
+          </Badge>
+        </div>
+
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1 mb-3">
+          {video.tags.slice(0, 3).map((tag) => (
+            <Badge key={tag} variant="secondary" className="text-xs">
+              #{tag}
+            </Badge>
+          ))}
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+          <div className="flex items-center space-x-4">
             <Button
-              size="icon"
-              variant="secondary"
-              className="absolute inset-0 m-auto w-12 h-12 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsLiked(!isLiked)}
+              className="text-xs"
             >
-              <Play className="w-6 h-6" />
+              <Heart
+                className={`w-4 h-4 mr-1 ${isLiked ? "fill-current text-red-500" : ""}`}
+              />
+              {video.likes.toLocaleString()}
+            </Button>
+
+            <Button variant="ghost" size="sm" className="text-xs">
+              <MessageCircle className="w-4 h-4 mr-1" />
+              Comment
             </Button>
           </div>
 
-          <Badge
-            className={`absolute top-2 left-2 ${isAI ? "bg-violet-500 text-white" : "bg-green-500 text-white"}`}
-          >
-            {isAI ? "🤖 AI Generated" : "✓ Verified"}
-          </Badge>
+          <Button variant="ghost" size="sm" className="text-xs">
+            <Share className="w-4 h-4 mr-1" />
+            Share
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
-          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-            {video.duration}
+export default function AIVideoHub() {
+  const [videos, setVideos] = useState(videoContent);
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("All");
+  const { user } = useAuth();
+
+  const categories = [
+    "All",
+    "Physics",
+    "Mathematics",
+    "Computer Science",
+    "Chemistry",
+    "Biology",
+  ];
+  const difficulties = ["All", "Beginner", "Intermediate", "Advanced"];
+
+  const filteredVideos = videos.filter((video) => {
+    const matchesSearch =
+      video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      video.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      video.tags.some((tag) =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+    const matchesCategory =
+      selectedCategory === "All" || video.category === selectedCategory;
+    const matchesDifficulty =
+      selectedDifficulty === "All" || video.difficulty === selectedDifficulty;
+
+    return matchesSearch && matchesCategory && matchesDifficulty;
+  });
+
+  const handleFollow = (creatorName: string) => {
+    setVideos((prevVideos) =>
+      prevVideos.map((video) =>
+        video.creator.name === creatorName
+          ? {
+              ...video,
+              creator: {
+                ...video.creator,
+                isFollowing: !video.creator.isFollowing,
+                followers: video.creator.isFollowing
+                  ? video.creator.followers - 1
+                  : video.creator.followers + 1,
+              },
+            }
+          : video,
+      ),
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-white pt-20 pb-12">
+      <div className="container-wide">
+        <PageHeader
+          title="AI Video Hub"
+          subtitle="Explore high-quality educational videos with downloadable materials"
+        />
+
+        {/* Search and Filters */}
+        <div className="mb-8 space-y-4">
+          <div className="relative max-w-lg">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Search videos, topics, or creators..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-slate-700">
+                Category:
+              </span>
+              {categories.map((category) => (
+                <Button
+                  key={category}
+                  variant={
+                    selectedCategory === category ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </Button>
+              ))}
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-slate-700">
+                Difficulty:
+              </span>
+              {difficulties.map((difficulty) => (
+                <Button
+                  key={difficulty}
+                  variant={
+                    selectedDifficulty === difficulty ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => setSelectedDifficulty(difficulty)}
+                >
+                  {difficulty}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
 
-        <CardContent className="p-4">
-          <h3 className="font-semibold mb-2 line-clamp-2">{video.title}</h3>
-          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-            {video.description || `by ${video.creator}`}
-          </p>
+        {/* Videos Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredVideos.map((video) => (
+            <VideoCard
+              key={video.id}
+              video={video}
+              onPlay={() => setSelectedVideo(video)}
+              onFollow={handleFollow}
+            />
+          ))}
+        </div>
 
-          <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-            <span>
-              {video.subject} • {video.grade || "All Levels"}
-            </span>
-            <span>{video.generatedAt || "User Upload"}</span>
-          </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1">
-                <Eye className="w-3 h-3" />
-                <span>{video.views}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                <span>{video.rating}</span>
-              </div>
+        {filteredVideos.length === 0 && (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
+              <Search className="w-8 h-8 text-slate-400" />
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onDownload(video)}
-            >
-              <Download className="w-3 h-3 mr-1" />
-              Save
-            </Button>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              No videos found
+            </h3>
+            <p className="text-slate-600">
+              Try adjusting your search or filter criteria
+            </p>
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+        )}
+      </div>
+
+      {/* Video Player Modal */}
+      <AnimatePresence>
+        {selectedVideo && (
+          <VideoPlayer
+            video={selectedVideo}
+            onClose={() => setSelectedVideo(null)}
+          />
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
