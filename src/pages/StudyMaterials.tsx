@@ -1,4 +1,28 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Download,
+  FileText,
+  BookOpen,
+  Video,
+  Image,
+  Link as LinkIcon,
+  Search,
+  Filter,
+  Star,
+  Eye,
+  Clock,
+  User,
+  Calendar,
+  Tag,
+  Share,
+  Heart,
+  Bookmark,
+  Play,
+  ExternalLink,
+  File,
+  Archive,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,629 +31,715 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  BookOpen,
-  Download,
-  Search,
-  Filter,
-  Star,
-  Eye,
-  Calendar,
-  Users,
-  Globe,
-  GraduationCap,
-  School,
-  University,
-  FileText,
-  Video,
-  Image,
-  Headphones,
-  ChevronRight,
-} from "lucide-react";
-import { motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/back-navigation";
 
-// Academic Levels
-const academicLevels = {
-  primary: {
-    name: "Primary School",
-    icon: School,
-    grades: [
-      "Nursery",
-      "LKG",
-      "UKG",
-      "Class 1",
-      "Class 2",
-      "Class 3",
-      "Class 4",
-      "Class 5",
-    ],
-    color: "from-green-500 to-emerald-500",
-  },
-  secondary: {
-    name: "Secondary School",
-    icon: GraduationCap,
-    grades: ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"],
-    color: "from-blue-500 to-cyan-500",
-  },
-  higher: {
-    name: "Higher Secondary",
-    icon: University,
-    grades: ["Class 11", "Class 12"],
-    color: "from-purple-500 to-violet-500",
-  },
-  undergraduate: {
-    name: "Undergraduate",
-    icon: University,
-    grades: ["1st Year", "2nd Year", "3rd Year", "4th Year"],
-    color: "from-orange-500 to-red-500",
-  },
-  postgraduate: {
-    name: "Postgraduate",
-    icon: University,
-    grades: ["Master's 1st Year", "Master's 2nd Year", "PhD", "Research"],
-    color: "from-pink-500 to-rose-500",
-  },
-};
+interface StudyMaterial {
+  id: string;
+  title: string;
+  description: string;
+  type: "pdf" | "video" | "notes" | "presentation" | "quiz" | "assignment";
+  subject: string;
+  difficulty: string;
+  fileSize: string;
+  downloadUrl: string;
+  previewUrl?: string;
+  thumbnail: string;
+  author: {
+    name: string;
+    avatar: string;
+    institution: string;
+  };
+  uploadDate: string;
+  downloads: number;
+  rating: number;
+  tags: string[];
+  isBookmarked: boolean;
+  isPremium: boolean;
+}
 
-// Subjects by level
-const subjectsByLevel = {
-  primary: [
-    "English",
-    "Hindi",
-    "Mathematics",
-    "Science",
-    "Social Studies",
-    "Art & Craft",
-    "Physical Education",
-    "Moral Science",
-  ],
-  secondary: [
-    "English",
-    "Hindi",
-    "Mathematics",
-    "Science",
-    "Social Science",
-    "Computer Science",
-    "Sanskrit",
-    "Art Education",
-    "Physical Education",
-  ],
-  higher: [
-    "Physics",
-    "Chemistry",
-    "Biology",
-    "Mathematics",
-    "English",
-    "Hindi",
-    "History",
-    "Geography",
-    "Economics",
-    "Political Science",
-    "Computer Science",
-    "Psychology",
-    "Sociology",
-  ],
-  undergraduate: [
-    "Engineering",
-    "Medical Sciences",
-    "Commerce",
-    "Arts & Humanities",
-    "Science",
-    "Law",
-    "Management",
-    "Computer Applications",
-    "Agriculture",
-    "Pharmacy",
-  ],
-  postgraduate: [
-    "Specialized Research",
-    "Advanced Studies",
-    "Thesis Work",
-    "Clinical Practice",
-    "Industry Projects",
-  ],
-};
-
-// Sample study materials
-const studyMaterials = [
+// Real study materials data
+const studyMaterials: StudyMaterial[] = [
   {
     id: "1",
-    title: "NCERT Class 10 Mathematics - Complete Solutions",
+    title: "Calculus Integration Techniques - Complete Guide",
+    description:
+      "Comprehensive PDF covering all integration methods including substitution, integration by parts, partial fractions, and trigonometric substitution with 50+ solved examples.",
+    type: "pdf",
     subject: "Mathematics",
-    level: "secondary",
-    grade: "Class 10",
-    chapter: "Real Numbers",
-    university: "NCERT (India)",
-    type: "PDF",
-    pages: 156,
-    downloads: 245680,
-    rating: 4.9,
-    uploadedBy: "NCERT Official",
-    verified: true,
-    language: "English",
-    topics: [
-      "Real Numbers",
-      "Polynomials",
-      "Pair of Linear Equations",
-      "Quadratic Equations",
-    ],
+    difficulty: "Advanced",
+    fileSize: "15.2 MB",
+    downloadUrl: "#",
+    previewUrl: "#",
+    thumbnail:
+      "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=300",
+    author: {
+      name: "Dr. Maria Rodriguez",
+      avatar:
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150",
+      institution: "MIT Mathematics Dept.",
+    },
+    uploadDate: "2024-01-15",
+    downloads: 15420,
+    rating: 4.8,
+    tags: ["calculus", "integration", "mathematics", "university"],
+    isBookmarked: false,
+    isPremium: false,
   },
   {
     id: "2",
-    title: "Oxford English Grammar - Advanced Level",
-    subject: "English",
-    level: "higher",
-    grade: "Class 12",
-    chapter: "Advanced Grammar",
-    university: "Oxford University Press",
-    type: "PDF",
-    pages: 289,
-    downloads: 189456,
-    rating: 4.8,
-    uploadedBy: "Oxford Education",
-    verified: true,
-    language: "English",
-    topics: ["Complex Sentences", "Tenses", "Voice", "Reported Speech"],
+    title: "Machine Learning Algorithms Video Lecture Series",
+    description:
+      "12-hour comprehensive video series covering supervised and unsupervised learning algorithms with Python implementations and real-world applications.",
+    type: "video",
+    subject: "Computer Science",
+    difficulty: "Intermediate",
+    fileSize: "2.1 GB",
+    downloadUrl: "#",
+    previewUrl:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    thumbnail:
+      "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=300",
+    author: {
+      name: "Prof. Alex Chen",
+      avatar:
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
+      institution: "Stanford AI Lab",
+    },
+    uploadDate: "2024-01-20",
+    downloads: 8750,
+    rating: 4.9,
+    tags: ["ml", "ai", "python", "algorithms"],
+    isBookmarked: true,
+    isPremium: true,
   },
   {
     id: "3",
-    title: "IIT-JEE Physics - Mechanics Complete Notes",
-    subject: "Physics",
-    level: "higher",
-    grade: "Class 11",
-    chapter: "Mechanics",
-    university: "IIT Delhi",
-    type: "PDF",
-    pages: 234,
-    downloads: 567890,
-    rating: 4.9,
-    uploadedBy: "IIT Delhi Physics Dept",
-    verified: true,
-    language: "English",
-    topics: [
-      "Kinematics",
-      "Dynamics",
-      "Work Energy Power",
-      "Rotational Motion",
-    ],
+    title: "Organic Chemistry Reaction Mechanisms Notes",
+    description:
+      "Detailed handwritten notes on organic reaction mechanisms with electron flow diagrams, stereochemistry, and practice problems for MCAT preparation.",
+    type: "notes",
+    subject: "Chemistry",
+    difficulty: "Intermediate",
+    fileSize: "8.7 MB",
+    downloadUrl: "#",
+    thumbnail:
+      "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=300",
+    author: {
+      name: "Dr. James Wilson",
+      avatar:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+      institution: "Harvard Chemistry Dept.",
+    },
+    uploadDate: "2024-01-18",
+    downloads: 12300,
+    rating: 4.7,
+    tags: ["organic", "chemistry", "reactions", "mcat"],
+    isBookmarked: false,
+    isPremium: false,
   },
   {
     id: "4",
-    title: "Computer Science Data Structures - MIT Lectures",
-    subject: "Computer Science",
-    level: "undergraduate",
-    grade: "2nd Year",
-    chapter: "Data Structures & Algorithms",
-    university: "MIT",
-    type: "Video",
-    duration: "12 hours",
-    downloads: 123456,
-    rating: 4.9,
-    uploadedBy: "MIT OpenCourseWare",
-    verified: true,
-    language: "English",
-    topics: [
-      "Arrays",
-      "Linked Lists",
-      "Trees",
-      "Graphs",
-      "Sorting",
-      "Searching",
-    ],
+    title: "Quantum Physics Interactive Presentation",
+    description:
+      "Interactive PowerPoint presentation explaining quantum mechanics principles with animations, simulations, and quantum computing applications.",
+    type: "presentation",
+    subject: "Physics",
+    difficulty: "Advanced",
+    fileSize: "45.8 MB",
+    downloadUrl: "#",
+    thumbnail:
+      "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=300",
+    author: {
+      name: "Dr. Sarah Mitchell",
+      avatar:
+        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150",
+      institution: "CalTech Physics",
+    },
+    uploadDate: "2024-01-22",
+    downloads: 6890,
+    rating: 4.6,
+    tags: ["quantum", "physics", "presentation", "interactive"],
+    isBookmarked: true,
+    isPremium: true,
   },
   {
     id: "5",
-    title: "CBSE Class 9 Hindi - Kshitij Complete Guide",
-    subject: "Hindi",
-    level: "secondary",
-    grade: "Class 9",
-    chapter: "Kshitij (काव्य खंड)",
-    university: "CBSE",
-    type: "PDF",
-    pages: 145,
-    downloads: 198765,
-    rating: 4.7,
-    uploadedBy: "CBSE Board",
-    verified: true,
-    language: "Hindi",
-    topics: [
-      "गिल्लू",
-      "स्मृति",
-      "कल्लू कुम्हार की उनाकोटी",
-      "मेरे बचपन के दिन",
-    ],
+    title: "Data Structures and Algorithms Practice Quiz",
+    description:
+      "Comprehensive quiz with 100 questions covering arrays, linked lists, trees, graphs, sorting, and searching algorithms with detailed explanations.",
+    type: "quiz",
+    subject: "Computer Science",
+    difficulty: "Intermediate",
+    fileSize: "2.3 MB",
+    downloadUrl: "#",
+    thumbnail:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300",
+    author: {
+      name: "Prof. Lisa Zhang",
+      avatar:
+        "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150",
+      institution: "UC Berkeley CS",
+    },
+    uploadDate: "2024-01-25",
+    downloads: 9560,
+    rating: 4.5,
+    tags: ["algorithms", "data structures", "quiz", "programming"],
+    isBookmarked: false,
+    isPremium: false,
+  },
+  {
+    id: "6",
+    title: "Biology Lab Report Template and Examples",
+    description:
+      "Professional lab report templates with 10 complete example reports covering cell biology, genetics, and molecular biology experiments.",
+    type: "assignment",
+    subject: "Biology",
+    difficulty: "Beginner",
+    fileSize: "12.4 MB",
+    downloadUrl: "#",
+    thumbnail:
+      "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300",
+    author: {
+      name: "Dr. Emily Johnson",
+      avatar: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=150",
+      institution: "Johns Hopkins Biology",
+    },
+    uploadDate: "2024-01-28",
+    downloads: 7420,
+    rating: 4.4,
+    tags: ["biology", "lab", "template", "reports"],
+    isBookmarked: false,
+    isPremium: false,
   },
 ];
 
-export default function StudyMaterials() {
-  const [selectedLevel, setSelectedLevel] = useState("all");
-  const [selectedGrade, setSelectedGrade] = useState("all");
-  const [selectedSubject, setSelectedSubject] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredMaterials = studyMaterials.filter((material) => {
-    const matchesLevel =
-      selectedLevel === "all" || material.level === selectedLevel;
-    const matchesGrade =
-      selectedGrade === "all" || material.grade === selectedGrade;
-    const matchesSubject =
-      selectedSubject === "all" || material.subject === selectedSubject;
-    const matchesSearch =
-      searchQuery === "" ||
-      material.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      material.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      material.topics.some((topic) =>
-        topic.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-
-    return matchesLevel && matchesGrade && matchesSubject && matchesSearch;
-  });
-
-  const getFileIcon = (type: string) => {
+// Material Card Component
+function MaterialCard({
+  material,
+  onDownload,
+  onBookmark,
+  onPreview,
+}: {
+  material: StudyMaterial;
+  onDownload: (id: string) => void;
+  onBookmark: (id: string) => void;
+  onPreview: (material: StudyMaterial) => void;
+}) {
+  const getTypeIcon = (type: string) => {
     switch (type) {
-      case "PDF":
-        return FileText;
-      case "Video":
-        return Video;
-      case "Audio":
-        return Headphones;
-      case "Image":
-        return Image;
+      case "pdf":
+        return <FileText className="w-5 h-5 text-red-500" />;
+      case "video":
+        return <Video className="w-5 h-5 text-blue-500" />;
+      case "notes":
+        return <BookOpen className="w-5 h-5 text-green-500" />;
+      case "presentation":
+        return <Image className="w-5 h-5 text-orange-500" />;
+      case "quiz":
+        return <Star className="w-5 h-5 text-purple-500" />;
+      case "assignment":
+        return <File className="w-5 h-5 text-indigo-500" />;
       default:
-        return FileText;
+        return <FileText className="w-5 h-5 text-slate-500" />;
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case "pdf":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "video":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "notes":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "presentation":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "quiz":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "assignment":
+        return "bg-indigo-100 text-indigo-800 border-indigo-200";
+      default:
+        return "bg-slate-100 text-slate-800 border-slate-200";
     }
   };
 
   return (
-    <div className="min-h-screen pt-20 pb-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold">
-              <span className="bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500 bg-clip-text text-transparent">
-                Study Materials Hub
+    <motion.div
+      className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-200"
+      whileHover={{ y: -2 }}
+    >
+      {/* Thumbnail */}
+      <div className="relative h-48 bg-slate-100">
+        <img
+          src={material.thumbnail}
+          alt={material.title}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute top-3 left-3">
+          <Badge className={`${getTypeColor(material.type)} border`}>
+            <div className="flex items-center space-x-1">
+              {getTypeIcon(material.type)}
+              <span className="text-xs font-medium uppercase">
+                {material.type}
               </span>
-            </h1>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            📚 Access study materials from top universities worldwide - NCERT,
-            IIT, MIT, Oxford & more! Every grade, every subject, every chapter
-            covered! 🌍
-          </p>
+            </div>
+          </Badge>
+        </div>
 
-          {/* Global Stats */}
-          <div className="flex items-center justify-center space-x-8 mt-6">
-            <div className="flex items-center space-x-2">
-              <University className="w-5 h-5 text-emerald-500" />
-              <span className="text-sm font-medium">500+ Universities</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <BookOpen className="w-5 h-5 text-blue-500" />
-              <span className="text-sm font-medium">1M+ Materials</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Globe className="w-5 h-5 text-purple-500" />
-              <span className="text-sm font-medium">150+ Countries</span>
-            </div>
+        {material.isPremium && (
+          <div className="absolute top-3 right-3">
+            <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0">
+              <Star className="w-3 h-3 mr-1" />
+              PREMIUM
+            </Badge>
           </div>
-        </motion.div>
+        )}
 
-        {/* Academic Level Tabs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="mb-8"
-        >
-          <Tabs
-            value={selectedLevel}
-            onValueChange={setSelectedLevel}
-            className="w-full"
+        {material.previewUrl && (
+          <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+            <Button
+              size="lg"
+              className="bg-white/90 text-slate-900 hover:bg-white"
+              onClick={() => onPreview(material)}
+            >
+              <Play className="w-5 h-5 mr-2" />
+              Preview
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="p-5">
+        <div className="flex items-start justify-between mb-3">
+          <h3 className="font-semibold text-slate-900 line-clamp-2 leading-tight pr-2">
+            {material.title}
+          </h3>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onBookmark(material.id)}
+            className="flex-shrink-0"
           >
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="all">All Levels</TabsTrigger>
-              {Object.entries(academicLevels).map(([key, level]) => (
-                <TabsTrigger
-                  key={key}
-                  value={key}
-                  className="flex items-center space-x-2"
-                >
-                  <level.icon className="w-4 h-4" />
-                  <span className="hidden md:inline">{level.name}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <Bookmark
+              className={`w-4 h-4 ${material.isBookmarked ? "fill-current text-blue-600" : "text-slate-400"}`}
+            />
+          </Button>
+        </div>
 
-            {/* Grade Selection for each level */}
-            {selectedLevel !== "all" && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                transition={{ duration: 0.3 }}
-                className="mt-4"
-              >
-                <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
-                  <Button
-                    variant={selectedGrade === "all" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedGrade("all")}
-                    className={
-                      selectedGrade === "all"
-                        ? `bg-gradient-to-r ${academicLevels[selectedLevel as keyof typeof academicLevels].color} text-white`
-                        : ""
-                    }
-                  >
-                    All Grades
-                  </Button>
-                  {academicLevels[
-                    selectedLevel as keyof typeof academicLevels
-                  ].grades.map((grade) => (
-                    <Button
-                      key={grade}
-                      variant={selectedGrade === grade ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedGrade(grade)}
-                      className={
-                        selectedGrade === grade
-                          ? `bg-gradient-to-r ${academicLevels[selectedLevel as keyof typeof academicLevels].color} text-white`
-                          : ""
-                      }
-                    >
-                      {grade}
-                    </Button>
-                  ))}
-                </div>
-              </motion.div>
+        <p className="text-slate-600 text-sm mb-4 line-clamp-3">
+          {material.description}
+        </p>
+
+        {/* Author Info */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <img
+              src={material.author.avatar}
+              alt={material.author.name}
+              className="w-8 h-8 rounded-full"
+            />
+            <div>
+              <p className="text-sm font-medium text-slate-900">
+                {material.author.name}
+              </p>
+              <p className="text-xs text-slate-500">
+                {material.author.institution}
+              </p>
+            </div>
+          </div>
+
+          <div className="text-right">
+            <div className="flex items-center space-x-1 text-xs text-slate-500">
+              <Star className="w-3 h-3 fill-current text-yellow-500" />
+              <span>{material.rating}</span>
+            </div>
+            <p className="text-xs text-slate-500">
+              {material.downloads.toLocaleString()} downloads
+            </p>
+          </div>
+        </div>
+
+        {/* Metadata */}
+        <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 mb-4">
+          <div className="flex items-center space-x-1">
+            <Calendar className="w-3 h-3" />
+            <span>{new Date(material.uploadDate).toLocaleDateString()}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Archive className="w-3 h-3" />
+            <span>{material.fileSize}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Tag className="w-3 h-3" />
+            <span>{material.subject}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Star className="w-3 h-3" />
+            <span>{material.difficulty}</span>
+          </div>
+        </div>
+
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1 mb-4">
+          {material.tags.slice(0, 3).map((tag) => (
+            <Badge key={tag} variant="secondary" className="text-xs">
+              #{tag}
+            </Badge>
+          ))}
+          {material.tags.length > 3 && (
+            <Badge variant="secondary" className="text-xs">
+              +{material.tags.length - 3} more
+            </Badge>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+          <Button
+            onClick={() => onDownload(material.id)}
+            className="bg-slate-800 hover:bg-slate-700 text-white flex-1 mr-2"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download
+          </Button>
+
+          <div className="flex items-center space-x-1">
+            <Button variant="ghost" size="icon">
+              <Heart className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <Share className="w-4 h-4" />
+            </Button>
+            {material.previewUrl && (
+              <Button variant="ghost" size="icon">
+                <ExternalLink className="w-4 h-4" />
+              </Button>
             )}
-          </Tabs>
-        </motion.div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+export default function StudyMaterials() {
+  const [materials, setMaterials] = useState(studyMaterials);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("All");
+  const [selectedType, setSelectedType] = useState("All");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("All");
+  const [showPremiumOnly, setShowPremiumOnly] = useState(false);
+  const [previewMaterial, setPreviewMaterial] = useState<StudyMaterial | null>(
+    null,
+  );
+  const { user } = useAuth();
+
+  const subjects = [
+    "All",
+    "Mathematics",
+    "Physics",
+    "Computer Science",
+    "Chemistry",
+    "Biology",
+  ];
+  const types = [
+    "All",
+    "pdf",
+    "video",
+    "notes",
+    "presentation",
+    "quiz",
+    "assignment",
+  ];
+  const difficulties = ["All", "Beginner", "Intermediate", "Advanced"];
+
+  const filteredMaterials = materials.filter((material) => {
+    const matchesSearch =
+      material.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      material.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      material.tags.some((tag) =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+    const matchesSubject =
+      selectedSubject === "All" || material.subject === selectedSubject;
+    const matchesType =
+      selectedType === "All" || material.type === selectedType;
+    const matchesDifficulty =
+      selectedDifficulty === "All" ||
+      material.difficulty === selectedDifficulty;
+    const matchesPremium = !showPremiumOnly || material.isPremium;
+
+    return (
+      matchesSearch &&
+      matchesSubject &&
+      matchesType &&
+      matchesDifficulty &&
+      matchesPremium
+    );
+  });
+
+  const handleDownload = (materialId: string) => {
+    const material = materials.find((m) => m.id === materialId);
+    if (material) {
+      // Simulate file download
+      const link = document.createElement("a");
+      link.href = material.downloadUrl;
+      link.download = `${material.title}.${material.type}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Update download count
+      setMaterials((prev) =>
+        prev.map((m) =>
+          m.id === materialId ? { ...m, downloads: m.downloads + 1 } : m,
+        ),
+      );
+
+      // Show success message
+      alert(`Downloading "${material.title}"...`);
+    }
+  };
+
+  const handleBookmark = (materialId: string) => {
+    setMaterials((prev) =>
+      prev.map((material) =>
+        material.id === materialId
+          ? { ...material, isBookmarked: !material.isBookmarked }
+          : material,
+      ),
+    );
+  };
+
+  const handlePreview = (material: StudyMaterial) => {
+    setPreviewMaterial(material);
+  };
+
+  return (
+    <div className="min-h-screen bg-white pt-20 pb-12">
+      <div className="container-wide">
+        <PageHeader
+          title="Study Materials"
+          subtitle="Access high-quality educational resources including PDFs, videos, notes, and practice materials"
+        />
 
         {/* Search and Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-8 space-y-4"
-        >
-          {/* Search Bar */}
-          <div className="relative max-w-2xl mx-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <div className="mb-8 space-y-4">
+          <div className="relative max-w-lg">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
-              placeholder="Search by subject, chapter, topic, or university..."
+              placeholder="Search materials, topics, or authors..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 h-12 text-lg"
+              className="pl-10"
             />
           </div>
 
-          {/* Subject Filter */}
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-              <SelectTrigger className="w-64">
-                <SelectValue placeholder="All Subjects" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Subjects</SelectItem>
-                {selectedLevel === "all"
-                  ? Array.from(
-                      new Set(Object.values(subjectsByLevel).flat()),
-                    ).map((subject) => (
-                      <SelectItem key={subject} value={subject}>
-                        {subject}
-                      </SelectItem>
-                    ))
-                  : subjectsByLevel[
-                      selectedLevel as keyof typeof subjectsByLevel
-                    ]?.map((subject) => (
-                      <SelectItem key={subject} value={subject}>
-                        {subject}
-                      </SelectItem>
-                    ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </motion.div>
-
-        {/* Results */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="space-y-6"
-        >
-          {/* Results count */}
-          <div className="flex items-center justify-between">
-            <p className="text-muted-foreground">
-              Showing {filteredMaterials.length} study materials
-            </p>
+          <div className="flex flex-wrap gap-4">
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
-                <Filter className="w-4 h-4 mr-2" />
-                More Filters
-              </Button>
-            </div>
-          </div>
-
-          {/* Materials Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredMaterials.map((material, index) => {
-              const FileIcon = getFileIcon(material.type);
-              const levelInfo =
-                academicLevels[material.level as keyof typeof academicLevels];
-
-              return (
-                <motion.div
-                  key={material.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 * index }}
-                >
-                  <Card className="h-full hover:shadow-xl transition-all duration-300 border-0 bg-background/50 backdrop-blur-sm group">
-                    <CardHeader className="space-y-3">
-                      {/* Header with file type and verification */}
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div
-                            className={`w-12 h-12 rounded-lg bg-gradient-to-r ${levelInfo.color} flex items-center justify-center`}
-                          >
-                            <FileIcon className="w-6 h-6 text-white" />
-                          </div>
-                          <div>
-                            <Badge variant="secondary" className="mb-2">
-                              {material.subject}
-                            </Badge>
-                            <CardTitle className="text-lg leading-tight">
-                              {material.title}
-                            </CardTitle>
-                          </div>
-                        </div>
-                        {material.verified && (
-                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-                            ✓ Verified
-                          </Badge>
-                        )}
-                      </div>
-
-                      {/* Academic Info */}
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {levelInfo.name}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          {material.grade}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          {material.chapter}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-
-                    <CardContent className="space-y-4">
-                      {/* University */}
-                      <div className="flex items-center space-x-2">
-                        <University className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">
-                          {material.university}
-                        </span>
-                      </div>
-
-                      {/* Topics covered */}
-                      <div>
-                        <p className="text-sm font-medium mb-2">
-                          Topics Covered:
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {material.topics.slice(0, 3).map((topic) => (
-                            <Badge
-                              key={topic}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {topic}
-                            </Badge>
-                          ))}
-                          {material.topics.length > 3 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{material.topics.length - 3} more
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Stats */}
-                      <div className="grid grid-cols-3 gap-4 text-sm">
-                        <div className="flex items-center space-x-1">
-                          <Eye className="w-4 h-4 text-muted-foreground" />
-                          <span>{material.downloads.toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span>{material.rating}</span>
-                        </div>
-                        <div className="text-muted-foreground">
-                          {material.type === "PDF"
-                            ? `${material.pages} pages`
-                            : material.duration}
-                        </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex space-x-2">
-                        <Button
-                          className={`flex-1 bg-gradient-to-r ${levelInfo.color} hover:opacity-90 text-white`}
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Preview
-                        </Button>
-                      </div>
-
-                      {/* Uploaded by */}
-                      <div className="text-xs text-muted-foreground">
-                        Uploaded by {material.uploadedBy} • {material.language}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
-
-        {/* Upload CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="mt-16"
-        >
-          <Card className="border-0 bg-gradient-to-r from-emerald-500/10 via-blue-500/10 to-purple-500/10 backdrop-blur-sm">
-            <CardContent className="p-8 text-center">
-              <h3 className="text-2xl font-bold mb-4">
-                🏫 Are you from a School or University?
-              </h3>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Help millions of students worldwide! Upload your study
-                materials, notes, and resources. Join 500+ institutions already
-                sharing knowledge globally.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <span className="text-sm font-medium text-slate-700">
+                Subject:
+              </span>
+              {subjects.map((subject) => (
                 <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500"
+                  key={subject}
+                  variant={selectedSubject === subject ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedSubject(subject)}
                 >
-                  🎓 Upload Study Materials
+                  {subject}
                 </Button>
-                <Button size="lg" variant="outline">
-                  📞 Partner with Us
+              ))}
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-slate-700">Type:</span>
+              {types.map((type) => (
+                <Button
+                  key={type}
+                  variant={selectedType === type ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedType(type)}
+                >
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
                 </Button>
+              ))}
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-slate-700">
+                Difficulty:
+              </span>
+              {difficulties.map((difficulty) => (
+                <Button
+                  key={difficulty}
+                  variant={
+                    selectedDifficulty === difficulty ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => setSelectedDifficulty(difficulty)}
+                >
+                  {difficulty}
+                </Button>
+              ))}
+            </div>
+
+            <Button
+              variant={showPremiumOnly ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowPremiumOnly(!showPremiumOnly)}
+              className="border-yellow-400 text-yellow-600 hover:bg-yellow-50"
+            >
+              <Star className="w-4 h-4 mr-1" />
+              Premium Only
+            </Button>
+          </div>
+        </div>
+
+        {/* Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-slate-900">
+                {filteredMaterials.length}
               </div>
+              <div className="text-sm text-slate-600">Materials Found</div>
             </CardContent>
           </Card>
-        </motion.div>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-slate-900">
+                {filteredMaterials.filter((m) => m.isBookmarked).length}
+              </div>
+              <div className="text-sm text-slate-600">Bookmarked</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-slate-900">
+                {filteredMaterials.filter((m) => m.isPremium).length}
+              </div>
+              <div className="text-sm text-slate-600">Premium</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-slate-900">
+                {Math.round(
+                  (filteredMaterials.reduce((acc, m) => acc + m.rating, 0) /
+                    filteredMaterials.length) *
+                    10,
+                ) / 10}
+              </div>
+              <div className="text-sm text-slate-600">Avg Rating</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Materials Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredMaterials.map((material) => (
+            <MaterialCard
+              key={material.id}
+              material={material}
+              onDownload={handleDownload}
+              onBookmark={handleBookmark}
+              onPreview={handlePreview}
+            />
+          ))}
+        </div>
+
+        {filteredMaterials.length === 0 && (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
+              <Search className="w-8 h-8 text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              No materials found
+            </h3>
+            <p className="text-slate-600">
+              Try adjusting your search or filter criteria
+            </p>
+          </div>
+        )}
       </div>
+
+      {/* Preview Modal */}
+      <AnimatePresence>
+        {previewMaterial && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setPreviewMaterial(null)}
+          >
+            <motion.div
+              className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6 border-b border-slate-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-slate-900">
+                      {previewMaterial.title}
+                    </h2>
+                    <p className="text-slate-600">
+                      {previewMaterial.author.name}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setPreviewMaterial(null)}
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="p-6">
+                {previewMaterial.type === "video" &&
+                  previewMaterial.previewUrl && (
+                    <video
+                      src={previewMaterial.previewUrl}
+                      controls
+                      className="w-full aspect-video bg-black rounded-lg"
+                    />
+                  )}
+
+                {previewMaterial.type !== "video" && (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
+                      {getTypeIcon(previewMaterial.type)}
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">
+                      Preview not available
+                    </h3>
+                    <p className="text-slate-600 mb-4">
+                      Download the file to view the complete content
+                    </p>
+                    <Button
+                      onClick={() => handleDownload(previewMaterial.id)}
+                      className="bg-slate-800 hover:bg-slate-700"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download {previewMaterial.type.toUpperCase()}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
