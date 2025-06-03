@@ -24,6 +24,9 @@ import {
   ChevronDown,
   Star,
   TrendingUp,
+  Heart,
+  UserPlus,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -63,35 +66,27 @@ const navigationItems: NavItem[] = [
     name: "AI Video Hub",
     href: "/ai-video-hub",
     icon: Video,
-    description: "Generate and manage AI videos",
-    premium: true,
+    description: "Watch educational videos with materials",
+    hot: true,
   },
   {
-    name: "EduReels",
-    href: "/reels",
-    icon: TrendingUp,
-    description: "Short educational content",
-    hot: true,
+    name: "AI Tutor",
+    href: "/ai-tutor",
+    icon: Brain,
+    description: "Get personalized tutoring help",
+    new: true,
   },
   {
     name: "Study Materials",
     href: "/study-materials",
-    icon: Brain,
-    description: "Premium study resources",
-    premium: true,
+    icon: BookOpen,
+    description: "Access notes, PDFs, and resources",
   },
   {
     name: "Local Tutors",
     href: "/local-tutors",
     icon: MapPin,
     description: "Find tutors near you",
-  },
-  {
-    name: "AI Tutor",
-    href: "/ai-tutor",
-    icon: Zap,
-    description: "Chat with AI assistant",
-    new: true,
   },
   {
     name: "Upload",
@@ -107,6 +102,7 @@ export function Navigation() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [notifications, setNotifications] = useState(3);
+  const [followingCount, setFollowingCount] = useState(12);
 
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
@@ -162,10 +158,10 @@ export function Navigation() {
 
   return (
     <motion.nav
-      className={`navbar fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
         isScrolled
-          ? "backdrop-blur-xl bg-background/95 border-border"
-          : "backdrop-blur-sm bg-background/50 border-border/50"
+          ? "bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm"
+          : "bg-white/80 backdrop-blur-sm border-b border-slate-100"
       }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -179,24 +175,23 @@ export function Navigation() {
             whileHover={{ scale: 1.02 }}
           >
             <Link to="/" className="flex items-center space-x-3 group">
-              {/* New Professional Logo */}
               <div className="relative">
                 <motion.div
-                  className="w-10 h-10 bg-primary-gradient rounded-xl flex items-center justify-center shadow-lg"
+                  className="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl flex items-center justify-center shadow-lg"
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.8, ease: "easeOut" }}
                 >
                   <Globe className="w-6 h-6 text-white" />
                 </motion.div>
-
-                {/* Glowing Effect */}
-                <div className="absolute inset-0 bg-primary-gradient rounded-xl blur-lg opacity-30 -z-10 group-hover:opacity-50 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl blur-lg opacity-30 -z-10 group-hover:opacity-50 transition-opacity" />
               </div>
 
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-gradient">LEARNVERSE</h1>
-                <p className="text-xs text-muted-foreground -mt-1">
-                  Learn Everything, Everywhere
+                <h1 className="text-xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent">
+                  LEARNVERSE
+                </h1>
+                <p className="text-xs text-slate-500 -mt-1">
+                  Professional Learning Platform
                 </p>
               </div>
             </Link>
@@ -212,8 +207,10 @@ export function Navigation() {
               >
                 <Link
                   to={item.href}
-                  className={`nav-link relative px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group ${
-                    isActive(item.href) ? "active" : ""
+                  className={`relative px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group ${
+                    isActive(item.href)
+                      ? "text-slate-900 bg-slate-100"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                   }`}
                 >
                   <div className="flex items-center space-x-2">
@@ -222,7 +219,7 @@ export function Navigation() {
 
                     {/* Badges */}
                     {item.premium && (
-                      <Badge className="badge-default text-xs px-1.5 py-0.5">
+                      <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-1.5 py-0.5">
                         <Crown className="w-3 h-3 mr-1" />
                         PRO
                       </Badge>
@@ -242,7 +239,7 @@ export function Navigation() {
                   {/* Active indicator */}
                   {isActive(item.href) && (
                     <motion.div
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-gradient"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-slate-700 to-slate-900"
                       layoutId="activeIndicator"
                       initial={false}
                       transition={{
@@ -263,17 +260,17 @@ export function Navigation() {
               {showSearch ? (
                 <motion.div
                   initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: 200, opacity: 1 }}
+                  animate={{ width: 250, opacity: 1 }}
                   exit={{ width: 0, opacity: 0 }}
                   className="relative"
                 >
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <Input
                     type="text"
-                    placeholder="Search courses..."
+                    placeholder="Search courses, videos, creators..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="form-input pl-10"
+                    className="pl-10 bg-white border-slate-300 focus:border-slate-500"
                     onBlur={() => !searchQuery && setShowSearch(false)}
                     autoFocus
                   />
@@ -282,7 +279,7 @@ export function Navigation() {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="btn-ghost"
+                  className="text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   onClick={() => setShowSearch(true)}
                 >
                   <Search className="w-4 h-4" />
@@ -298,11 +295,18 @@ export function Navigation() {
 
             {isAuthenticated && safeUser ? (
               <>
+                {/* Following Count */}
+                <div className="hidden md:flex items-center space-x-1 text-sm text-slate-600">
+                  <Heart className="w-4 h-4" />
+                  <span>{followingCount}</span>
+                  <span className="text-xs">following</span>
+                </div>
+
                 {/* Notifications */}
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="btn-ghost relative"
+                  className="relative text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 >
                   <Bell className="w-4 h-4" />
                   {notifications > 0 && (
@@ -321,7 +325,7 @@ export function Navigation() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="btn-ghost relative h-10 px-2"
+                      className="relative h-10 px-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                     >
                       <div className="flex items-center space-x-2">
                         <Avatar className="h-8 w-8">
@@ -329,13 +333,13 @@ export function Navigation() {
                             src={safeUser.avatar}
                             alt={safeUser.name}
                           />
-                          <AvatarFallback className="bg-primary-gradient text-white">
+                          <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-900 text-white">
                             {getUserInitials(safeUser.name)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="hidden sm:block text-left">
                           <p className="text-sm font-medium">{safeUser.name}</p>
-                          <p className="text-xs text-muted-foreground capitalize">
+                          <p className="text-xs text-slate-500 capitalize">
                             {safeUser.plan} Plan
                           </p>
                         </div>
@@ -345,7 +349,7 @@ export function Navigation() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="dropdown-content w-64"
+                    className="w-64 bg-white border border-slate-200 shadow-lg"
                   >
                     <DropdownMenuLabel>
                       <div className="flex items-center space-x-3">
@@ -354,13 +358,15 @@ export function Navigation() {
                             src={safeUser.avatar}
                             alt={safeUser.name}
                           />
-                          <AvatarFallback className="bg-primary-gradient text-white">
+                          <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-900 text-white">
                             {getUserInitials(safeUser.name)}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium">{safeUser.name}</p>
-                          <p className="text-muted-foreground text-sm">
+                          <p className="font-medium text-slate-900">
+                            {safeUser.name}
+                          </p>
+                          <p className="text-slate-600 text-sm">
                             {safeUser.email}
                           </p>
                           <Badge
@@ -391,6 +397,31 @@ export function Navigation() {
 
                     <DropdownMenuItem asChild>
                       <Link
+                        to="/following"
+                        className="flex items-center space-x-2"
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        <span>Following ({followingCount})</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/messages"
+                        className="flex items-center space-x-2"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        <span>Messages</span>
+                        {notifications > 0 && (
+                          <Badge className="bg-red-500 text-white text-xs ml-auto">
+                            {notifications}
+                          </Badge>
+                        )}
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild>
+                      <Link
                         to="/profile"
                         className="flex items-center space-x-2"
                       >
@@ -403,7 +434,7 @@ export function Navigation() {
                       <DropdownMenuItem asChild>
                         <Link
                           to="/pricing"
-                          className="flex items-center space-x-2 text-amber-600 dark:text-amber-400"
+                          className="flex items-center space-x-2 text-amber-600"
                         >
                           <Crown className="w-4 h-4" />
                           <span>Upgrade Plan</span>
@@ -416,7 +447,7 @@ export function Navigation() {
 
                     <DropdownMenuItem
                       onClick={handleLogout}
-                      className="text-destructive focus:text-destructive"
+                      className="text-red-600 focus:text-red-600"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       <span>Sign Out</span>
@@ -426,10 +457,19 @@ export function Navigation() {
               </>
             ) : (
               <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="sm" asChild className="btn-ghost">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                >
                   <Link to="/login">Sign In</Link>
                 </Button>
-                <MagneticButton size="sm" asChild className="btn-primary">
+                <MagneticButton
+                  size="sm"
+                  asChild
+                  className="bg-slate-800 hover:bg-slate-700 text-white"
+                >
                   <Link to="/register">Get Started</Link>
                 </MagneticButton>
               </div>
@@ -439,7 +479,7 @@ export function Navigation() {
             <Button
               size="icon"
               variant="ghost"
-              className="lg:hidden btn-ghost"
+              className="lg:hidden text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               onClick={() => setIsOpen(!isOpen)}
             >
               {isOpen ? (
@@ -459,18 +499,18 @@ export function Navigation() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden glass-card border-t"
+            className="lg:hidden bg-white/95 backdrop-blur-xl border-t border-slate-200"
           >
             <div className="px-4 py-6 space-y-3">
               {/* Mobile Search */}
               <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
                   type="text"
-                  placeholder="Search courses..."
+                  placeholder="Search courses, videos, creators..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="form-input pl-10"
+                  className="pl-10 bg-white border-slate-300"
                 />
               </div>
 
@@ -485,8 +525,8 @@ export function Navigation() {
                     to={item.href}
                     className={`flex items-center justify-between p-3 rounded-lg transition-all ${
                       isActive(item.href)
-                        ? "bg-accent text-accent-foreground"
-                        : "hover:bg-accent hover:text-accent-foreground"
+                        ? "bg-slate-100 text-slate-900"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
@@ -494,7 +534,7 @@ export function Navigation() {
                       <item.icon className="w-5 h-5" />
                       <div>
                         <p className="font-medium">{item.name}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-slate-500">
                           {item.description}
                         </p>
                       </div>
@@ -520,18 +560,22 @@ export function Navigation() {
               ))}
 
               {!isAuthenticated && (
-                <div className="pt-4 border-t space-y-2">
+                <div className="pt-4 border-t border-slate-200 space-y-2">
                   <Button
                     variant="outline"
                     size="sm"
                     asChild
-                    className="w-full"
+                    className="w-full border-slate-300"
                   >
                     <Link to="/login" onClick={() => setIsOpen(false)}>
                       Sign In
                     </Link>
                   </Button>
-                  <Button size="sm" asChild className="w-full btn-primary">
+                  <Button
+                    size="sm"
+                    asChild
+                    className="w-full bg-slate-800 hover:bg-slate-700"
+                  >
                     <Link to="/register" onClick={() => setIsOpen(false)}>
                       Get Started
                     </Link>
