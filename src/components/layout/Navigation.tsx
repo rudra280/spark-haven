@@ -38,6 +38,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { MagneticButton } from "@/components/ui/cursor-effects";
 
 interface NavItem {
