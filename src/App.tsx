@@ -32,57 +32,50 @@ import TutorBooking from "@/pages/TutorBooking";
 import Pricing from "@/pages/Pricing";
 import NotFound from "@/pages/NotFound";
 
-// Enhanced Loading Component (Fixes stuck loading issue)
-function SmartLoader() {
+// Fast Loading Component with immediate progress
+function QuickLoader() {
   const [progress, setProgress] = useState(0);
-  const [loadingMessage, setLoadingMessage] = useState("Initializing...");
+  const [loadingText, setLoadingText] = useState("Initializing...");
 
   useEffect(() => {
-    const messages = [
-      "Initializing...",
-      "Loading authentication...",
-      "Setting up dashboard...",
-      "Almost ready...",
+    const loadingSteps = [
+      { progress: 25, text: "Loading user data..." },
+      { progress: 50, text: "Setting up workspace..." },
+      { progress: 75, text: "Finalizing setup..." },
+      { progress: 100, text: "Ready!" },
     ];
 
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        const next = prev + 25;
-        if (next >= 100) {
-          clearInterval(progressInterval);
-          return 100;
-        }
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      if (currentStep < loadingSteps.length) {
+        const step = loadingSteps[currentStep];
+        setProgress(step.progress);
+        setLoadingText(step.text);
+        currentStep++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 250); // Very fast loading
 
-        // Update message based on progress
-        const messageIndex = Math.floor(next / 25) - 1;
-        if (messageIndex >= 0 && messageIndex < messages.length) {
-          setLoadingMessage(messages[messageIndex]);
-        }
-
-        return next;
-      });
-    }, 200); // Faster intervals for smoother loading
-
-    // Cleanup
-    return () => clearInterval(progressInterval);
+    return () => clearInterval(interval);
   }, []);
 
   if (progress >= 100) return null;
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 bg-background flex items-center justify-center"
+      className="fixed inset-0 z-50 bg-white flex items-center justify-center"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
       <div className="text-center max-w-md mx-auto px-6">
-        {/* Logo */}
+        {/* Professional Logo */}
         <motion.div
-          className="w-20 h-20 mx-auto mb-8 bg-primary-gradient rounded-2xl flex items-center justify-center shadow-lg"
+          className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-slate-600 to-slate-800 rounded-xl flex items-center justify-center shadow-lg"
           animate={{
-            scale: [1, 1.05, 1],
-            rotate: [0, 5, -5, 0],
+            scale: [1, 1.02, 1],
+            rotate: [0, 2, -2, 0],
           }}
           transition={{
             duration: 2,
@@ -90,49 +83,42 @@ function SmartLoader() {
             ease: "easeInOut",
           }}
         >
-          <span className="text-3xl">🌍</span>
+          <span className="text-2xl text-white">🌍</span>
         </motion.div>
 
         {/* Brand */}
-        <motion.h1
-          className="heading-md text-gradient mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          LEARNVERSE
-        </motion.h1>
+        <h1 className="text-2xl font-bold text-slate-800 mb-6">LEARNVERSE</h1>
 
         {/* Progress Bar */}
         <div className="w-full max-w-xs mx-auto mb-4">
-          <div className="progress-bar h-2">
+          <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
             <motion.div
-              className="progress-fill h-full"
+              className="h-full bg-gradient-to-r from-slate-600 to-slate-800"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
             />
           </div>
         </div>
 
-        {/* Progress Text */}
+        {/* Loading Text */}
         <motion.p
-          className="text-muted-foreground text-sm mb-2"
-          key={loadingMessage}
+          className="text-slate-600 text-sm mb-2"
+          key={loadingText}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.2 }}
         >
-          {loadingMessage}
+          {loadingText}
         </motion.p>
 
-        <p className="text-muted-foreground text-xs">{progress}% Complete</p>
+        <p className="text-slate-500 text-xs">{progress}% Complete</p>
       </div>
     </motion.div>
   );
 }
 
-// Protected Route with Enhanced Role-based Redirection
+// Protected Route Component
 function ProtectedRoute({
   children,
   requiredRole,
@@ -143,14 +129,14 @@ function ProtectedRoute({
   const { isAuthenticated, user, isLoading } = useAuth();
 
   if (isLoading) {
-    return <SmartLoader />;
+    return <QuickLoader />;
   }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Role-based dashboard routing
+  // Role-based redirection
   if (requiredRole && user?.role !== requiredRole) {
     switch (user?.role) {
       case "creator":
@@ -165,10 +151,10 @@ function ProtectedRoute({
   return <>{children}</>;
 }
 
-// Enhanced Error Boundary Component
+// Error Boundary
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
-  { hasError: boolean; error?: Error; errorInfo?: string }
+  { hasError: boolean; error?: Error }
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props);
@@ -180,59 +166,38 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("🚨 Application Error:", error);
-    console.error("Error Info:", errorInfo);
-
-    this.setState({
-      error,
-      errorInfo: errorInfo.componentStack,
-    });
+    console.error("Application Error:", error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="min-h-screen bg-white flex items-center justify-center p-4">
           <div className="text-center max-w-md mx-auto">
-            <motion.div
-              className="w-20 h-20 mx-auto mb-6 bg-destructive/10 rounded-full flex items-center justify-center"
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <span className="text-3xl">⚠️</span>
-            </motion.div>
+            <div className="w-16 h-16 mx-auto mb-6 bg-red-100 rounded-full flex items-center justify-center">
+              <span className="text-2xl">⚠️</span>
+            </div>
 
-            <h1 className="heading-md text-destructive mb-4">
-              Oops! Something went wrong
+            <h1 className="text-2xl font-bold text-slate-800 mb-4">
+              Something went wrong
             </h1>
 
-            <p className="text-muted-foreground mb-6">
-              Don't worry, our team has been notified. Please try refreshing the
-              page.
+            <p className="text-slate-600 mb-6">
+              We're sorry for the inconvenience. Please refresh the page to try
+              again.
             </p>
-
-            {this.state.error && (
-              <details className="mb-6 text-left bg-muted p-4 rounded-lg">
-                <summary className="cursor-pointer text-sm font-medium mb-2">
-                  Error Details
-                </summary>
-                <pre className="text-xs text-muted-foreground whitespace-pre-wrap">
-                  {this.state.error.message}
-                </pre>
-              </details>
-            )}
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => window.location.reload()}
-                className="btn-primary px-6 py-3 rounded-lg font-medium"
+                className="px-6 py-3 bg-slate-800 text-white rounded-lg font-medium hover:bg-slate-700 transition-colors"
               >
                 Refresh Page
               </button>
 
               <button
                 onClick={() => (window.location.href = "/")}
-                className="btn-secondary px-6 py-3 rounded-lg font-medium"
+                className="px-6 py-3 bg-slate-200 text-slate-800 rounded-lg font-medium hover:bg-slate-300 transition-colors"
               >
                 Go Home
               </button>
@@ -252,10 +217,10 @@ function AppContent() {
   const { isLoading: authLoading, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    // Quick initial loading
+    // Quick initial loading - no more stuck loading
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
-    }, 800); // Balanced loading time
+    }, 1000); // 1 second max
 
     return () => clearTimeout(timer);
   }, []);
@@ -266,19 +231,18 @@ function AppContent() {
     <Router>
       <ErrorBoundary>
         <CursorEffects>
-          <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+          <div className="min-h-screen bg-white text-slate-900">
             <AnimatePresence mode="wait">
-              {showLoading && <SmartLoader />}
+              {showLoading && <QuickLoader />}
             </AnimatePresence>
 
             {!showLoading && (
               <motion.div
-                className="page-transition"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
+                transition={{ duration: 0.3 }}
               >
-                {/* Quick back navigation for authenticated users */}
+                {/* Back navigation for authenticated users */}
                 {isAuthenticated && <QuickBackButton />}
 
                 <Routes>
@@ -319,10 +283,10 @@ function AppContent() {
                     }
                   />
 
-                  {/* Special Routes (No Navigation) */}
+                  {/* Special Routes */}
                   <Route path="/reels" element={<EduReels />} />
 
-                  {/* Student Dashboard (Default) */}
+                  {/* Role-based Dashboards */}
                   <Route
                     path="/dashboard"
                     element={
@@ -334,7 +298,6 @@ function AppContent() {
                     }
                   />
 
-                  {/* Creator Dashboard */}
                   <Route
                     path="/creator-dashboard"
                     element={
@@ -346,7 +309,6 @@ function AppContent() {
                     }
                   />
 
-                  {/* Institution Dashboard */}
                   <Route
                     path="/institution-dashboard"
                     element={
@@ -448,7 +410,7 @@ function AppContent() {
   );
 }
 
-// Main App Component with Enhanced Error Handling
+// Main App Component
 export default function App() {
   return (
     <ErrorBoundary>
