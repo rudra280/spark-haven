@@ -129,14 +129,35 @@ export function Navigation() {
   const isActive = (path: string) => location.pathname === path;
 
   const getPlanColor = (plan: string) => {
-    switch (plan) {
+    switch (plan?.toLowerCase()) {
       case "pro":
         return "from-blue-500 to-cyan-500";
       case "ultimate":
         return "from-purple-500 to-pink-500";
       default:
-        return "from-gray-500 to-gray-600";
+        return "from-slate-500 to-slate-600";
     }
+  };
+
+  // Safe user data with fallbacks
+  const safeUser = user
+    ? {
+        name: user.name || "User",
+        email: user.email || "",
+        avatar: user.avatar || "",
+        role: user.role || "student",
+        plan: user.subscription?.plan || "free",
+      }
+    : null;
+
+  const getUserInitials = (name: string) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0))
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
   };
 
   return (
@@ -161,7 +182,7 @@ export function Navigation() {
               {/* New Professional Logo */}
               <div className="relative">
                 <motion.div
-                  className="w-10 h-10 bg-gradient-to-br from-orange-500 via-pink-500 to-violet-500 rounded-xl flex items-center justify-center"
+                  className="w-10 h-10 bg-primary-gradient rounded-xl flex items-center justify-center shadow-lg"
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.8, ease: "easeOut" }}
                 >
@@ -169,7 +190,7 @@ export function Navigation() {
                 </motion.div>
 
                 {/* Glowing Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-pink-500 to-violet-500 rounded-xl blur-lg opacity-30 -z-10 group-hover:opacity-50 transition-opacity" />
+                <div className="absolute inset-0 bg-primary-gradient rounded-xl blur-lg opacity-30 -z-10 group-hover:opacity-50 transition-opacity" />
               </div>
 
               <div className="hidden sm:block">
@@ -191,10 +212,8 @@ export function Navigation() {
               >
                 <Link
                   to={item.href}
-                  className={`relative px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group ${
-                    isActive(item.href)
-                      ? "text-white bg-gradient-to-r from-orange-500/20 via-pink-500/20 to-violet-500/20"
-                      : "text-white/70 hover:text-white hover:bg-white/10"
+                  className={`nav-link relative px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group ${
+                    isActive(item.href) ? "active" : ""
                   }`}
                 >
                   <div className="flex items-center space-x-2">
@@ -203,18 +222,18 @@ export function Navigation() {
 
                     {/* Badges */}
                     {item.premium && (
-                      <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-1.5 py-0.5">
+                      <Badge className="badge-default text-xs px-1.5 py-0.5">
                         <Crown className="w-3 h-3 mr-1" />
                         PRO
                       </Badge>
                     )}
                     {item.new && (
-                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-1.5 py-0.5">
+                      <Badge className="bg-green-500 text-white text-xs px-1.5 py-0.5">
                         NEW
                       </Badge>
                     )}
                     {item.hot && (
-                      <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs px-1.5 py-0.5 animate-pulse">
+                      <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 animate-pulse">
                         🔥 HOT
                       </Badge>
                     )}
@@ -223,7 +242,7 @@ export function Navigation() {
                   {/* Active indicator */}
                   {isActive(item.href) && (
                     <motion.div
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-gradient"
                       layoutId="activeIndicator"
                       initial={false}
                       transition={{
@@ -248,13 +267,13 @@ export function Navigation() {
                   exit={{ width: 0, opacity: 0 }}
                   className="relative"
                 >
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     type="text"
                     placeholder="Search courses..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-pink-400"
+                    className="form-input pl-10"
                     onBlur={() => !searchQuery && setShowSearch(false)}
                     autoFocus
                   />
@@ -263,7 +282,7 @@ export function Navigation() {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="text-white/70 hover:text-white hover:bg-white/10"
+                  className="btn-ghost"
                   onClick={() => setShowSearch(true)}
                 >
                   <Search className="w-4 h-4" />
@@ -277,20 +296,20 @@ export function Navigation() {
             {/* Theme Toggle */}
             <ThemeToggle />
 
-            {isAuthenticated && user ? (
+            {isAuthenticated && safeUser ? (
               <>
                 {/* Notifications */}
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="relative text-foreground/70 hover:text-foreground hover:bg-accent"
+                  className="btn-ghost relative"
                 >
                   <Bell className="w-4 h-4" />
                   {notifications > 0 && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center text-xs text-white"
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white"
                     >
                       {notifications}
                     </motion.div>
@@ -302,19 +321,22 @@ export function Navigation() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="relative h-10 px-2 text-white/70 hover:text-white hover:bg-white/10"
+                      className="btn-ghost relative h-10 px-2"
                     >
                       <div className="flex items-center space-x-2">
-                        <Avatar className="h-8 w-8 user-avatar">
-                          <AvatarImage src={user.avatar} alt={user.name} />
-                          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-violet-500 text-white">
-                            {user.name.charAt(0)}
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage
+                            src={safeUser.avatar}
+                            alt={safeUser.name}
+                          />
+                          <AvatarFallback className="bg-primary-gradient text-white">
+                            {getUserInitials(safeUser.name)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="hidden sm:block text-left">
-                          <p className="text-sm font-medium">{user.name}</p>
-                          <p className="text-xs text-white/50 capitalize">
-                            {user.plan} Plan
+                          <p className="text-sm font-medium">{safeUser.name}</p>
+                          <p className="text-xs text-muted-foreground capitalize">
+                            {safeUser.plan} Plan
                           </p>
                         </div>
                         <ChevronDown className="w-4 h-4" />
@@ -323,33 +345,44 @@ export function Navigation() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="w-64 bg-slate-800/95 backdrop-blur-xl border-white/20"
+                    className="dropdown-content w-64"
                   >
                     <DropdownMenuLabel>
                       <div className="flex items-center space-x-3">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={user.avatar} alt={user.name} />
-                          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-violet-500 text-white">
-                            {user.name.charAt(0)}
+                          <AvatarImage
+                            src={safeUser.avatar}
+                            alt={safeUser.name}
+                          />
+                          <AvatarFallback className="bg-primary-gradient text-white">
+                            {getUserInitials(safeUser.name)}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="text-white font-medium">{user.name}</p>
-                          <p className="text-white/60 text-sm">{user.email}</p>
+                          <p className="font-medium">{safeUser.name}</p>
+                          <p className="text-muted-foreground text-sm">
+                            {safeUser.email}
+                          </p>
                           <Badge
-                            className={`mt-1 bg-gradient-to-r ${getPlanColor(user.plan)} text-white text-xs`}
+                            className={`mt-1 bg-gradient-to-r ${getPlanColor(safeUser.plan)} text-white text-xs`}
                           >
-                            {user.plan.toUpperCase()} PLAN
+                            {(safeUser.plan || "FREE").toUpperCase()} PLAN
                           </Badge>
                         </div>
                       </div>
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator className="border-white/20" />
+                    <DropdownMenuSeparator />
 
                     <DropdownMenuItem asChild>
                       <Link
-                        to="/dashboard"
-                        className="flex items-center space-x-2 text-white hover:bg-white/10"
+                        to={
+                          safeUser.role === "creator"
+                            ? "/creator-dashboard"
+                            : safeUser.role === "institution"
+                              ? "/institution-dashboard"
+                              : "/dashboard"
+                        }
+                        className="flex items-center space-x-2"
                       >
                         <User className="w-4 h-4" />
                         <span>Dashboard</span>
@@ -359,18 +392,18 @@ export function Navigation() {
                     <DropdownMenuItem asChild>
                       <Link
                         to="/profile"
-                        className="flex items-center space-x-2 text-white hover:bg-white/10"
+                        className="flex items-center space-x-2"
                       >
                         <Settings className="w-4 h-4" />
                         <span>Profile Settings</span>
                       </Link>
                     </DropdownMenuItem>
 
-                    {user.plan === "free" && (
+                    {safeUser.plan === "free" && (
                       <DropdownMenuItem asChild>
                         <Link
                           to="/pricing"
-                          className="flex items-center space-x-2 text-orange-400 hover:bg-orange-500/10"
+                          className="flex items-center space-x-2 text-amber-600 dark:text-amber-400"
                         >
                           <Crown className="w-4 h-4" />
                           <span>Upgrade Plan</span>
@@ -379,11 +412,11 @@ export function Navigation() {
                       </DropdownMenuItem>
                     )}
 
-                    <DropdownMenuSeparator className="border-white/20" />
+                    <DropdownMenuSeparator />
 
                     <DropdownMenuItem
                       onClick={handleLogout}
-                      className="text-red-400 hover:bg-red-500/10"
+                      className="text-destructive focus:text-destructive"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       <span>Sign Out</span>
@@ -393,19 +426,10 @@ export function Navigation() {
               </>
             ) : (
               <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className="text-white/70 hover:text-white hover:bg-white/10"
-                >
+                <Button variant="ghost" size="sm" asChild className="btn-ghost">
                   <Link to="/login">Sign In</Link>
                 </Button>
-                <MagneticButton
-                  size="sm"
-                  asChild
-                  className="bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 hover:opacity-90 text-white"
-                >
+                <MagneticButton size="sm" asChild className="btn-primary">
                   <Link to="/register">Get Started</Link>
                 </MagneticButton>
               </div>
@@ -415,7 +439,7 @@ export function Navigation() {
             <Button
               size="icon"
               variant="ghost"
-              className="lg:hidden text-white/70 hover:text-white hover:bg-white/10"
+              className="lg:hidden btn-ghost"
               onClick={() => setIsOpen(!isOpen)}
             >
               {isOpen ? (
@@ -435,18 +459,18 @@ export function Navigation() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-slate-900/95 backdrop-blur-xl border-t border-white/10"
+            className="lg:hidden glass-card border-t"
           >
             <div className="px-4 py-6 space-y-3">
               {/* Mobile Search */}
               <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder="Search courses..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  className="form-input pl-10"
                 />
               </div>
 
@@ -461,8 +485,8 @@ export function Navigation() {
                     to={item.href}
                     className={`flex items-center justify-between p-3 rounded-lg transition-all ${
                       isActive(item.href)
-                        ? "bg-gradient-to-r from-orange-500/20 via-pink-500/20 to-violet-500/20 text-white"
-                        : "text-white/70 hover:text-white hover:bg-white/10"
+                        ? "bg-accent text-accent-foreground"
+                        : "hover:bg-accent hover:text-accent-foreground"
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
@@ -470,7 +494,7 @@ export function Navigation() {
                       <item.icon className="w-5 h-5" />
                       <div>
                         <p className="font-medium">{item.name}</p>
-                        <p className="text-xs text-white/50">
+                        <p className="text-xs text-muted-foreground">
                           {item.description}
                         </p>
                       </div>
@@ -478,7 +502,7 @@ export function Navigation() {
 
                     <div className="flex items-center space-x-1">
                       {item.premium && (
-                        <Crown className="w-4 h-4 text-purple-400" />
+                        <Crown className="w-4 h-4 text-purple-500" />
                       )}
                       {item.new && (
                         <Badge className="bg-green-500 text-white text-xs">
@@ -496,22 +520,18 @@ export function Navigation() {
               ))}
 
               {!isAuthenticated && (
-                <div className="pt-4 border-t border-white/10 space-y-2">
+                <div className="pt-4 border-t space-y-2">
                   <Button
                     variant="outline"
                     size="sm"
                     asChild
-                    className="w-full border-white/20 text-white hover:bg-white/10"
+                    className="w-full"
                   >
                     <Link to="/login" onClick={() => setIsOpen(false)}>
                       Sign In
                     </Link>
                   </Button>
-                  <Button
-                    size="sm"
-                    asChild
-                    className="w-full bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 hover:opacity-90 text-white"
-                  >
+                  <Button size="sm" asChild className="w-full btn-primary">
                     <Link to="/register" onClick={() => setIsOpen(false)}>
                       Get Started
                     </Link>
