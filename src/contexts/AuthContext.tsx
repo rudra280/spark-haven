@@ -36,14 +36,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Initialize auth state
+  // Initialize auth state on app load
   useEffect(() => {
     initializeAuth();
   }, []);
 
   const initializeAuth = async () => {
+    console.log("🔄 Initializing authentication...");
     setIsLoading(true);
+
     try {
+      // Add a small delay to prevent flash
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       // Check if user is already authenticated
       const currentUser = realAuth.getCurrentUser();
       if (currentUser && realAuth.isAuthenticated()) {
@@ -56,23 +61,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
       } else {
         console.log("❌ No authenticated user found");
+        setUser(null);
+        setIsAuthenticated(false);
       }
     } catch (error) {
-      console.error("Auth initialization error:", error);
-      logout();
+      console.error("❌ Auth initialization error:", error);
+      handleAuthError();
     } finally {
       setIsLoading(false);
+      console.log("✅ Auth initialization complete");
     }
+  };
+
+  const handleAuthError = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    realAuth.logout();
   };
 
   const login = async (
     email: string,
     password: string,
   ): Promise<{ success: boolean; error?: string }> => {
+    console.log("🔐 Starting login process for:", email);
     setIsLoading(true);
 
     try {
-      console.log("🔐 Attempting login for:", email);
       const result = await realAuth.login(email, password);
 
       if (result.success && result.user) {
@@ -83,13 +97,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           result.user.name,
           `(${result.user.role})`,
         );
+
+        // Ensure user data is persisted
+        localStorage.setItem(
+          "learnverse_user_data",
+          JSON.stringify(result.user),
+        );
+
         return { success: true };
       } else {
         console.log("❌ Login failed:", result.error);
+        handleAuthError();
         return { success: false, error: result.error || "Login failed" };
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("❌ Login error:", error);
+      handleAuthError();
       return { success: false, error: "Network error. Please try again." };
     } finally {
       setIsLoading(false);
@@ -102,14 +125,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string;
     role: "student" | "creator" | "institution";
   }): Promise<{ success: boolean; error?: string }> => {
+    console.log(
+      "📝 Starting registration for:",
+      userData.email,
+      `as ${userData.role}`,
+    );
     setIsLoading(true);
 
     try {
-      console.log(
-        "📝 Attempting registration for:",
-        userData.email,
-        `as ${userData.role}`,
-      );
       const result = await realAuth.register(userData);
 
       if (result.success && result.user) {
@@ -120,13 +143,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           result.user.name,
           `(${result.user.role})`,
         );
+
+        // Ensure user data is persisted
+        localStorage.setItem(
+          "learnverse_user_data",
+          JSON.stringify(result.user),
+        );
+
         return { success: true };
       } else {
         console.log("❌ Registration failed:", result.error);
+        handleAuthError();
         return { success: false, error: result.error || "Registration failed" };
       }
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("❌ Registration error:", error);
+      handleAuthError();
       return { success: false, error: "Network error. Please try again." };
     } finally {
       setIsLoading(false);
@@ -137,10 +169,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     success: boolean;
     error?: string;
   }> => {
+    console.log("🔗 Starting Google OAuth...");
     setIsLoading(true);
 
     try {
-      console.log("🔗 Attempting Google OAuth...");
       const result = await realAuth.signInWithGoogle();
 
       if (result.success && result.user) {
@@ -151,16 +183,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           result.user.name,
           `(${result.user.role})`,
         );
+
+        // Ensure user data is persisted
+        localStorage.setItem(
+          "learnverse_user_data",
+          JSON.stringify(result.user),
+        );
+
         return { success: true };
       } else {
         console.log("❌ Google OAuth failed:", result.error);
+        handleAuthError();
         return {
           success: false,
           error: result.error || "Google sign-in failed",
         };
       }
     } catch (error) {
-      console.error("Google OAuth error:", error);
+      console.error("❌ Google OAuth error:", error);
+      handleAuthError();
       return {
         success: false,
         error: "Google sign-in failed. Please try again.",
@@ -174,10 +215,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     success: boolean;
     error?: string;
   }> => {
+    console.log("🔗 Starting GitHub OAuth...");
     setIsLoading(true);
 
     try {
-      console.log("🔗 Attempting GitHub OAuth...");
       const result = await realAuth.signInWithGitHub();
 
       if (result.success && result.user) {
@@ -188,16 +229,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           result.user.name,
           `(${result.user.role})`,
         );
+
+        // Ensure user data is persisted
+        localStorage.setItem(
+          "learnverse_user_data",
+          JSON.stringify(result.user),
+        );
+
         return { success: true };
       } else {
         console.log("❌ GitHub OAuth failed:", result.error);
+        handleAuthError();
         return {
           success: false,
           error: result.error || "GitHub sign-in failed",
         };
       }
     } catch (error) {
-      console.error("GitHub OAuth error:", error);
+      console.error("❌ GitHub OAuth error:", error);
+      handleAuthError();
       return {
         success: false,
         error: "GitHub sign-in failed. Please try again.",
@@ -232,7 +282,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("✅ Profile updated successfully");
       return true;
     } catch (error) {
-      console.error("Profile update error:", error);
+      console.error("❌ Profile update error:", error);
       return false;
     }
   };
@@ -267,7 +317,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("✅ Plan upgraded to:", plan);
       return true;
     } catch (error) {
-      console.error("Plan upgrade error:", error);
+      console.error("❌ Plan upgrade error:", error);
       return false;
     }
   };
@@ -276,6 +326,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const currentUser = realAuth.getCurrentUser();
     if (currentUser) {
       setUser(currentUser);
+      setIsAuthenticated(true);
     }
   };
 
