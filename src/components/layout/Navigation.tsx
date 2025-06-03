@@ -276,13 +276,16 @@ export function Navigation() {
 
           {/* Right Side */}
           <div className="flex items-center space-x-3">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {isAuthenticated && user ? (
               <>
                 {/* Notifications */}
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="relative text-white/70 hover:text-white hover:bg-white/10"
+                  className="relative text-foreground/70 hover:text-foreground hover:bg-accent"
                 >
                   <Bell className="w-4 h-4" />
                   {notifications > 0 && (
