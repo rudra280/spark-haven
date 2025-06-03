@@ -7,9 +7,11 @@ import {
 } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { CursorEffects } from "@/components/ui/cursor-effects";
+import { QuickBackButton } from "@/components/ui/back-navigation";
 
 // Import all pages
 import Index from "@/pages/Index";
@@ -30,60 +32,101 @@ import TutorBooking from "@/pages/TutorBooking";
 import Pricing from "@/pages/Pricing";
 import NotFound from "@/pages/NotFound";
 
-// Fast Loading Component (No more stuck at 0%)
-function QuickLoader() {
+// Enhanced Loading Component (Fixes stuck loading issue)
+function SmartLoader() {
   const [progress, setProgress] = useState(0);
+  const [loadingMessage, setLoadingMessage] = useState("Initializing...");
 
   useEffect(() => {
-    // Fast, realistic loading
-    const interval = setInterval(() => {
+    const messages = [
+      "Initializing...",
+      "Loading authentication...",
+      "Setting up dashboard...",
+      "Almost ready...",
+    ];
+
+    const progressInterval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
+        const next = prev + 25;
+        if (next >= 100) {
+          clearInterval(progressInterval);
           return 100;
         }
-        return prev + 33; // Fast increments for quick loading
-      });
-    }, 150); // Every 150ms for super fast loading
 
-    return () => clearInterval(interval);
+        // Update message based on progress
+        const messageIndex = Math.floor(next / 25) - 1;
+        if (messageIndex >= 0 && messageIndex < messages.length) {
+          setLoadingMessage(messages[messageIndex]);
+        }
+
+        return next;
+      });
+    }, 200); // Faster intervals for smoother loading
+
+    // Cleanup
+    return () => clearInterval(progressInterval);
   }, []);
 
   if (progress >= 100) return null;
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center"
+      className="fixed inset-0 z-50 bg-background flex items-center justify-center"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="text-center">
+      <div className="text-center max-w-md mx-auto px-6">
+        {/* Logo */}
         <motion.div
-          className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-orange-500 via-pink-500 to-violet-500 rounded-2xl flex items-center justify-center"
-          animate={{ scale: [1, 1.1, 1], rotate: [0, 180, 360] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
+          className="w-20 h-20 mx-auto mb-8 bg-primary-gradient rounded-2xl flex items-center justify-center shadow-lg"
+          animate={{
+            scale: [1, 1.05, 1],
+            rotate: [0, 5, -5, 0],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
         >
-          <span className="text-2xl">🌍</span>
+          <span className="text-3xl">🌍</span>
         </motion.div>
 
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent mb-4">
+        {/* Brand */}
+        <motion.h1
+          className="heading-md text-gradient mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
           LEARNVERSE
-        </h1>
+        </motion.h1>
 
-        <div className="w-64 h-2 bg-white/10 rounded-full overflow-hidden mx-auto mb-2">
-          <motion.div
-            className="h-full bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.2 }}
-          />
+        {/* Progress Bar */}
+        <div className="w-full max-w-xs mx-auto mb-4">
+          <div className="progress-bar h-2">
+            <motion.div
+              className="progress-fill h-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            />
+          </div>
         </div>
 
-        <p className="text-white/70 text-sm">{progress}% Loading...</p>
-        <p className="text-white/50 text-xs mt-1">
-          Professional Platform Ready
-        </p>
+        {/* Progress Text */}
+        <motion.p
+          className="text-muted-foreground text-sm mb-2"
+          key={loadingMessage}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          {loadingMessage}
+        </motion.p>
+
+        <p className="text-muted-foreground text-xs">{progress}% Complete</p>
       </div>
     </motion.div>
   );
@@ -100,7 +143,7 @@ function ProtectedRoute({
   const { isAuthenticated, user, isLoading } = useAuth();
 
   if (isLoading) {
-    return <QuickLoader />;
+    return <SmartLoader />;
   }
 
   if (!isAuthenticated) {
@@ -122,10 +165,10 @@ function ProtectedRoute({
   return <>{children}</>;
 }
 
-// Error Boundary Component
+// Enhanced Error Boundary Component
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
-  { hasError: boolean; error?: Error }
+  { hasError: boolean; error?: Error; errorInfo?: string }
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props);
@@ -137,26 +180,63 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Application Error:", error, errorInfo);
+    console.error("🚨 Application Error:", error);
+    console.error("Error Info:", errorInfo);
+
+    this.setState({
+      error,
+      errorInfo: errorInfo.componentStack,
+    });
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-          <div className="text-center text-white">
-            <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <div className="text-center max-w-md mx-auto">
+            <motion.div
+              className="w-20 h-20 mx-auto mb-6 bg-destructive/10 rounded-full flex items-center justify-center"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <span className="text-3xl">⚠️</span>
+            </motion.div>
+
+            <h1 className="heading-md text-destructive mb-4">
               Oops! Something went wrong
             </h1>
-            <p className="mb-6 text-white/70">
-              Don't worry, we're fixing this. Please refresh the page.
+
+            <p className="text-muted-foreground mb-6">
+              Don't worry, our team has been notified. Please try refreshing the
+              page.
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity"
-            >
-              Refresh Page
-            </button>
+
+            {this.state.error && (
+              <details className="mb-6 text-left bg-muted p-4 rounded-lg">
+                <summary className="cursor-pointer text-sm font-medium mb-2">
+                  Error Details
+                </summary>
+                <pre className="text-xs text-muted-foreground whitespace-pre-wrap">
+                  {this.state.error.message}
+                </pre>
+              </details>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={() => window.location.reload()}
+                className="btn-primary px-6 py-3 rounded-lg font-medium"
+              >
+                Refresh Page
+              </button>
+
+              <button
+                onClick={() => (window.location.href = "/")}
+                className="btn-secondary px-6 py-3 rounded-lg font-medium"
+              >
+                Go Home
+              </button>
+            </div>
           </div>
         </div>
       );
@@ -169,33 +249,38 @@ class ErrorBoundary extends React.Component<
 // Main App Content
 function AppContent() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const { isLoading: authLoading } = useAuth();
+  const { isLoading: authLoading, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    // Super fast initial loading
+    // Quick initial loading
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
-    }, 500); // Reduced to 500ms for instant loading
+    }, 800); // Balanced loading time
 
     return () => clearTimeout(timer);
   }, []);
+
+  const showLoading = isInitialLoading || authLoading;
 
   return (
     <Router>
       <ErrorBoundary>
         <CursorEffects>
-          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+          <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
             <AnimatePresence mode="wait">
-              {(isInitialLoading || authLoading) && <QuickLoader />}
+              {showLoading && <SmartLoader />}
             </AnimatePresence>
 
-            {!isInitialLoading && !authLoading && (
+            {!showLoading && (
               <motion.div
                 className="page-transition"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.4 }}
               >
+                {/* Quick back navigation for authenticated users */}
+                {isAuthenticated && <QuickBackButton />}
+
                 <Routes>
                   {/* Public Routes */}
                   <Route
@@ -363,13 +448,15 @@ function AppContent() {
   );
 }
 
-// Main App Component with Error Handling
+// Main App Component with Enhanced Error Handling
 export default function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }
