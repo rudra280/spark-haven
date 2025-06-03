@@ -32,17 +32,20 @@ import TutorBooking from "@/pages/TutorBooking";
 import Pricing from "@/pages/Pricing";
 import NotFound from "@/pages/NotFound";
 
-// Fast Loading Component with immediate progress
-function QuickLoader() {
+// Professional Loading Component with Modern Design
+function ModernLoader() {
   const [progress, setProgress] = useState(0);
-  const [loadingText, setLoadingText] = useState("Initializing...");
+  const [loadingText, setLoadingText] = useState("Initializing platform...");
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     const loadingSteps = [
-      { progress: 25, text: "Loading user data..." },
-      { progress: 50, text: "Setting up workspace..." },
-      { progress: 75, text: "Finalizing setup..." },
-      { progress: 100, text: "Ready!" },
+      { progress: 15, text: "Loading AI systems..." },
+      { progress: 35, text: "Connecting to educational database..." },
+      { progress: 55, text: "Setting up video streaming..." },
+      { progress: 75, text: "Preparing your dashboard..." },
+      { progress: 90, text: "Almost ready..." },
+      { progress: 100, text: "Welcome to LearnVerse!" },
     ];
 
     let currentStep = 0;
@@ -53,29 +56,37 @@ function QuickLoader() {
         setLoadingText(step.text);
         currentStep++;
       } else {
+        setIsComplete(true);
         clearInterval(interval);
       }
-    }, 250); // Very fast loading
+    }, 200); // Fast loading - 200ms per step
 
     return () => clearInterval(interval);
   }, []);
 
-  if (progress >= 100) return null;
+  if (isComplete) return null;
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 bg-white flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      }}
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.5 }}
     >
       <div className="text-center max-w-md mx-auto px-6">
-        {/* Professional Logo */}
+        {/* Modern Logo */}
         <motion.div
-          className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-slate-600 to-slate-800 rounded-xl flex items-center justify-center shadow-lg"
+          className="w-20 h-20 mx-auto mb-8 rounded-2xl flex items-center justify-center shadow-2xl"
+          style={{
+            background: "linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1)",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+          }}
           animate={{
-            scale: [1, 1.02, 1],
-            rotate: [0, 2, -2, 0],
+            scale: [1, 1.05, 1],
+            rotate: [0, 5, -5, 0],
           }}
           transition={{
             duration: 2,
@@ -83,17 +94,37 @@ function QuickLoader() {
             ease: "easeInOut",
           }}
         >
-          <span className="text-2xl text-white">🌍</span>
+          <span className="text-3xl">🚀</span>
         </motion.div>
 
         {/* Brand */}
-        <h1 className="text-2xl font-bold text-slate-800 mb-6">LEARNVERSE</h1>
+        <motion.h1
+          className="text-4xl font-bold text-white mb-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          LearnVerse
+        </motion.h1>
 
-        {/* Progress Bar */}
-        <div className="w-full max-w-xs mx-auto mb-4">
-          <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+        <motion.p
+          className="text-white/80 text-sm mb-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          Your Ultimate Learning Destination
+        </motion.p>
+
+        {/* Modern Progress Bar */}
+        <div className="w-full max-w-xs mx-auto mb-6">
+          <div className="h-2 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
             <motion.div
-              className="h-full bg-gradient-to-r from-slate-600 to-slate-800"
+              className="h-full rounded-full"
+              style={{
+                background: "linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1)",
+                boxShadow: "0 0 10px rgba(255,255,255,0.5)",
+              }}
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.3, ease: "easeOut" }}
@@ -103,16 +134,35 @@ function QuickLoader() {
 
         {/* Loading Text */}
         <motion.p
-          className="text-slate-600 text-sm mb-2"
+          className="text-white/90 text-sm mb-2"
           key={loadingText}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
         >
           {loadingText}
         </motion.p>
 
-        <p className="text-slate-500 text-xs">{progress}% Complete</p>
+        <p className="text-white/70 text-xs">{progress}% Complete</p>
+
+        {/* Loading Dots */}
+        <div className="flex justify-center space-x-1 mt-4">
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              className="w-2 h-2 bg-white/60 rounded-full"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.6, 1, 0.6],
+              }}
+              transition={{
+                duration: 1,
+                repeat: Infinity,
+                delay: i * 0.2,
+              }}
+            />
+          ))}
+        </div>
       </div>
     </motion.div>
   );
@@ -129,7 +179,7 @@ function ProtectedRoute({
   const { isAuthenticated, user, isLoading } = useAuth();
 
   if (isLoading) {
-    return <QuickLoader />;
+    return <ModernLoader />;
   }
 
   if (!isAuthenticated) {
@@ -151,7 +201,7 @@ function ProtectedRoute({
   return <>{children}</>;
 }
 
-// Error Boundary
+// Enhanced Error Boundary
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; error?: Error }
@@ -172,32 +222,40 @@ class ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-white flex items-center justify-center p-4">
-          <div className="text-center max-w-md mx-auto">
-            <div className="w-16 h-16 mx-auto mb-6 bg-red-100 rounded-full flex items-center justify-center">
+        <div
+          className="min-h-screen flex items-center justify-center p-4"
+          style={{
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          }}
+        >
+          <div className="text-center max-w-md mx-auto text-white">
+            <motion.div
+              className="w-16 h-16 mx-auto mb-6 bg-red-500/20 rounded-full flex items-center justify-center"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
               <span className="text-2xl">⚠️</span>
-            </div>
+            </motion.div>
 
-            <h1 className="text-2xl font-bold text-slate-800 mb-4">
-              Something went wrong
+            <h1 className="text-2xl font-bold mb-4">
+              Oops! Something went wrong
             </h1>
 
-            <p className="text-slate-600 mb-6">
-              We're sorry for the inconvenience. Please refresh the page to try
-              again.
+            <p className="text-white/80 mb-6">
+              Don't worry, we're fixing this. Please refresh to try again.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => window.location.reload()}
-                className="px-6 py-3 bg-slate-800 text-white rounded-lg font-medium hover:bg-slate-700 transition-colors"
+                className="px-6 py-3 bg-white/20 backdrop-blur-sm rounded-lg font-medium hover:bg-white/30 transition-all"
               >
-                Refresh Page
+                Refresh App
               </button>
 
               <button
                 onClick={() => (window.location.href = "/")}
-                className="px-6 py-3 bg-slate-200 text-slate-800 rounded-lg font-medium hover:bg-slate-300 transition-colors"
+                className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg font-medium hover:opacity-90 transition-all"
               >
                 Go Home
               </button>
@@ -217,10 +275,10 @@ function AppContent() {
   const { isLoading: authLoading, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    // Quick initial loading - no more stuck loading
+    // Fast initialization - no more stuck loading
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
-    }, 1000); // 1 second max
+    }, 1200); // 1.2 seconds for complete loading
 
     return () => clearTimeout(timer);
   }, []);
@@ -231,16 +289,21 @@ function AppContent() {
     <Router>
       <ErrorBoundary>
         <CursorEffects>
-          <div className="min-h-screen bg-white text-slate-900">
+          <div
+            className="min-h-screen text-slate-800"
+            style={{
+              background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+            }}
+          >
             <AnimatePresence mode="wait">
-              {showLoading && <QuickLoader />}
+              {showLoading && <ModernLoader />}
             </AnimatePresence>
 
             {!showLoading && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.5 }}
               >
                 {/* Back navigation for authenticated users */}
                 {isAuthenticated && <QuickBackButton />}
@@ -284,7 +347,14 @@ function AppContent() {
                   />
 
                   {/* Special Routes */}
-                  <Route path="/reels" element={<EduReels />} />
+                  <Route
+                    path="/reels"
+                    element={
+                      <>
+                        <EduReels />
+                      </>
+                    }
+                  />
 
                   {/* Role-based Dashboards */}
                   <Route
