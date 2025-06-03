@@ -141,10 +141,10 @@ export function Navigation() {
 
   return (
     <motion.nav
-      className={`fixed top-0 left-0 right-0 z-40 border-b border-white/10 transition-all duration-300 ${
+      className={`navbar fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
         isScrolled
-          ? "backdrop-blur-xl bg-slate-900/80"
-          : "backdrop-blur-sm bg-slate-900/10"
+          ? "backdrop-blur-xl bg-background/95 border-border"
+          : "backdrop-blur-sm bg-background/50 border-border/50"
       }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
