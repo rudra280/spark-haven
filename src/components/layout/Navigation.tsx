@@ -173,10 +173,8 @@ export function Navigation() {
               </div>
 
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent">
-                  LEARNVERSE
-                </h1>
-                <p className="text-xs text-white/60 -mt-1">
+                <h1 className="text-xl font-bold text-gradient">LEARNVERSE</h1>
+                <p className="text-xs text-muted-foreground -mt-1">
                   Learn Everything, Everywhere
                 </p>
               </div>
