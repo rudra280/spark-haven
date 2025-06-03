@@ -1,21 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  ArrowRight,
-  Github,
-  Chrome,
-  Sparkles,
-  Shield,
-  Zap,
-  CheckCircle,
-  AlertCircle,
-  ArrowLeft,
-} from "lucide-react";
+import { Eye, EyeOff, Github, Mail, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,18 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
-import { MagneticButton } from "@/components/ui/cursor-effects";
-
-interface FloatingParticle {
-  id: number;
-  x: number;
-  y: number;
-  size: number;
-  color: string;
-  speed: number;
-}
+import { QuickBackButton } from "@/components/ui/back-navigation";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -45,85 +21,46 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [particles, setParticles] = useState<FloatingParticle[]>([]);
 
   const { login, signInWithGoogle, signInWithGitHub } = useAuth();
   const navigate = useNavigate();
-  const formRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Initialize floating particles
-    const newParticles: FloatingParticle[] = [];
-    for (let i = 0; i < 50; i++) {
-      newParticles.push({
-        id: i,
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        size: Math.random() * 3 + 1,
-        color: ["#f97316", "#ec4899", "#8b5cf6"][Math.floor(Math.random() * 3)],
-        speed: Math.random() * 0.5 + 0.1,
-      });
-    }
-    setParticles(newParticles);
-
-    // Animate particles
-    const animateParticles = () => {
-      setParticles((prev) =>
-        prev
-          .map((particle) => ({
-            ...particle,
-            y: particle.y - particle.speed,
-            x: particle.x + Math.sin(particle.y * 0.01) * 0.5,
-          }))
-          .filter((particle) => particle.y > -10),
-      );
-    };
-
-    const interval = setInterval(animateParticles, 16);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
     setIsLoading(true);
+    setError("");
 
     try {
       const result = await login(email, password);
-
       if (result.success) {
-        setSuccess("Login successful! Welcome back to LEARNVERSE! 🎉");
-        setTimeout(() => navigate("/dashboard"), 1000);
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1000);
       } else {
         setError(result.error || "Login failed");
       }
     } catch (err) {
-      setError("Network error. Please check your connection.");
+      setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const fillDemoCredentials = () => {
-    setEmail("demo@learnverse.ai");
-    setPassword("demo123");
-  };
-
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     setError("");
+
     try {
       const result = await signInWithGoogle();
       if (result.success) {
-        setSuccess("Google sign-in successful! Welcome to LEARNVERSE! 🎉");
-        setTimeout(() => navigate("/dashboard"), 1500);
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1500);
       } else {
         setError(result.error || "Google sign-in failed");
       }
-    } catch (error) {
-      setError("Google sign-in failed. Please try again.");
+    } catch (err) {
+      setError("Google sign-in failed");
     } finally {
       setIsLoading(false);
     }
@@ -132,318 +69,234 @@ export default function Login() {
   const handleGitHubSignIn = async () => {
     setIsLoading(true);
     setError("");
+
     try {
       const result = await signInWithGitHub();
       if (result.success) {
-        setSuccess("GitHub sign-in successful! Welcome to LEARNVERSE! 🎉");
-        setTimeout(() => navigate("/dashboard"), 1500);
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1500);
       } else {
         setError(result.error || "GitHub sign-in failed");
       }
-    } catch (error) {
-      setError("GitHub sign-in failed. Please try again.");
+    } catch (err) {
+      setError("GitHub sign-in failed");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Back Button */}
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800" />
+
       <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="absolute top-6 left-6 z-50"
+        className="absolute top-20 left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl"
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.6, 0.3],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      <motion.div
+        className="absolute bottom-20 right-20 w-80 h-80 bg-accent/5 rounded-full blur-3xl"
+        animate={{
+          scale: [1.2, 1, 1.2],
+          opacity: [0.4, 0.7, 0.4],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* Back Navigation */}
+      <QuickBackButton />
+
+      {/* Login Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative z-10 w-full max-w-md"
       >
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-white/70 hover:text-white hover:bg-white/10"
-          onClick={() => navigate("/")}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Button>
-      </motion.div>
+        <Card className="glass-card shadow-2xl">
+          <CardHeader className="text-center pb-2">
+            {/* Logo */}
+            <motion.div
+              className="w-16 h-16 mx-auto mb-4 bg-primary-gradient rounded-2xl flex items-center justify-center shadow-lg"
+              whileHover={{ scale: 1.05, rotate: 5 }}
+              transition={{ duration: 0.3 }}
+            >
+              <span className="text-2xl">🌍</span>
+            </motion.div>
 
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 via-pink-500/20 to-violet-500/20 bg-[length:400%_400%] animate-gradient" />
+            <CardTitle className="heading-md text-gradient">
+              Welcome Back
+            </CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Sign in to continue your learning journey
+            </CardDescription>
+          </CardHeader>
 
-      {/* Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {particles.map((particle) => (
-          <div
-            key={particle.id}
-            className="absolute rounded-full opacity-30"
-            style={{
-              left: particle.x,
-              top: particle.y,
-              width: particle.size,
-              height: particle.size,
-              background: particle.color,
-              filter: "blur(1px)",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Grid Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
-
-      {/* Main Content */}
-      <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
-        <motion.div
-          ref={formRef}
-          className="login-form w-full max-w-md"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl">
-            <CardHeader className="text-center space-y-4">
-              {/* Logo */}
+          <CardContent className="space-y-6">
+            {/* Error Display */}
+            {error && (
               <motion.div
-                className="mx-auto w-16 h-16 bg-gradient-to-br from-orange-500 via-pink-500 to-violet-500 rounded-2xl flex items-center justify-center"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 300 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg"
               >
-                <Sparkles className="w-8 h-8 text-white" />
+                <p className="text-destructive text-sm text-center">{error}</p>
               </motion.div>
+            )}
 
-              <div>
-                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 bg-clip-text text-transparent">
-                  Welcome Back
-                </CardTitle>
-                <CardDescription className="text-white/70 mt-2">
-                  Sign in to continue your learning journey
-                </CardDescription>
-              </div>
-
-              {/* Features Preview */}
-              <div className="flex justify-center space-x-4 text-white/60">
-                <div className="flex items-center space-x-1">
-                  <Shield className="w-4 h-4" />
-                  <span className="text-xs">Secure</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Zap className="w-4 h-4" />
-                  <span className="text-xs">Fast</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Sparkles className="w-4 h-4" />
-                  <span className="text-xs">AI-Powered</span>
-                </div>
-              </div>
-            </CardHeader>
-
-            <CardContent className="space-y-6">
-              {/* Demo Credentials Banner */}
-              <motion.div
-                className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-lg p-3"
-                whileHover={{ scale: 1.02 }}
+            {/* OAuth Buttons */}
+            <div className="space-y-3">
+              <Button
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
+                className="w-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-white text-sm font-medium">
-                      Quick Demo Login
-                    </p>
-                    <p className="text-white/70 text-xs">
-                      demo@learnverse.ai / demo123
-                    </p>
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <div className="w-4 h-4 mr-2 bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 rounded-sm flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">G</span>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="demo-fill border-blue-500/30 text-blue-400 hover:bg-blue-500/20"
-                    onClick={fillDemoCredentials}
-                  >
-                    Use Demo
-                  </Button>
-                </div>
-              </motion.div>
+                )}
+                Continue with Google
+              </Button>
 
-              {/* OAuth Buttons - Primary Options */}
-              <div className="space-y-3">
-                <Button
-                  onClick={handleGoogleSignIn}
-                  disabled={isLoading}
-                  className="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold py-3 transition-all duration-300"
-                >
-                  <Chrome className="w-5 h-5 mr-3" />
-                  {isLoading ? "Connecting..." : "Continue with Google"}
-                </Button>
+              <Button
+                onClick={handleGitHubSignIn}
+                disabled={isLoading}
+                className="w-full bg-slate-900 dark:bg-slate-700 text-white hover:bg-slate-800 dark:hover:bg-slate-600 transition-all duration-200"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Github className="w-4 h-4 mr-2" />
+                )}
+                Continue with GitHub
+              </Button>
+            </div>
 
-                <Button
-                  onClick={handleGitHubSignIn}
-                  disabled={isLoading}
-                  className="w-full bg-gray-800 hover:bg-gray-700 text-white font-semibold py-3 transition-all duration-300"
-                >
-                  <Github className="w-5 h-5 mr-3" />
-                  {isLoading ? "Connecting..." : "Continue with GitHub"}
-                </Button>
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
               </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with email
+                </span>
+              </div>
+            </div>
 
-              {/* Alert Messages */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  >
-                    <Alert className="border-red-500/30 bg-red-500/10">
-                      <AlertCircle className="h-4 w-4 text-red-400" />
-                      <AlertDescription className="text-red-300">
-                        {error}
-                      </AlertDescription>
-                    </Alert>
-                  </motion.div>
-                )}
-
-                {success && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  >
-                    <Alert className="border-green-500/30 bg-green-500/10">
-                      <CheckCircle className="h-4 w-4 text-green-400" />
-                      <AlertDescription className="text-green-300">
-                        {success}
-                      </AlertDescription>
-                    </Alert>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Divider */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/20" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-slate-900 text-white/70">
-                    Or continue with email
-                  </span>
+            {/* Email/Password Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="form-label">
+                  Email
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="form-input pl-10"
+                    disabled={isLoading}
+                    required
+                  />
                 </div>
               </div>
 
-              {/* Email/Password Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Email Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-white/90">
-                    Email
-                  </Label>
-                  <div className="relative group">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50 group-focus-within:text-pink-400 transition-colors" />
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-pink-400 focus:ring-pink-400/20"
-                      placeholder="Enter your email"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Password Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-white/90">
-                    Password
-                  </Label>
-                  <div className="relative group">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50 group-focus-within:text-pink-400 transition-colors" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10 bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-pink-400 focus:ring-pink-400/20"
-                      placeholder="Enter your password"
-                      required
-                    />
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 w-8 h-8 text-white/50 hover:text-white"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Remember & Forgot */}
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center space-x-2 text-sm text-white/70 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="rounded border-white/20 bg-white/5"
-                    />
-                    <span>Remember me</span>
-                  </label>
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm text-pink-400 hover:text-pink-300 transition-colors"
+              <div className="space-y-2">
+                <Label htmlFor="password" className="form-label">
+                  Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="form-input pr-10"
+                    disabled={isLoading}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    disabled={isLoading}
                   >
-                    Forgot password?
-                  </Link>
-                </div>
-
-                {/* Submit Button */}
-                <MagneticButton
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-orange-500 via-pink-500 to-violet-500 hover:opacity-90 text-white font-semibold py-3 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group"
-                >
-                  <span className="flex items-center justify-center space-x-2">
-                    {isLoading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Signing in...</span>
-                      </>
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
                     ) : (
-                      <>
-                        <span>Sign In</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </>
+                      <Eye className="w-4 h-4" />
                     )}
-                  </span>
-                </MagneticButton>
-              </form>
+                  </button>
+                </div>
+              </div>
 
-              {/* Sign Up Link */}
-              <div className="text-center">
-                <span className="text-white/70">Don't have an account? </span>
+              <Button
+                type="submit"
+                className="w-full btn-primary"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+            </form>
+
+            {/* Demo Account Notice */}
+            <div className="p-3 bg-accent/10 rounded-lg">
+              <p className="text-xs text-muted-foreground text-center">
+                <strong>Demo Account:</strong> demo@learnverse.ai / demo123
+              </p>
+            </div>
+
+            {/* Footer Links */}
+            <div className="text-center space-y-2">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Forgot your password?
+              </Link>
+
+              <div className="text-sm text-muted-foreground">
+                Don't have an account?{" "}
                 <Link
                   to="/register"
-                  className="text-pink-400 hover:text-pink-300 font-semibold transition-colors"
+                  className="text-primary hover:text-primary/80 font-medium transition-colors"
                 >
-                  Sign up for free
+                  Sign up
                 </Link>
               </div>
-
-              {/* Professional Note */}
-              <div className="text-center text-xs text-white/50 border-t border-white/10 pt-4">
-                <p>
-                  🔒 Professional OAuth integration like YouTube & Instagram
-                </p>
-                <p>
-                  ✨ Choose Student, Creator, or Institution role during sign-up
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }
