@@ -40,11 +40,11 @@ function ModernLoader() {
 
   useEffect(() => {
     const loadingSteps = [
-      { progress: 15, text: "Loading AI systems..." },
-      { progress: 35, text: "Connecting to educational database..." },
-      { progress: 55, text: "Setting up video streaming..." },
-      { progress: 75, text: "Preparing your dashboard..." },
-      { progress: 90, text: "Almost ready..." },
+      { progress: 20, text: "Loading AI systems..." },
+      { progress: 40, text: "Connecting to educational database..." },
+      { progress: 60, text: "Setting up video streaming..." },
+      { progress: 80, text: "Preparing your dashboard..." },
+      { progress: 95, text: "Almost ready..." },
       { progress: 100, text: "Welcome to LearnVerse!" },
     ];
 
@@ -55,11 +55,16 @@ function ModernLoader() {
         setProgress(step.progress);
         setLoadingText(step.text);
         currentStep++;
-      } else {
-        setIsComplete(true);
-        clearInterval(interval);
+
+        // Auto-complete on final step
+        if (currentStep === loadingSteps.length) {
+          setTimeout(() => {
+            setIsComplete(true);
+            clearInterval(interval);
+          }, 300);
+        }
       }
-    }, 200); // Fast loading - 200ms per step
+    }, 150); // Faster loading - 150ms per step
 
     return () => clearInterval(interval);
   }, []);
@@ -275,10 +280,10 @@ function AppContent() {
   const { isLoading: authLoading, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    // Fast initialization - no more stuck loading
+    // Super fast initialization - optimized for instant access
     const timer = setTimeout(() => {
       setIsInitialLoading(false);
-    }, 1200); // 1.2 seconds for complete loading
+    }, 900); // 0.9 seconds for complete loading
 
     return () => clearTimeout(timer);
   }, []);
