@@ -295,13 +295,6 @@ export function Navigation() {
 
             {isAuthenticated && safeUser ? (
               <>
-                {/* Following Count */}
-                <div className="hidden md:flex items-center space-x-1 text-sm text-slate-600">
-                  <Heart className="w-4 h-4" />
-                  <span>{followingCount}</span>
-                  <span className="text-xs">following</span>
-                </div>
-
                 {/* Notifications */}
                 <Button
                   size="icon"
