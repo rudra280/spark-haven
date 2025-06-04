@@ -261,7 +261,7 @@ export default function Tutors() {
                       <CardTitle className="text-lg">{tutor.name}</CardTitle>
                       <div className="flex items-center space-x-2 mt-1">
                         <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <Star className="w-4 h-4 fill-blue-400 text-blue-400" />
                           <span className="text-sm font-medium">
                             {tutor.rating}
                           </span>

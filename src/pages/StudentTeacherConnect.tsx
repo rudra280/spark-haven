@@ -184,7 +184,7 @@ export default function StudentTeacherConnect() {
       case "online":
         return "bg-green-500";
       case "busy":
-        return "bg-yellow-500";
+        return "bg-blue-500";
       case "offline":
         return "bg-gray-500";
       default:
@@ -311,7 +311,7 @@ export default function StudentTeacherConnect() {
 
                         <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
                           <div className="flex items-center space-x-1">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            <Star className="w-4 h-4 fill-blue-400 text-blue-400" />
                             <span>
                               {teacher.rating} ({teacher.reviews})
                             </span>

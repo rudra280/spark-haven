@@ -234,7 +234,7 @@ const learningPaths: LearningPath[] = [
 const subjects = [
   {
     name: "Mathematics",
-    icon: "📐",
+    icon: "��",
     link: "/courses",
     description: "Calculus, Algebra, Statistics",
     courses: 45,
@@ -517,7 +517,7 @@ export default function Index() {
                         </div>
 
                         <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                          <Star className="w-4 h-4 text-blue-500 fill-current" />
                           <span className="text-sm font-medium">
                             {featuredContent[currentSlide].rating}
                           </span>

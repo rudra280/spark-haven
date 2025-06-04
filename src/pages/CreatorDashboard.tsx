@@ -238,13 +238,11 @@ export default function CreatorDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <Card className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/30">
+            <Card className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-blue-500/30">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-yellow-400 text-sm font-medium">
-                      Revenue
-                    </p>
+                    <p className="text-blue-400 text-sm font-medium">Revenue</p>
                     <p className="text-3xl font-bold text-white">
                       ₹{formatNumber(stats.totalRevenue)}
                     </p>
@@ -252,7 +250,7 @@ export default function CreatorDashboard() {
                       ↗ +15.3% this month
                     </p>
                   </div>
-                  <DollarSign className="w-12 h-12 text-yellow-400" />
+                  <DollarSign className="w-12 h-12 text-blue-400" />
                 </div>
               </CardContent>
             </Card>
@@ -434,7 +432,7 @@ export default function CreatorDashboard() {
                       </div>
 
                       <div className="text-center">
-                        <div className="flex items-center text-yellow-400">
+                        <div className="flex items-center text-blue-400">
                           <DollarSign className="w-4 h-4 mr-1" />
                           <span>₹{video.revenue}</span>
                         </div>
@@ -508,7 +506,7 @@ export default function CreatorDashboard() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
                     <Star className="w-5 h-5 text-white" />
                   </div>
                   <div>
