@@ -30,6 +30,7 @@ import StudentTeacherConnect from "@/pages/StudentTeacherConnect";
 import AITutor from "@/pages/AITutor";
 import TutorBooking from "@/pages/TutorBooking";
 import Pricing from "@/pages/Pricing";
+import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
 
 // Professional Loading Component with Modern Design
@@ -460,6 +461,17 @@ function AppContent() {
                       <ProtectedRoute>
                         <Navigation />
                         <TutorBooking />
+                        <Footer />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <Navigation />
+                        <Profile />
                         <Footer />
                       </ProtectedRoute>
                     }
