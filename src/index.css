@@ -117,9 +117,9 @@
     @apply glass rounded-xl;
   }
 
-  /* Professional gradients */
+  /* Professional gradients - Blue/Purple theme */
   .bg-primary-gradient {
-    background: linear-gradient(135deg, #334155, #475569);
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   }
 
   .bg-secondary-gradient {
@@ -127,7 +127,16 @@
   }
 
   .bg-accent-gradient {
-    background: linear-gradient(135deg, #64748b, #475569);
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  }
+
+  /* Remove all yellow/amber references */
+  .text-yellow-500,
+  .text-amber-500,
+  .bg-yellow-500,
+  .bg-amber-500 {
+    color: rgb(59 130 246) !important; /* Blue instead */
+    background-color: rgb(59 130 246) !important;
   }
 
   /* Page transitions */
