@@ -293,11 +293,8 @@ function AppContent() {
               background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
             }}
           >
-            <AnimatePresence mode="wait">
-              {showLoading && <ModernLoader />}
-            </AnimatePresence>
-
-            {!showLoading && (
+            {/* No loading screen - instant access */}
+            {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -481,7 +478,7 @@ function AppContent() {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </motion.div>
-            )}
+            }
           </div>
         </CursorEffects>
       </ErrorBoundary>
