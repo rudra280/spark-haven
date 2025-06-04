@@ -541,17 +541,17 @@ class Student:
         self.age = age
         self.courses = courses or []
         self._gpa = 0.0  # Private attribute
-    
+
     def enroll_course(self, course):
         if course not in self.courses:
             self.courses.append(course)
             return f"{self.name} enrolled in {course}"
         return f"Already enrolled in {course}"
-    
+
     @property
     def gpa(self):
         return self._gpa
-    
+
     @gpa.setter
     def gpa(self, value):
         if 0.0 <= value <= 4.0:
@@ -566,7 +566,7 @@ from typing import List, Callable
 def calculate_statistics(scores: List[float]) -> dict:
     if not scores:
         return {"mean": 0, "max": 0, "min": 0}
-    
+
     return {
         "mean": sum(scores) / len(scores),
         "max": max(scores),
@@ -609,8 +609,8 @@ summary_stats = df.groupby('major').agg({
 df_clean = df.dropna().pipe(
     lambda x: x[x['gpa'] > 0]
 ).assign(
-    gpa_category=lambda x: pd.cut(x['gpa'], 
-                                  bins=[0, 2.0, 3.0, 4.0], 
+    gpa_category=lambda x: pd.cut(x['gpa'],
+                                  bins=[0, 2.0, 3.0, 4.0],
                                   labels=['Low', 'Medium', 'High'])
 )
 \`\`\`
@@ -624,15 +624,15 @@ class DataService {
     constructor(baseURL) {
         this.baseURL = baseURL;
     }
-    
+
     async fetchUserData(userId) {
         try {
             const response = await fetch(\`\${this.baseURL}/users/\${userId}\`);
-            
+
             if (!response.ok) {
                 throw new Error(\`HTTP \${response.status}: \${response.statusText}\`);
             }
-            
+
             const userData = await response.json();
             return this.processUserData(userData);
         } catch (error) {
@@ -640,7 +640,7 @@ class DataService {
             throw new Error('Failed to fetch user data');
         }
     }
-    
+
     processUserData({id, name, email, ...metadata}) {
         return {
             userId: id,
@@ -658,7 +658,7 @@ const StudentDashboard = ({ studentId }) => {
     const [student, setStudent] = useState(null);
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
-    
+
     const fetchStudentData = useCallback(async () => {
         setLoading(true);
         try {
@@ -666,7 +666,7 @@ const StudentDashboard = ({ studentId }) => {
                 fetch(\`/api/students/\${studentId}\`).then(r => r.json()),
                 fetch(\`/api/students/\${studentId}/courses\`).then(r => r.json())
             ]);
-            
+
             setStudent(studentData);
             setCourses(courseData);
         } catch (error) {
@@ -675,27 +675,35 @@ const StudentDashboard = ({ studentId }) => {
             setLoading(false);
         }
     }, [studentId]);
-    
+
     useEffect(() => {
         fetchStudentData();
     }, [fetchStudentData]);
-    
+
     const gpa = useMemo(() => {
         if (!courses.length) return 0;
-        const totalPoints = courses.reduce((sum, course) => 
+        const totalPoints = courses.reduce((sum, course) =>
             sum + (course.grade * course.credits), 0);
-        const totalCredits = courses.reduce((sum, course) => 
+        const totalCredits = courses.reduce((sum, course) =>
             sum + course.credits, 0);
         return totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : 0;
     }, [courses]);
-    
+
     if (loading) return <div>Loading student data...</div>;
-    
+
     return (
         <div className="student-dashboard">
             <h1>Welcome, {student?.name}</h1>
             <p>Current GPA: {gpa}</p>
-            {/* Course components */}
+            <div className="courses-grid">
+                {courses.map(course => (
+                    <div key={course.id} className="course-card">
+                        <h3>{course.name}</h3>
+                        <p>Grade: {course.grade}</p>
+                        <p>Credits: {course.credits}</p>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
@@ -728,11 +736,11 @@ const Student = mongoose.model('Student', studentSchema);
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    
+
     if (!token) {
         return res.status(401).json({ error: 'Access token required' });
     }
-    
+
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) return res.status(403).json({ error: 'Invalid token' });
         req.user = user;
@@ -744,38 +752,38 @@ const authenticateToken = (req, res, next) => {
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        
+
         // Validate input
         if (!name || !email || !password) {
             return res.status(400).json({ error: 'All fields required' });
         }
-        
+
         // Hash password
         const saltRounds = 12;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        
+
         // Create student
         const student = new Student({
             name,
             email: email.toLowerCase(),
             password: hashedPassword
         });
-        
+
         await student.save();
-        
+
         // Generate JWT
         const token = jwt.sign(
             { id: student._id, email: student.email },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
-        
+
         res.status(201).json({
             message: 'Student registered successfully',
             token,
             student: { id: student._id, name, email }
         });
-        
+
     } catch (error) {
         if (error.code === 11000) {
             return res.status(409).json({ error: 'Email already exists' });
@@ -801,25 +809,25 @@ class TestStudentManager(unittest.TestCase):
             'email': 'john@example.com',
             'courses': ['CS101', 'MATH201']
         }
-    
+
     def test_student_creation(self):
         student = self.student_manager.create_student(**self.sample_student)
         self.assertIsNotNone(student.id)
         self.assertEqual(student.name, 'John Doe')
         self.assertEqual(len(student.courses), 2)
-    
+
     @patch('student_manager.database.save')
     def test_student_save_with_mock(self, mock_save):
         mock_save.return_value = True
         result = self.student_manager.save_student(self.sample_student)
         self.assertTrue(result)
         mock_save.assert_called_once()
-    
+
     def test_invalid_email_raises_exception(self):
         with self.assertRaises(ValueError):
             self.student_manager.create_student(
-                name='Test', 
-                email='invalid-email', 
+                name='Test',
+                email='invalid-email',
                 courses=[]
             )
 
@@ -864,23 +872,23 @@ def create_advanced_model(input_shape, num_classes):
     model = tf.keras.Sequential([
         # Input layer with normalization
         tf.keras.layers.BatchNormalization(input_shape=input_shape),
-        
+
         # Hidden layers with dropout for regularization
         tf.keras.layers.Dense(256, activation='relu'),
         tf.keras.layers.Dropout(0.3),
         tf.keras.layers.BatchNormalization(),
-        
+
         tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.Dropout(0.3),
         tf.keras.layers.BatchNormalization(),
-        
+
         tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dropout(0.2),
-        
+
         # Output layer
         tf.keras.layers.Dense(num_classes, activation='softmax')
     ])
-    
+
     # Advanced optimizer with learning rate scheduling
     optimizer = tf.keras.optimizers.Adam(
         learning_rate=0.001,
@@ -888,13 +896,13 @@ def create_advanced_model(input_shape, num_classes):
         beta_2=0.999,
         epsilon=1e-07
     )
-    
+
     model.compile(
         optimizer=optimizer,
         loss='sparse_categorical_crossentropy',
         metrics=['accuracy', 'top_3_accuracy']
     )
-    
+
     return model
 
 # Training with callbacks
@@ -917,7 +925,7 @@ def train_model(model, X_train, y_train, X_val, y_val):
             save_best_only=True
         )
     ]
-    
+
     history = model.fit(
         X_train, y_train,
         epochs=100,
@@ -926,7 +934,7 @@ def train_model(model, X_train, y_train, X_val, y_val):
         callbacks=callbacks,
         verbose=1
     )
-    
+
     return history
 \`\`\`
 
@@ -991,25 +999,25 @@ svm_model.fit(X_scaled, y_train)
 def create_cnn_model(input_shape, num_classes):
     model = tf.keras.Sequential([
         # First convolutional block
-        tf.keras.layers.Conv2D(32, (3, 3), activation='relu', 
+        tf.keras.layers.Conv2D(32, (3, 3), activation='relu',
                               input_shape=input_shape),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Conv2D(32, (3, 3), activation='relu'),
         tf.keras.layers.MaxPooling2D((2, 2)),
         tf.keras.layers.Dropout(0.25),
-        
+
         # Second convolutional block
         tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
         tf.keras.layers.MaxPooling2D((2, 2)),
         tf.keras.layers.Dropout(0.25),
-        
+
         # Third convolutional block
         tf.keras.layers.Conv2D(128, (3, 3), activation='relu'),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dropout(0.25),
-        
+
         # Dense layers
         tf.keras.layers.GlobalAveragePooling2D(),
         tf.keras.layers.Dense(512, activation='relu'),
@@ -1017,7 +1025,7 @@ def create_cnn_model(input_shape, num_classes):
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(num_classes, activation='softmax')
     ])
-    
+
     return model
 \`\`\`
 
@@ -1025,7 +1033,7 @@ def create_cnn_model(input_shape, num_classes):
 \`\`\`python
 def create_lstm_model(max_sequence_length, vocab_size, embedding_dim=128):
     model = tf.keras.Sequential([
-        tf.keras.layers.Embedding(vocab_size, embedding_dim, 
+        tf.keras.layers.Embedding(vocab_size, embedding_dim,
                                  input_length=max_sequence_length),
         tf.keras.layers.LSTM(128, return_sequences=True, dropout=0.2),
         tf.keras.layers.LSTM(64, dropout=0.2),
@@ -1033,7 +1041,7 @@ def create_lstm_model(max_sequence_length, vocab_size, embedding_dim=128):
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
-    
+
     return model
 \`\`\`
 
@@ -1055,16 +1063,16 @@ class F1Score(tf.keras.metrics.Metric):
         super().__init__(name=name, **kwargs)
         self.precision = tf.keras.metrics.Precision()
         self.recall = tf.keras.metrics.Recall()
-    
+
     def update_state(self, y_true, y_pred, sample_weight=None):
         self.precision.update_state(y_true, y_pred, sample_weight)
         self.recall.update_state(y_true, y_pred, sample_weight)
-    
+
     def result(self):
         p = self.precision.result()
         r = self.recall.result()
         return 2 * ((p * r) / (p + r + tf.keras.backend.epsilon()))
-    
+
     def reset_state(self):
         self.precision.reset_state()
         self.recall.reset_state()
@@ -1080,18 +1088,18 @@ def evaluate_model_comprehensive(model, X_test, y_test, class_names):
     # Predictions
     y_pred = model.predict(X_test)
     y_pred_classes = np.argmax(y_pred, axis=1)
-    
+
     # Classification report
-    report = classification_report(y_test, y_pred_classes, 
-                                 target_names=class_names, 
+    report = classification_report(y_test, y_pred_classes,
+                                 target_names=class_names,
                                  output_dict=True)
-    
+
     # Confusion matrix
     cm = confusion_matrix(y_test, y_pred_classes)
-    
+
     # Visualization
     plt.figure(figsize=(12, 5))
-    
+
     plt.subplot(1, 2, 1)
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
                 xticklabels=class_names,
@@ -1099,15 +1107,15 @@ def evaluate_model_comprehensive(model, X_test, y_test, class_names):
     plt.title('Confusion Matrix')
     plt.ylabel('True Label')
     plt.xlabel('Predicted Label')
-    
+
     plt.subplot(1, 2, 2)
     metrics_df = pd.DataFrame(report).transpose()
     sns.heatmap(metrics_df.iloc[:-1, :-1], annot=True, cmap='Greens')
     plt.title('Classification Metrics')
-    
+
     plt.tight_layout()
     plt.show()
-    
+
     return report
 \`\`\`
 
@@ -1130,18 +1138,18 @@ def predict():
         # Get data from request
         data = request.get_json()
         features = np.array(data['features']).reshape(1, -1)
-        
+
         # Make prediction
         prediction = model.predict(features)
         confidence = float(np.max(prediction))
         predicted_class = int(np.argmax(prediction))
-        
+
         return jsonify({
             'prediction': predicted_class,
             'confidence': confidence,
             'status': 'success'
         })
-        
+
     except Exception as e:
         return jsonify({
             'error': str(e),
