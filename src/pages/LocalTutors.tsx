@@ -290,7 +290,7 @@ export default function LocalTutors() {
             </h1>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            🇮🇳 Find verified tutors in your city! In-person or online sessions
+            🇮�� Find verified tutors in your city! In-person or online sessions
             with local experts across India. Connect with tutors who understand
             your local curriculum! 📍
           </p>
@@ -415,7 +415,7 @@ export default function LocalTutors() {
 
                             <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-2">
                               <div className="flex items-center space-x-1">
-                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                <Star className="w-4 h-4 fill-blue-400 text-blue-400" />
                                 <span>
                                   {tutor.rating} ({tutor.reviews} reviews)
                                 </span>

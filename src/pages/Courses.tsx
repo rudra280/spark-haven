@@ -723,7 +723,7 @@ export default function Courses() {
                           course.difficulty === "Beginner"
                             ? "border-green-500 text-green-700"
                             : course.difficulty === "Intermediate"
-                              ? "border-yellow-500 text-yellow-700"
+                              ? "border-blue-500 text-blue-700"
                               : "border-red-500 text-red-700"
                         }
                       >
@@ -762,7 +762,7 @@ export default function Courses() {
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <Star className="w-4 h-4 fill-blue-400 text-blue-400" />
                           <span className="font-medium">{course.rating}</span>
                           <span>({course.reviews})</span>
                         </div>

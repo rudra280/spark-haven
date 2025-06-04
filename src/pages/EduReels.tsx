@@ -315,7 +315,7 @@ const mockComments: { [key: string]: Comment[] } = {
           "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
         isVerified: false,
       },
-      text: "Mind blown! 🤯 Finally understand derivatives",
+      text: "Mind blown! �� Finally understand derivatives",
       likes: 78,
       isLiked: false,
       createdAt: "2024-01-14T16:20:00Z",
@@ -830,7 +830,7 @@ export default function EduReels() {
               onClick={() => handleBookmark(currentReel.id)}
               className={`w-12 h-12 rounded-full ${
                 currentReel.isBookmarked
-                  ? "bg-yellow-500/20 text-yellow-400"
+                  ? "bg-blue-500/20 text-blue-400"
                   : "bg-black/40 text-white hover:bg-black/60"
               }`}
             >
