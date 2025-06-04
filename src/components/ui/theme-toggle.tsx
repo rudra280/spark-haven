@@ -40,7 +40,7 @@ export function ThemeToggle() {
             ease: "easeInOut",
           }}
         >
-          <Sun className="w-5 h-5 text-amber-500" />
+          <Sun className="w-5 h-5 text-blue-500" />
         </motion.div>
 
         {/* Moon Icon */}
@@ -170,7 +170,7 @@ export function AnimatedThemeToggle() {
           }}
           transition={{ duration: 0.2 }}
         >
-          <Sun className="w-3 h-3 text-amber-500" />
+          <Sun className="w-3 h-3 text-blue-500" />
         </motion.div>
       </motion.div>
     </motion.button>

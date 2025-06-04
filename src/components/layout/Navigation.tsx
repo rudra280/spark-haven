@@ -432,7 +432,7 @@ export function Navigation() {
                       <DropdownMenuItem asChild>
                         <Link
                           to="/pricing"
-                          className="flex items-center space-x-2 text-amber-600"
+                          className="flex items-center space-x-2 text-blue-600"
                         >
                           <Crown className="w-4 h-4" />
                           <span>Upgrade Plan</span>

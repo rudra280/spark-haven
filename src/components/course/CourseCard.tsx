@@ -176,7 +176,7 @@ export function CourseCard({
               <span>{(course.students || 0).toLocaleString()}</span>
             </div>
             <div className="flex items-center space-x-1">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <Star className="w-4 h-4 fill-blue-400 text-blue-400" />
               <span className="font-medium">{course.rating || "N/A"}</span>
             </div>
           </div>

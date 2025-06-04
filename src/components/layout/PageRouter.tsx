@@ -103,7 +103,7 @@ const allPages: PageLink[] = [
     href: "/video-upload",
     icon: Upload,
     description: "Share your knowledge",
-    color: "from-amber-500 to-orange-500",
+    color: "from-blue-500 to-purple-500",
   },
 
   // AI & Tutoring
@@ -143,7 +143,7 @@ const allPages: PageLink[] = [
     href: "/pricing",
     icon: CreditCard,
     description: "View pricing plans",
-    color: "from-yellow-500 to-amber-500",
+    color: "from-blue-500 to-purple-500",
   },
   {
     name: "Profile",
