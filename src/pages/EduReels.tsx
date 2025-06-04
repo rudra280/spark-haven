@@ -23,12 +23,25 @@ import {
   Smile,
   Camera,
   Search,
+  Filter,
+  CheckCircle,
+  X,
+  Upload as UploadIcon,
+  Plus,
+  Music,
+  Sparkles,
+  TrendingUp,
+  Clock,
+  Eye,
+  Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface EduReel {
   id: string;
@@ -55,300 +68,391 @@ interface EduReel {
     comments: number;
     shares: number;
   };
-  uploadedAt: string;
   isLiked: boolean;
   isBookmarked: boolean;
+  createdAt: string;
+  music?: {
+    title: string;
+    artist: string;
+  };
 }
 
 interface Comment {
   id: string;
   user: {
+    id: string;
     name: string;
-    username: string;
     avatar: string;
+    isVerified: boolean;
   };
   text: string;
-  timestamp: string;
   likes: number;
   isLiked: boolean;
+  createdAt: string;
+  replies?: Comment[];
 }
 
-// Real educational content for reels
+// Comprehensive Educational Reels Database
 const eduReels: EduReel[] = [
   {
-    id: "1",
-    title: "Quantum Physics in 60 Seconds",
+    id: "reel_1",
+    title: "Photosynthesis in 60 Seconds",
     description:
-      "Understanding wave-particle duality, quantum superposition, and the observer effect in under a minute! Perfect for competitive exams like JEE and NEET.",
+      "Learn how plants convert sunlight into energy! 🌱 Follow for more biology hacks #photosynthesis #biology #science",
     videoUrl:
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
     thumbnail:
-      "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500",
-    duration: 58,
+      "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=800",
+    duration: 62,
     creator: {
-      id: "creator1",
-      name: "Dr. Physics Pro",
-      username: "@physicsexplained",
+      id: "creator_1",
+      name: "Dr. Sarah Chen",
+      username: "drbiologychen",
       avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150",
+        "https://images.unsplash.com/photo-1494790108755-2616b612b632?w=400",
       isVerified: true,
-      followers: 125000,
+      followers: 245000,
       isFollowing: false,
     },
-    subject: "Physics",
-    difficulty: "Advanced",
-    tags: ["quantum", "physics", "JEE", "NEET", "science"],
+    subject: "Biology",
+    difficulty: "Beginner",
+    tags: ["photosynthesis", "biology", "plants", "science", "education"],
     stats: {
-      views: 524000,
-      likes: 42300,
+      views: 1240000,
+      likes: 89500,
       comments: 1250,
-      shares: 890,
+      shares: 2300,
     },
-    uploadedAt: "2024-01-20",
     isLiked: false,
     isBookmarked: false,
+    createdAt: "2024-01-15T10:30:00Z",
+    music: {
+      title: "Educational Vibes",
+      artist: "Study Beats",
+    },
   },
   {
-    id: "2",
-    title: "Calculus Tricks for Competitive Exams",
+    id: "reel_2",
+    title: "Derivative Tricks That Will Blow Your Mind",
     description:
-      "Master integration by parts in 45 seconds! This technique works for JEE Mains, JEE Advanced, and other engineering entrance exams.",
+      "Master calculus with these simple tricks! 🧮 Save this for your next exam #calculus #math #derivatives #study",
     videoUrl:
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
     thumbnail:
-      "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=500",
-    duration: 47,
+      "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
+    duration: 45,
     creator: {
-      id: "creator2",
-      name: "Math Wizard",
-      username: "@mathwizard",
+      id: "creator_2",
+      name: "Prof. Michael Kumar",
+      username: "mathwithmike",
       avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
       isVerified: true,
-      followers: 89000,
+      followers: 180000,
       isFollowing: true,
     },
     subject: "Mathematics",
     difficulty: "Intermediate",
-    tags: ["calculus", "integration", "JEE", "tricks", "math"],
+    tags: ["calculus", "derivatives", "math", "study", "tricks"],
     stats: {
-      views: 892000,
-      likes: 67500,
-      comments: 2100,
-      shares: 1450,
+      views: 890000,
+      likes: 67200,
+      comments: 890,
+      shares: 1800,
     },
-    uploadedAt: "2024-01-22",
     isLiked: true,
     isBookmarked: true,
+    createdAt: "2024-01-14T15:20:00Z",
   },
   {
-    id: "3",
-    title: "NEET Biology Memory Palace",
+    id: "reel_3",
+    title: "Quantum Physics Made Simple",
     description:
-      "Remember all 20 amino acids using this incredible memory palace technique! Perfect for NEET, AIIMS, and medical entrance preparation.",
+      "Breaking down quantum mechanics in 60 seconds ⚛️ Mind = Blown #quantumphysics #physics #science #mindblown",
     videoUrl:
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+      "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
     thumbnail:
-      "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=500",
-    duration: 52,
+      "https://images.unsplash.com/photo-1636953056323-9c09fdd74fa6?w=800",
+    duration: 58,
     creator: {
-      id: "creator3",
-      name: "NEET Guru",
-      username: "@neetcrack",
+      id: "creator_3",
+      name: "Dr. Emily Rodriguez",
+      username: "quantumemily",
       avatar:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150",
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400",
       isVerified: true,
-      followers: 156000,
+      followers: 320000,
       isFollowing: false,
     },
-    subject: "Biology",
-    difficulty: "Intermediate",
-    tags: ["biology", "NEET", "memory", "amino acids", "medical"],
+    subject: "Physics",
+    difficulty: "Advanced",
+    tags: ["quantum", "physics", "science", "mechanics", "atoms"],
     stats: {
-      views: 673000,
-      likes: 54200,
-      comments: 1890,
-      shares: 1120,
+      views: 2100000,
+      likes: 156000,
+      comments: 3200,
+      shares: 8900,
     },
-    uploadedAt: "2024-01-18",
     isLiked: false,
     isBookmarked: false,
+    createdAt: "2024-01-13T09:45:00Z",
+    music: {
+      title: "Sci-Fi Ambience",
+      artist: "Space Sounds",
+    },
   },
   {
-    id: "4",
-    title: "Python for Data Science Quick Start",
+    id: "reel_4",
+    title: "Organic Chemistry Mechanisms",
     description:
-      "Learn pandas, numpy, and matplotlib basics in under 60 seconds! Perfect for coding interviews and data science bootcamps.",
+      "Master organic reactions with visual tricks! 🧪 Perfect for JEE & NEET prep #chemistry #organic #jeemains #neet",
     videoUrl:
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+      "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
     thumbnail:
-      "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=500",
-    duration: 55,
+      "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800",
+    duration: 72,
     creator: {
-      id: "creator4",
-      name: "Code Academy Pro",
-      username: "@codeacademy",
+      id: "creator_4",
+      name: "Prof. David Kim",
+      username: "chemistryking",
       avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
       isVerified: true,
-      followers: 234000,
-      isFollowing: true,
-    },
-    subject: "Computer Science",
-    difficulty: "Beginner",
-    tags: ["python", "datascience", "coding", "programming", "AI"],
-    stats: {
-      views: 1200000,
-      likes: 89400,
-      comments: 3450,
-      shares: 2100,
-    },
-    uploadedAt: "2024-01-25",
-    isLiked: true,
-    isBookmarked: false,
-  },
-  {
-    id: "5",
-    title: "Organic Chemistry Reactions Hack",
-    description:
-      "Remember all reaction mechanisms with this ONE simple trick! Essential for JEE, NEET, and chemistry olympiads.",
-    videoUrl:
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-    thumbnail:
-      "https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=500",
-    duration: 49,
-    creator: {
-      id: "creator5",
-      name: "Chem Master",
-      username: "@chemmaster",
-      avatar:
-        "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150",
-      isVerified: true,
-      followers: 198000,
+      followers: 210000,
       isFollowing: false,
     },
     subject: "Chemistry",
-    difficulty: "Advanced",
-    tags: ["chemistry", "organic", "reactions", "JEE", "NEET"],
+    difficulty: "Intermediate",
+    tags: ["organic", "chemistry", "reactions", "jee", "neet"],
     stats: {
-      views: 756000,
-      likes: 61200,
-      comments: 2340,
-      shares: 1680,
+      views: 750000,
+      likes: 54000,
+      comments: 1100,
+      shares: 1900,
     },
-    uploadedAt: "2024-01-15",
     isLiked: false,
-    isBookmarked: true,
-  },
-];
-
-// Sample comments for reels
-const sampleComments: Comment[] = [
-  {
-    id: "1",
-    user: {
-      name: "Study Master",
-      username: "@studymaster",
-      avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50",
-    },
-    text: "This is exactly what I needed for my JEE preparation! Thank you so much! 🔥",
-    timestamp: "2h ago",
-    likes: 234,
-    isLiked: false,
+    isBookmarked: false,
+    createdAt: "2024-01-12T14:15:00Z",
   },
   {
-    id: "2",
-    user: {
-      name: "NEET Aspirant",
-      username: "@neetfighter",
+    id: "reel_5",
+    title: "Machine Learning in 60 Seconds",
+    description:
+      "AI explained simply! From neural networks to deep learning 🤖 #ai #machinelearning #coding #tech",
+    videoUrl:
+      "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+    thumbnail:
+      "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800",
+    duration: 61,
+    creator: {
+      id: "creator_5",
+      name: "Alex Chen",
+      username: "aicoder",
       avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50",
+        "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400",
+      isVerified: true,
+      followers: 890000,
+      isFollowing: true,
     },
-    text: "Can you make more videos on this topic? This helped me understand concepts better than my coaching classes!",
-    timestamp: "4h ago",
-    likes: 156,
+    subject: "Computer Science",
+    difficulty: "Advanced",
+    tags: ["ai", "machinelearning", "coding", "neural networks", "tech"],
+    stats: {
+      views: 3200000,
+      likes: 234000,
+      comments: 5600,
+      shares: 12000,
+    },
     isLiked: true,
-  },
-  {
-    id: "3",
-    user: {
-      name: "Physics Lover",
-      username: "@physicslover",
-      avatar:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50",
+    isBookmarked: true,
+    createdAt: "2024-01-11T11:30:00Z",
+    music: {
+      title: "Tech Beats",
+      artist: "Digital Music",
     },
-    text: "Mind = Blown 🤯 Never thought quantum physics could be this simple!",
-    timestamp: "6h ago",
-    likes: 89,
-    isLiked: false,
   },
 ];
 
-// Video Player Component
-function ReelPlayer({
-  reel,
-  isActive,
-  onVideoEnd,
-}: {
-  reel: EduReel;
-  isActive: boolean;
-  onVideoEnd: () => void;
-}) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+// Mock comments data
+const mockComments: { [key: string]: Comment[] } = {
+  reel_1: [
+    {
+      id: "comment_1",
+      user: {
+        id: "user_1",
+        name: "StudyBuddy123",
+        avatar:
+          "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400",
+        isVerified: false,
+      },
+      text: "This helped me so much for my biology exam! Thank you! 🙏",
+      likes: 45,
+      isLiked: false,
+      createdAt: "2024-01-15T11:30:00Z",
+    },
+    {
+      id: "comment_2",
+      user: {
+        id: "user_2",
+        name: "BiologyNerd",
+        avatar:
+          "https://images.unsplash.com/photo-1494790108755-2616b612b632?w=400",
+        isVerified: true,
+      },
+      text: "Perfect explanation! Can you do cellular respiration next?",
+      likes: 23,
+      isLiked: true,
+      createdAt: "2024-01-15T12:15:00Z",
+    },
+  ],
+  reel_2: [
+    {
+      id: "comment_3",
+      user: {
+        id: "user_3",
+        name: "MathStudent",
+        avatar:
+          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
+        isVerified: false,
+      },
+      text: "Mind blown! 🤯 Finally understand derivatives",
+      likes: 78,
+      isLiked: false,
+      createdAt: "2024-01-14T16:20:00Z",
+    },
+  ],
+};
+
+export default function EduReels() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [currentReelIndex, setCurrentReelIndex] = useState(0);
+  const [reels, setReels] = useState(eduReels);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [showUpload, setShowUpload] = useState(false);
 
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const currentReel = reels[currentReelIndex];
+
+  // Auto-play functionality
   useEffect(() => {
-    if (videoRef.current) {
-      if (isActive && !isPlaying) {
-        videoRef.current.play();
-        setIsPlaying(true);
-      } else if (!isActive && isPlaying) {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      }
+    if (videoRef.current && isPlaying) {
+      videoRef.current.play().catch(console.error);
+    } else if (videoRef.current) {
+      videoRef.current.pause();
     }
-  }, [isActive]);
+  }, [currentReelIndex, isPlaying]);
 
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
+  // Load comments for current reel
+  useEffect(() => {
+    setComments(mockComments[currentReel?.id] || []);
+  }, [currentReel]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.code === "ArrowUp") {
+        e.preventDefault();
+        navigateReel("up");
+      } else if (e.code === "ArrowDown") {
+        e.preventDefault();
+        navigateReel("down");
+      } else if (e.code === "Space") {
+        e.preventDefault();
+        togglePlay();
       }
-      setIsPlaying(!isPlaying);
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [currentReelIndex]);
+
+  // Touch navigation for mobile
+  useEffect(() => {
+    let startY = 0;
+    let endY = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      startY = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      endY = e.changedTouches[0].clientY;
+      const diff = startY - endY;
+
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          navigateReel("down");
+        } else {
+          navigateReel("up");
+        }
+      }
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener("touchstart", handleTouchStart);
+      container.addEventListener("touchend", handleTouchEnd);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener("touchstart", handleTouchStart);
+        container.removeEventListener("touchend", handleTouchEnd);
+      }
+    };
+  }, [currentReelIndex]);
+
+  const navigateReel = (direction: "up" | "down") => {
+    setCurrentTime(0);
+    setIsPlaying(true);
+
+    if (direction === "down" && currentReelIndex < reels.length - 1) {
+      setCurrentReelIndex(currentReelIndex + 1);
+    } else if (direction === "up" && currentReelIndex > 0) {
+      setCurrentReelIndex(currentReelIndex - 1);
     }
   };
 
+  const togglePlay = () => {
+    setIsPlaying(!isPlaying);
+  };
+
   const toggleMute = () => {
+    setIsMuted(!isMuted);
     if (videoRef.current) {
       videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
     }
   };
 
   const skipTime = (seconds: number) => {
     if (videoRef.current) {
-      videoRef.current.currentTime += seconds;
+      videoRef.current.currentTime = Math.max(
+        0,
+        videoRef.current.currentTime + seconds,
+      );
     }
   };
 
   const handleTimeUpdate = () => {
     if (videoRef.current) {
-      const current = videoRef.current.currentTime;
-      const duration = videoRef.current.duration;
-      setCurrentTime(current);
-      setProgress((current / duration) * 100);
+      setCurrentTime(videoRef.current.currentTime);
     }
   };
 
   const handleVideoEnd = () => {
     setIsPlaying(false);
-    onVideoEnd();
+    // Auto-advance to next reel
+    if (currentReelIndex < reels.length - 1) {
+      setTimeout(() => navigateReel("down"), 1000);
+    }
   };
 
   const formatTime = (time: number) => {
@@ -357,392 +461,24 @@ function ReelPlayer({
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  return (
-    <div className="relative w-full h-full">
-      <video
-        ref={videoRef}
-        src={reel.videoUrl}
-        className="w-full h-full object-cover"
-        muted={isMuted}
-        onTimeUpdate={handleTimeUpdate}
-        onEnded={handleVideoEnd}
-        loop={false}
-        playsInline
-      />
-
-      {/* Video Controls Overlay */}
-      <div
-        className="absolute inset-0 flex items-center justify-center"
-        onClick={togglePlay}
-      >
-        <AnimatePresence>
-          {!isPlaying && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0 }}
-              className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center"
-            >
-              <Play className="w-8 h-8 text-white ml-1" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="absolute bottom-20 left-4 right-20">
-        <div className="w-full h-1 bg-white/20 rounded-full">
-          <div
-            className="h-full bg-white rounded-full transition-all duration-100"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <div className="flex justify-between text-white text-xs mt-1">
-          <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(reel.duration)}</span>
-        </div>
-      </div>
-
-      {/* Time Skip Controls */}
-      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-white bg-black/20 backdrop-blur-sm hover:bg-black/40"
-          onClick={() => skipTime(-10)}
-        >
-          <SkipBack className="w-5 h-5" />
-        </Button>
-        <div className="text-white text-xs text-center bg-black/20 backdrop-blur-sm rounded px-2 py-1">
-          -10s
-        </div>
-      </div>
-
-      <div className="absolute right-20 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-white bg-black/20 backdrop-blur-sm hover:bg-black/40"
-          onClick={() => skipTime(10)}
-        >
-          <SkipForward className="w-5 h-5" />
-        </Button>
-        <div className="text-white text-xs text-center bg-black/20 backdrop-blur-sm rounded px-2 py-1">
-          +10s
-        </div>
-      </div>
-
-      {/* Volume Control */}
-      <div className="absolute top-4 right-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-white bg-black/20 backdrop-blur-sm hover:bg-black/40"
-          onClick={toggleMute}
-        >
-          {isMuted ? (
-            <VolumeX className="w-5 h-5" />
-          ) : (
-            <Volume2 className="w-5 h-5" />
-          )}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// Reel Info Component
-function ReelInfo({
-  reel,
-  onFollow,
-  onLike,
-  onBookmark,
-  onComment,
-  onShare,
-}: {
-  reel: EduReel;
-  onFollow: (creatorId: string) => void;
-  onLike: (reelId: string) => void;
-  onBookmark: (reelId: string) => void;
-  onComment: (reelId: string) => void;
-  onShare: (reelId: string) => void;
-}) {
-  return (
-    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
-      <div className="flex justify-between">
-        {/* Left side - Reel Info */}
-        <div className="flex-1 pr-4">
-          {/* Creator Info */}
-          <div className="flex items-center space-x-3 mb-3">
-            <Avatar className="w-10 h-10 border-2 border-white">
-              <AvatarImage src={reel.creator.avatar} alt={reel.creator.name} />
-              <AvatarFallback>{reel.creator.name[0]}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <div className="flex items-center space-x-2">
-                <span className="text-white font-semibold">
-                  {reel.creator.username}
-                </span>
-                {reel.creator.isVerified && (
-                  <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs">✓</span>
-                  </div>
-                )}
-              </div>
-              <div className="text-white/80 text-sm">
-                {reel.creator.followers.toLocaleString()} followers
-              </div>
-            </div>
-            <Button
-              variant={reel.creator.isFollowing ? "secondary" : "default"}
-              size="sm"
-              onClick={() => onFollow(reel.creator.id)}
-              className={
-                reel.creator.isFollowing
-                  ? "bg-white/20 text-white"
-                  : "bg-white text-black"
-              }
-            >
-              {reel.creator.isFollowing ? "Following" : "Follow"}
-            </Button>
-          </div>
-
-          {/* Title & Description */}
-          <h3 className="text-white font-semibold mb-2">{reel.title}</h3>
-          <p className="text-white/90 text-sm mb-3 line-clamp-2">
-            {reel.description}
-          </p>
-
-          {/* Tags and Subject */}
-          <div className="flex flex-wrap gap-2 mb-3">
-            <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-              {reel.subject}
-            </Badge>
-            <Badge
-              className={`${
-                reel.difficulty === "Beginner"
-                  ? "bg-green-500"
-                  : reel.difficulty === "Intermediate"
-                    ? "bg-yellow-500"
-                    : "bg-red-500"
-              } text-white`}
-            >
-              {reel.difficulty}
-            </Badge>
-            {reel.tags.slice(0, 2).map((tag) => (
-              <Badge
-                key={tag}
-                variant="secondary"
-                className="bg-white/20 text-white"
-              >
-                #{tag}
-              </Badge>
-            ))}
-          </div>
-
-          {/* Stats */}
-          <div className="flex items-center space-x-4 text-white/80 text-sm">
-            <span>{reel.stats.views.toLocaleString()} views</span>
-            <span>•</span>
-            <span>{reel.uploadedAt}</span>
-          </div>
-        </div>
-
-        {/* Right side - Action Buttons */}
-        <div className="flex flex-col space-y-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20"
-            onClick={() => onLike(reel.id)}
-          >
-            <Heart
-              className={`w-6 h-6 ${reel.isLiked ? "fill-red-500 text-red-500" : ""}`}
-            />
-          </Button>
-          <span className="text-white text-xs text-center">
-            {reel.stats.likes.toLocaleString()}
-          </span>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20"
-            onClick={() => onComment(reel.id)}
-          >
-            <MessageCircle className="w-6 h-6" />
-          </Button>
-          <span className="text-white text-xs text-center">
-            {reel.stats.comments.toLocaleString()}
-          </span>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20"
-            onClick={() => onBookmark(reel.id)}
-          >
-            <Bookmark
-              className={`w-6 h-6 ${reel.isBookmarked ? "fill-yellow-500 text-yellow-500" : ""}`}
-            />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20"
-            onClick={() => onShare(reel.id)}
-          >
-            <Share className="w-6 h-6" />
-          </Button>
-          <span className="text-white text-xs text-center">
-            {reel.stats.shares.toLocaleString()}
-          </span>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20"
-          >
-            <MoreHorizontal className="w-6 h-6" />
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Comments Modal Component
-function CommentsModal({
-  reel,
-  comments,
-  isOpen,
-  onClose,
-  onAddComment,
-}: {
-  reel: EduReel;
-  comments: Comment[];
-  isOpen: boolean;
-  onClose: () => void;
-  onAddComment: (text: string) => void;
-}) {
-  const [newComment, setNewComment] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newComment.trim()) {
-      onAddComment(newComment);
-      setNewComment("");
-    }
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <motion.div
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end justify-center"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={onClose}
-    >
-      <motion.div
-        className="bg-white rounded-t-3xl w-full max-w-md h-[70vh] flex flex-col"
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="text-lg font-semibold">
-            Comments ({comments.length})
-          </h3>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-        </div>
-
-        {/* Comments List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {comments.map((comment) => (
-            <div key={comment.id} className="flex space-x-3">
-              <Avatar className="w-8 h-8">
-                <AvatarImage
-                  src={comment.user.avatar}
-                  alt={comment.user.name}
-                />
-                <AvatarFallback>{comment.user.name[0]}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-sm">
-                    {comment.user.username}
-                  </span>
-                  <span className="text-gray-500 text-xs">
-                    {comment.timestamp}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-800 mt-1">{comment.text}</p>
-                <div className="flex items-center space-x-4 mt-2">
-                  <Button variant="ghost" size="sm" className="text-xs">
-                    <Heart
-                      className={`w-3 h-3 mr-1 ${comment.isLiked ? "fill-red-500 text-red-500" : ""}`}
-                    />
-                    {comment.likes}
-                  </Button>
-                  <Button variant="ghost" size="sm" className="text-xs">
-                    Reply
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Add Comment */}
-        <form onSubmit={handleSubmit} className="p-4 border-t">
-          <div className="flex space-x-2">
-            <Input
-              placeholder="Add a comment..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className="flex-1"
-            />
-            <Button type="submit" size="icon">
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-        </form>
-      </motion.div>
-    </motion.div>
-  );
-}
-
-export default function EduReels() {
-  const [reels, setReels] = useState(eduReels);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [comments, setComments] = useState<Comment[]>(sampleComments);
-  const [showComments, setShowComments] = useState(false);
-  const [selectedReelId, setSelectedReelId] = useState<string | null>(null);
-  const { user } = useAuth();
-
-  const currentReel = reels[currentIndex];
-
-  const handleNext = () => {
-    if (currentIndex < reels.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      setCurrentIndex(0); // Loop back to first reel
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    } else {
-      setCurrentIndex(reels.length - 1); // Loop to last reel
-    }
+  // Social actions
+  const handleLike = (reelId: string) => {
+    setReels((prev) =>
+      prev.map((reel) =>
+        reel.id === reelId
+          ? {
+              ...reel,
+              isLiked: !reel.isLiked,
+              stats: {
+                ...reel.stats,
+                likes: reel.isLiked
+                  ? reel.stats.likes - 1
+                  : reel.stats.likes + 1,
+              },
+            }
+          : reel,
+      ),
+    );
   };
 
   const handleFollow = (creatorId: string) => {
@@ -764,25 +500,6 @@ export default function EduReels() {
     );
   };
 
-  const handleLike = (reelId: string) => {
-    setReels((prev) =>
-      prev.map((reel) =>
-        reel.id === reelId
-          ? {
-              ...reel,
-              isLiked: !reel.isLiked,
-              stats: {
-                ...reel.stats,
-                likes: reel.isLiked
-                  ? reel.stats.likes - 1
-                  : reel.stats.likes + 1,
-              },
-            }
-          : reel,
-      ),
-    );
-  };
-
   const handleBookmark = (reelId: string) => {
     setReels((prev) =>
       prev.map((reel) =>
@@ -793,157 +510,548 @@ export default function EduReels() {
     );
   };
 
-  const handleComment = (reelId: string) => {
-    setSelectedReelId(reelId);
-    setShowComments(true);
-  };
-
-  const handleShare = (reelId: string) => {
-    // Implement share functionality
-    const reel = reels.find((r) => r.id === reelId);
-    if (reel) {
-      const shareUrl = `${window.location.origin}/reels/${reelId}`;
-      navigator.clipboard.writeText(shareUrl);
-      alert("Link copied to clipboard!");
+  const handleShare = (reel: EduReel) => {
+    if (navigator.share) {
+      navigator.share({
+        title: reel.title,
+        text: reel.description,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      // Show toast notification
     }
   };
 
-  const handleAddComment = (text: string) => {
-    const newComment: Comment = {
-      id: Date.now().toString(),
+  const handleComment = () => {
+    setShowComments(true);
+  };
+
+  const handleAddComment = () => {
+    if (!newComment.trim()) return;
+
+    const comment: Comment = {
+      id: `comment_${Date.now()}`,
       user: {
-        name: user?.name || "Current User",
-        username: `@${user?.name?.toLowerCase().replace(" ", "") || "user"}`,
-        avatar:
-          user?.avatar ||
-          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50",
+        id: user?.id || "anonymous",
+        name: user?.name || "Anonymous",
+        avatar: user?.avatar || "",
+        isVerified: user?.verified || false,
       },
-      text,
-      timestamp: "now",
+      text: newComment,
       likes: 0,
       isLiked: false,
+      createdAt: new Date().toISOString(),
     };
-    setComments((prev) => [newComment, ...prev]);
+
+    setComments((prev) => [comment, ...prev]);
+    setNewComment("");
+
+    // Update reel stats
+    setReels((prev) =>
+      prev.map((reel) =>
+        reel.id === currentReel.id
+          ? {
+              ...reel,
+              stats: {
+                ...reel.stats,
+                comments: reel.stats.comments + 1,
+              },
+            }
+          : reel,
+      ),
+    );
   };
 
-  // Swipe handling for mobile
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    const startY = touch.clientY;
-
-    const handleTouchEnd = (endEvent: TouchEvent) => {
-      const endTouch = endEvent.changedTouches[0];
-      const endY = endTouch.clientY;
-      const deltaY = startY - endY;
-
-      if (Math.abs(deltaY) > 50) {
-        if (deltaY > 0) {
-          handleNext();
-        } else {
-          handlePrev();
-        }
-      }
-
-      document.removeEventListener("touchend", handleTouchEnd);
-    };
-
-    document.addEventListener("touchend", handleTouchEnd);
+  const handleCommentLike = (commentId: string) => {
+    setComments((prev) =>
+      prev.map((comment) =>
+        comment.id === commentId
+          ? {
+              ...comment,
+              isLiked: !comment.isLiked,
+              likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1,
+            }
+          : comment,
+      ),
+    );
   };
 
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowUp") {
-        e.preventDefault();
-        handlePrev();
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        handleNext();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentIndex]);
+  if (!currentReel) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-black text-white">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">No EduReels Available</h1>
+          <Button onClick={() => navigate("/")}>
+            <Home className="w-4 h-4 mr-2" />
+            Go Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden">
-      {/* Main Reel Container */}
-      <div className="w-full h-full relative" onTouchStart={handleTouchStart}>
-        <ReelPlayer
-          reel={currentReel}
-          isActive={true}
-          onVideoEnd={handleNext}
+    <div
+      ref={containerRef}
+      className="h-screen bg-black relative overflow-hidden select-none"
+    >
+      {/* Video Container */}
+      <div className="h-full w-full relative">
+        <video
+          ref={videoRef}
+          src={currentReel.videoUrl}
+          className="h-full w-full object-cover"
+          loop
+          muted={isMuted}
+          onTimeUpdate={handleTimeUpdate}
+          onEnded={handleVideoEnd}
+          onClick={togglePlay}
         />
 
-        <ReelInfo
-          reel={currentReel}
-          onFollow={handleFollow}
-          onLike={handleLike}
-          onBookmark={handleBookmark}
-          onComment={handleComment}
-          onShare={handleShare}
-        />
-      </div>
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40 pointer-events-none" />
 
-      {/* Navigation Controls */}
-      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20"
-          onClick={handlePrev}
-        >
-          <ArrowUp className="w-6 h-6" />
-        </Button>
+        {/* Top Navigation */}
+        <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-10">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/")}
+            className="text-white hover:bg-white/20"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </Button>
 
-        <div className="text-white text-xs text-center bg-black/20 backdrop-blur-sm rounded px-2 py-1">
-          {currentIndex + 1}/{reels.length}
+          <div className="flex items-center space-x-2">
+            <span className="text-white font-medium">EduReels</span>
+            <Badge
+              variant="secondary"
+              className="bg-white/20 text-white border-white/30"
+            >
+              {currentReelIndex + 1} / {reels.length}
+            </Badge>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/20"
+            >
+              <Search className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowUpload(true)}
+              className="text-white hover:bg-white/20"
+            >
+              <Plus className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20"
-          onClick={handleNext}
-        >
-          <ArrowDown className="w-6 h-6" />
-        </Button>
-      </div>
+        {/* Video Progress Bar */}
+        <div className="absolute top-20 left-4 right-4">
+          <div className="w-full h-0.5 bg-white/20 rounded-full">
+            <div
+              className="h-full bg-white rounded-full transition-all duration-300"
+              style={{
+                width: `${(currentTime / currentReel.duration) * 100}%`,
+              }}
+            />
+          </div>
+        </div>
 
-      {/* Back Button */}
-      <div className="absolute top-4 left-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20"
-          onClick={() => window.history.back()}
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </Button>
-      </div>
+        {/* Center Play/Pause Button */}
+        {!isPlaying && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={togglePlay}
+              className="w-16 h-16 bg-black/40 hover:bg-black/60 rounded-full"
+            >
+              <Play className="w-8 h-8 text-white ml-1" />
+            </Button>
+          </div>
+        )}
 
-      {/* Search Button */}
-      <div className="absolute top-4 right-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20"
-        >
-          <Search className="w-6 h-6" />
-        </Button>
+        {/* Left Info Panel */}
+        <div className="absolute bottom-0 left-0 right-20 p-4">
+          {/* Creator Info */}
+          <div className="flex items-center space-x-3 mb-3">
+            <Avatar className="w-12 h-12 border-2 border-white">
+              <AvatarImage
+                src={currentReel.creator.avatar}
+                alt={currentReel.creator.name}
+              />
+              <AvatarFallback>{currentReel.creator.name[0]}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <div className="flex items-center space-x-2">
+                <span className="text-white font-semibold text-lg">
+                  @{currentReel.creator.username}
+                </span>
+                {currentReel.creator.isVerified && (
+                  <CheckCircle className="w-5 h-5 text-blue-400" />
+                )}
+              </div>
+              <div className="text-white/80 text-sm">
+                {currentReel.creator.followers.toLocaleString()} followers
+              </div>
+            </div>
+            <Button
+              variant={
+                currentReel.creator.isFollowing ? "secondary" : "default"
+              }
+              size="sm"
+              onClick={() => handleFollow(currentReel.creator.id)}
+              className={
+                currentReel.creator.isFollowing
+                  ? "bg-white/20 text-white border-white/30"
+                  : "bg-white text-black hover:bg-white/90"
+              }
+            >
+              {currentReel.creator.isFollowing ? (
+                <>
+                  <CheckCircle className="w-4 h-4 mr-1" />
+                  Following
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-4 h-4 mr-1" />
+                  Follow
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Reel Info */}
+          <div className="space-y-2">
+            <h2 className="text-white font-bold text-xl leading-tight">
+              {currentReel.title}
+            </h2>
+            <p className="text-white/90 text-sm leading-relaxed">
+              {currentReel.description}
+            </p>
+
+            {/* Tags and Subject */}
+            <div className="flex items-center space-x-2 flex-wrap">
+              <Badge variant="secondary" className="bg-blue-500/80 text-white">
+                {currentReel.subject}
+              </Badge>
+              <Badge variant="outline" className="border-white/40 text-white">
+                {currentReel.difficulty}
+              </Badge>
+              {currentReel.tags.slice(0, 3).map((tag, index) => (
+                <span key={index} className="text-blue-300 text-sm">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+
+            {/* Music */}
+            {currentReel.music && (
+              <div className="flex items-center space-x-2 text-white/80 text-sm">
+                <Music className="w-4 h-4" />
+                <span>
+                  {currentReel.music.title} - {currentReel.music.artist}
+                </span>
+              </div>
+            )}
+
+            {/* Stats */}
+            <div className="flex items-center space-x-4 text-white/80 text-sm">
+              <div className="flex items-center space-x-1">
+                <Eye className="w-4 h-4" />
+                <span>{(currentReel.stats.views / 1000000).toFixed(1)}M</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Heart className="w-4 h-4" />
+                <span>{(currentReel.stats.likes / 1000).toFixed(0)}K</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <MessageCircle className="w-4 h-4" />
+                <span>{currentReel.stats.comments}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Clock className="w-4 h-4" />
+                <span>{formatTime(currentReel.duration)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Action Panel */}
+        <div className="absolute right-4 bottom-20 flex flex-col space-y-6">
+          {/* Like Button */}
+          <div className="text-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleLike(currentReel.id)}
+              className={`w-12 h-12 rounded-full ${
+                currentReel.isLiked
+                  ? "bg-red-500/20 text-red-400"
+                  : "bg-black/40 text-white hover:bg-black/60"
+              }`}
+            >
+              <Heart
+                className={`w-6 h-6 ${currentReel.isLiked ? "fill-current" : ""}`}
+              />
+            </Button>
+            <div className="text-white text-xs mt-1 font-medium">
+              {(currentReel.stats.likes / 1000).toFixed(0)}K
+            </div>
+          </div>
+
+          {/* Comment Button */}
+          <div className="text-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleComment}
+              className="w-12 h-12 rounded-full bg-black/40 text-white hover:bg-black/60"
+            >
+              <MessageCircle className="w-6 h-6" />
+            </Button>
+            <div className="text-white text-xs mt-1 font-medium">
+              {currentReel.stats.comments}
+            </div>
+          </div>
+
+          {/* Bookmark Button */}
+          <div className="text-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleBookmark(currentReel.id)}
+              className={`w-12 h-12 rounded-full ${
+                currentReel.isBookmarked
+                  ? "bg-yellow-500/20 text-yellow-400"
+                  : "bg-black/40 text-white hover:bg-black/60"
+              }`}
+            >
+              <Bookmark
+                className={`w-6 h-6 ${currentReel.isBookmarked ? "fill-current" : ""}`}
+              />
+            </Button>
+          </div>
+
+          {/* Share Button */}
+          <div className="text-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleShare(currentReel)}
+              className="w-12 h-12 rounded-full bg-black/40 text-white hover:bg-black/60"
+            >
+              <Share className="w-6 h-6" />
+            </Button>
+            <div className="text-white text-xs mt-1 font-medium">
+              {(currentReel.stats.shares / 1000).toFixed(1)}K
+            </div>
+          </div>
+
+          {/* Download Button */}
+          <div className="text-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-12 h-12 rounded-full bg-black/40 text-white hover:bg-black/60"
+            >
+              <Download className="w-6 h-6" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Navigation Arrows */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 bottom-6 flex flex-col space-y-2">
+          {currentReelIndex > 0 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigateReel("up")}
+              className="w-10 h-10 rounded-full bg-black/40 text-white hover:bg-black/60"
+            >
+              <ArrowUp className="w-5 h-5" />
+            </Button>
+          )}
+          {currentReelIndex < reels.length - 1 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigateReel("down")}
+              className="w-10 h-10 rounded-full bg-black/40 text-white hover:bg-black/60"
+            >
+              <ArrowDown className="w-5 h-5" />
+            </Button>
+          )}
+        </div>
+
+        {/* Skip Controls */}
+        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white bg-black/20 backdrop-blur-sm hover:bg-black/40"
+            onClick={() => skipTime(-10)}
+          >
+            <SkipBack className="w-5 h-5" />
+          </Button>
+          <div className="text-white text-xs text-center bg-black/20 backdrop-blur-sm rounded px-2 py-1">
+            -10s
+          </div>
+        </div>
+
+        <div className="absolute right-24 top-1/2 transform -translate-y-1/2 flex flex-col space-y-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white bg-black/20 backdrop-blur-sm hover:bg-black/40"
+            onClick={() => skipTime(10)}
+          >
+            <SkipForward className="w-5 h-5" />
+          </Button>
+          <div className="text-white text-xs text-center bg-black/20 backdrop-blur-sm rounded px-2 py-1">
+            +10s
+          </div>
+        </div>
+
+        {/* Volume Control */}
+        <div className="absolute top-32 right-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white bg-black/20 backdrop-blur-sm hover:bg-black/40"
+            onClick={toggleMute}
+          >
+            {isMuted ? (
+              <VolumeX className="w-5 h-5" />
+            ) : (
+              <Volume2 className="w-5 h-5" />
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Comments Modal */}
       <AnimatePresence>
         {showComments && (
-          <CommentsModal
-            reel={currentReel}
-            comments={comments}
-            isOpen={showComments}
-            onClose={() => setShowComments(false)}
-            onAddComment={handleAddComment}
-          />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end"
+            onClick={() => setShowComments(false)}
+          >
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 500 }}
+              className="w-full max-h-[70vh] bg-white rounded-t-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-4 border-b">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-lg">
+                    Comments ({comments.length})
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowComments(false)}
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto max-h-96 p-4">
+                <div className="space-y-4">
+                  {comments.map((comment) => (
+                    <div key={comment.id} className="flex space-x-3">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage
+                          src={comment.user.avatar}
+                          alt={comment.user.name}
+                        />
+                        <AvatarFallback>{comment.user.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-sm">
+                            {comment.user.name}
+                          </span>
+                          {comment.user.isVerified && (
+                            <CheckCircle className="w-4 h-4 text-blue-500" />
+                          )}
+                          <span className="text-xs text-gray-500">
+                            {new Date(comment.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-800 mt-1">
+                          {comment.text}
+                        </p>
+                        <div className="flex items-center space-x-4 mt-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCommentLike(comment.id)}
+                            className={`h-6 px-2 ${
+                              comment.isLiked ? "text-red-500" : "text-gray-500"
+                            }`}
+                          >
+                            <Heart
+                              className={`w-3 h-3 mr-1 ${comment.isLiked ? "fill-current" : ""}`}
+                            />
+                            {comment.likes}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-gray-500"
+                          >
+                            Reply
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Add Comment */}
+              <div className="p-4 border-t">
+                <div className="flex space-x-3">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={user?.avatar} alt={user?.name} />
+                    <AvatarFallback>{user?.name?.[0] || "U"}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 flex space-x-2">
+                    <Input
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Add a comment..."
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && handleAddComment()
+                      }
+                    />
+                    <Button
+                      onClick={handleAddComment}
+                      disabled={!newComment.trim()}
+                      size="sm"
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
