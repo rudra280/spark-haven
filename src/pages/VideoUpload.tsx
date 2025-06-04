@@ -4,91 +4,118 @@ import {
   Upload,
   Video,
   Image,
-  FileText,
+  File,
   X,
   Play,
   Pause,
   Volume2,
   VolumeX,
-  Edit,
-  Save,
-  Eye,
-  EyeOff,
-  Globe,
-  Lock,
-  Users,
   CheckCircle,
   AlertCircle,
   Loader2,
+  Plus,
+  Trash2,
+  Edit,
+  Save,
   Camera,
-  Scissors,
-  Palette,
-  Music,
-  Hash,
-  DollarSign,
-  Calendar,
+  Mic,
+  Settings,
+  Share,
+  Download,
+  Eye,
   Clock,
-  MapPin,
-  Target,
-  Award,
+  Users,
+  Star,
   BookOpen,
+  Tag,
+  Globe,
+  Lock,
+  Eye as EyeIcon,
+  FileText,
+  Sparkles,
   Brain,
   Zap,
-  Star,
-  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
-import { PageHeader } from "@/components/ui/back-navigation";
+import { useNavigate } from "react-router-dom";
 
-interface VideoFile {
-  file: File;
-  preview: string;
-  duration: number;
-  size: string;
-}
-
-interface ThumbnailFile {
-  file: File;
-  preview: string;
+interface UploadedFile {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+  duration?: number;
+  thumbnail?: string;
 }
 
 interface VideoMetadata {
   title: string;
   description: string;
-  tags: string[];
+  category: string;
   subject: string;
   difficulty: "Beginner" | "Intermediate" | "Advanced";
-  category: string;
+  tags: string[];
+  isReelContent: boolean;
   visibility: "public" | "unlisted" | "private";
   allowComments: boolean;
   allowDownloads: boolean;
   monetization: boolean;
-  scheduledDate?: string;
+  customThumbnail?: string;
+  chapters: Chapter[];
   language: string;
-  subtitles: File[];
-  thumbnail?: ThumbnailFile;
+  subtitles: boolean;
+}
+
+interface Chapter {
+  id: string;
+  title: string;
+  timeStart: number;
+  timeEnd: number;
 }
 
 interface UploadProgress {
-  video: number;
-  thumbnail: number;
-  processing: number;
-  overall: number;
+  stage: "uploading" | "processing" | "generating" | "complete" | "error";
+  progress: number;
+  message: string;
+  details?: string;
 }
 
-const subjects = [
+const SUPPORTED_VIDEO_FORMATS = [".mp4", ".mov", ".avi", ".mkv", ".webm"];
+const SUPPORTED_IMAGE_FORMATS = [".jpg", ".jpeg", ".png", ".webp"];
+const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2GB
+
+const CATEGORIES = [
+  "Education",
+  "Science",
+  "Mathematics",
+  "Technology",
+  "Languages",
+  "Arts",
+  "Business",
+  "Health",
+  "Sports",
+  "Music",
+];
+
+const SUBJECTS = [
   "Mathematics",
   "Physics",
   "Chemistry",
@@ -100,180 +127,242 @@ const subjects = [
   "Economics",
   "Psychology",
   "Philosophy",
+  "Engineering",
+  "Medicine",
+  "Law",
+  "Business",
   "Art",
   "Music",
-  "Physical Education",
-  "Life Skills",
+  "Sports",
+  "Cooking",
+  "Photography",
 ];
 
-const categories = [
-  "Educational Tutorial",
-  "Lecture Series",
-  "Competitive Exam Prep",
-  "Skill Development",
-  "Language Learning",
-  "Science Experiments",
-  "Coding Tutorial",
-  "Art & Creativity",
-  "Health & Wellness",
-  "Career Guidance",
-  "Technology Review",
-  "Book Summary",
-];
-
-const languages = [
-  "English",
-  "Hindi",
-  "Spanish",
-  "French",
-  "German",
-  "Chinese",
-  "Japanese",
-  "Korean",
-  "Arabic",
-  "Portuguese",
-  "Russian",
-  "Italian",
-];
-
-const competitiveExams = [
+const COMPETITIVE_EXAMS = [
   "JEE Main",
   "JEE Advanced",
   "NEET",
   "GATE",
   "CAT",
-  "GRE",
-  "SAT",
-  "GMAT",
   "UPSC",
   "SSC",
-  "Bank PO",
-  "Railway",
-  "Defence",
-  "State PSC",
-  "KVPY",
-  "NTSE",
-  "Olympiad",
+  "IBPS",
   "CLAT",
-  "AIIMS",
-  "JIPMER",
+  "GMAT",
+  "GRE",
+  "TOEFL",
+  "IELTS",
 ];
 
 export default function VideoUpload() {
-  const [step, setStep] = useState(1);
-  const [videoFile, setVideoFile] = useState<VideoFile | null>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress>({
+    stage: "uploading",
+    progress: 0,
+    message: "Preparing upload...",
+  });
+
   const [metadata, setMetadata] = useState<VideoMetadata>({
     title: "",
     description: "",
+    category: "",
+    subject: "",
+    difficulty: "Beginner",
     tags: [],
-    subject: "Mathematics",
-    difficulty: "Intermediate",
-    category: "Educational Tutorial",
+    isReelContent: false,
     visibility: "public",
     allowComments: true,
-    allowDownloads: true,
+    allowDownloads: false,
     monetization: false,
+    chapters: [],
     language: "English",
-    subtitles: [],
+    subtitles: false,
   });
-  const [currentTag, setCurrentTag] = useState("");
-  const [uploadProgress, setUploadProgress] = useState<UploadProgress>({
-    video: 0,
-    thumbnail: 0,
-    processing: 0,
-    overall: 0,
-  });
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadComplete, setUploadComplete] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
-  const [videoPreview, setVideoPreview] = useState(false);
+
+  const [currentStep, setCurrentStep] = useState(1);
+  const [tagInput, setTagInput] = useState("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [customThumbnails, setCustomThumbnails] = useState<string[]>([]);
+  const [isGeneratingThumbnails, setIsGeneratingThumbnails] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { user } = useAuth();
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
-  // File upload handlers
-  const handleDrag = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
+  // File upload handler
+  const handleFileUpload = useCallback((files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+
+    // Validate file type
+    const isVideo = SUPPORTED_VIDEO_FORMATS.some((format) =>
+      file.name.toLowerCase().endsWith(format),
+    );
+
+    if (!isVideo) {
+      setErrors({
+        file: "Please upload a supported video format (MP4, MOV, AVI, MKV, WebM)",
+      });
+      return;
     }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      setErrors({ file: "File size must be less than 2GB" });
+      return;
+    }
+
+    setErrors({});
+    startUpload(file);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
+  // Start upload process
+  const startUpload = async (file: File) => {
+    setIsUploading(true);
+    setCurrentStep(2);
 
-    const files = Array.from(e.dataTransfer.files);
-    const videoFile = files.find((file) => file.type.startsWith("video/"));
+    const uploadedFile: UploadedFile = {
+      id: `upload_${Date.now()}`,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      url: URL.createObjectURL(file),
+    };
 
-    if (videoFile) {
-      processVideoFile(videoFile);
-    }
-  }, []);
-
-  const processVideoFile = (file: File) => {
-    const video = document.createElement("video");
-    const url = URL.createObjectURL(file);
-    video.src = url;
-
-    video.onloadedmetadata = () => {
-      const duration = Math.floor(video.duration);
-      const size = (file.size / (1024 * 1024)).toFixed(2) + " MB";
-
-      setVideoFile({
-        file,
-        preview: url,
-        duration,
-        size,
+    try {
+      // Stage 1: Upload
+      setUploadProgress({
+        stage: "uploading",
+        progress: 0,
+        message: "Uploading your video...",
+        details: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
       });
 
+      // Simulate upload progress
+      for (let i = 0; i <= 100; i += 5) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        setUploadProgress((prev) => ({ ...prev, progress: i }));
+      }
+
+      // Stage 2: Processing
+      setUploadProgress({
+        stage: "processing",
+        progress: 0,
+        message: "Processing video...",
+        details: "Optimizing quality and extracting metadata",
+      });
+
+      // Simulate processing
+      for (let i = 0; i <= 100; i += 10) {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        setUploadProgress((prev) => ({ ...prev, progress: i }));
+      }
+
+      // Extract video metadata
+      const video = document.createElement("video");
+      video.src = uploadedFile.url;
+
+      await new Promise((resolve) => {
+        video.onloadedmetadata = () => {
+          uploadedFile.duration = video.duration;
+          resolve(void 0);
+        };
+      });
+
+      // Stage 3: Generating thumbnails and materials
+      setUploadProgress({
+        stage: "generating",
+        progress: 0,
+        message: "Generating thumbnails and study materials...",
+        details: "Creating AI-powered learning resources",
+      });
+
+      // Generate thumbnails
+      setIsGeneratingThumbnails(true);
+      await generateThumbnails(uploadedFile);
+      setIsGeneratingThumbnails(false);
+
+      // Simulate material generation
+      for (let i = 0; i <= 100; i += 8) {
+        await new Promise((resolve) => setTimeout(resolve, 150));
+        setUploadProgress((prev) => ({ ...prev, progress: i }));
+      }
+
+      // Complete
+      setUploadProgress({
+        stage: "complete",
+        progress: 100,
+        message: "Upload complete!",
+        details: "Your video is ready for publishing",
+      });
+
+      setUploadedFile(uploadedFile);
+      setCurrentStep(3);
+
       // Auto-generate title from filename
-      const fileName = file.name.replace(/\.[^/.]+$/, "");
-      setMetadata((prev) => ({
-        ...prev,
-        title:
-          fileName.charAt(0).toUpperCase() +
-          fileName.slice(1).replace(/[_-]/g, " "),
-      }));
+      const generatedTitle = file.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[_-]/g, " ")
+        .replace(/\b\w/g, (l) => l.toUpperCase());
 
-      setStep(2);
-    };
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith("video/")) {
-      processVideoFile(file);
+      setMetadata((prev) => ({ ...prev, title: generatedTitle }));
+    } catch (error) {
+      console.error("Upload error:", error);
+      setUploadProgress({
+        stage: "error",
+        progress: 0,
+        message: "Upload failed",
+        details: "Please try again",
+      });
     }
   };
 
-  const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      const preview = URL.createObjectURL(file);
-      setMetadata((prev) => ({
-        ...prev,
-        thumbnail: { file, preview },
-      }));
-    }
+  // Generate thumbnail previews
+  const generateThumbnails = async (file: UploadedFile) => {
+    const thumbnails: string[] = [];
+
+    // Use sample thumbnails for demonstration
+    const sampleThumbnails = [
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400",
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400",
+      "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
+    ];
+
+    setCustomThumbnails(sampleThumbnails);
   };
 
+  // Handle drag and drop
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      const files = e.dataTransfer.files;
+      handleFileUpload(files);
+    },
+    [handleFileUpload],
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  // Add tag
   const addTag = () => {
-    if (currentTag.trim() && !metadata.tags.includes(currentTag.trim())) {
+    if (tagInput.trim() && !metadata.tags.includes(tagInput.trim())) {
       setMetadata((prev) => ({
         ...prev,
-        tags: [...prev.tags, currentTag.trim()],
+        tags: [...prev.tags, tagInput.trim()],
       }));
-      setCurrentTag("");
+      setTagInput("");
     }
   };
 
+  // Remove tag
   const removeTag = (tagToRemove: string) => {
     setMetadata((prev) => ({
       ...prev,
@@ -281,527 +370,478 @@ export default function VideoUpload() {
     }));
   };
 
-  const handleUpload = async () => {
-    if (!videoFile) return;
+  // Validate metadata
+  const validateMetadata = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!metadata.title.trim()) {
+      newErrors.title = "Title is required";
+    }
+    if (!metadata.description.trim()) {
+      newErrors.description = "Description is required";
+    }
+    if (!metadata.category) {
+      newErrors.category = "Category is required";
+    }
+    if (!metadata.subject) {
+      newErrors.subject = "Subject is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Publish video
+  const handlePublish = async () => {
+    if (!validateMetadata()) return;
 
     setIsUploading(true);
-    setStep(3);
+    setUploadProgress({
+      stage: "uploading",
+      progress: 0,
+      message: "Publishing your video...",
+      details: "Making it available to learners worldwide",
+    });
 
     try {
-      // Simulate realistic upload process
-      const steps = [
-        {
-          name: "Uploading video file",
-          duration: 3000,
-          progressKey: "video" as keyof UploadProgress,
-        },
-        {
-          name: "Uploading thumbnail",
-          duration: 1000,
-          progressKey: "thumbnail" as keyof UploadProgress,
-        },
-        {
-          name: "Processing video",
-          duration: 2000,
-          progressKey: "processing" as keyof UploadProgress,
-        },
-      ];
-
-      for (const step of steps) {
-        await simulateProgress(step.progressKey, step.duration);
+      // Simulate publishing process
+      for (let i = 0; i <= 100; i += 10) {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        setUploadProgress((prev) => ({ ...prev, progress: i }));
       }
 
-      // Calculate overall progress
-      setUploadProgress((prev) => ({ ...prev, overall: 100 }));
-      setUploadComplete(true);
-      setStep(4);
+      // Success
+      setUploadProgress({
+        stage: "complete",
+        progress: 100,
+        message: "Video published successfully!",
+        details: "Your content is now live",
+      });
 
-      // Store video data (simulate backend storage)
-      const videoData = {
-        id: Date.now().toString(),
-        ...metadata,
-        videoFile: videoFile.file.name,
-        uploadDate: new Date().toISOString(),
-        creator: user,
-        stats: {
-          views: 0,
-          likes: 0,
-          comments: 0,
-          shares: 0,
-        },
-      };
-
-      // Simulate saving to localStorage (mock backend)
-      const existingVideos = JSON.parse(
-        localStorage.getItem("uploaded_videos") || "[]",
-      );
-      existingVideos.push(videoData);
-      localStorage.setItem("uploaded_videos", JSON.stringify(existingVideos));
+      setTimeout(() => {
+        navigate("/creator-dashboard");
+      }, 2000);
     } catch (error) {
-      console.error("Upload failed:", error);
-      alert("Upload failed. Please try again.");
-    } finally {
-      setIsUploading(false);
+      setUploadProgress({
+        stage: "error",
+        progress: 0,
+        message: "Publishing failed",
+        details: "Please try again",
+      });
     }
   };
 
-  const simulateProgress = (
-    key: keyof UploadProgress,
-    duration: number,
-  ): Promise<void> => {
-    return new Promise((resolve) => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 15;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-          resolve();
-        }
-        setUploadProgress((prev) => ({ ...prev, [key]: progress }));
-      }, duration / 20);
-    });
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    }
+    return `${minutes}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const resetUpload = () => {
-    setStep(1);
-    setVideoFile(null);
-    setMetadata({
-      title: "",
-      description: "",
-      tags: [],
-      subject: "Mathematics",
-      difficulty: "Intermediate",
-      category: "Educational Tutorial",
-      visibility: "public",
-      allowComments: true,
-      allowDownloads: true,
-      monetization: false,
-      language: "English",
-      subtitles: [],
-    });
-    setUploadProgress({ video: 0, thumbnail: 0, processing: 0, overall: 0 });
-    setUploadComplete(false);
-    setIsUploading(false);
-  };
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Please log in to upload videos
+          </h1>
+          <Button onClick={() => navigate("/login")}>Go to Login</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div
-      className="min-h-screen pt-20 pb-12"
-      style={{
-        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-      }}
-    >
-      <div className="container-wide max-w-4xl">
-        <PageHeader
-          title="Upload Video"
-          subtitle="Share your knowledge with millions of learners worldwide"
-        />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Upload Your Video
+          </h1>
+          <p className="text-xl text-gray-600">
+            Share your knowledge with millions of learners worldwide
+          </p>
+        </motion.div>
 
         {/* Progress Steps */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            {[1, 2, 3, 4].map((stepNumber) => (
-              <div key={stepNumber} className="flex items-center">
+        <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center space-x-8">
+            {[1, 2, 3, 4].map((step) => (
+              <div key={step} className="flex items-center">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                    step >= stepNumber
-                      ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
-                      : "bg-white/80 text-slate-400 border border-slate-200"
+                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    currentStep >= step
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-500"
                   }`}
                 >
-                  {stepNumber === 4 && uploadComplete ? (
-                    <CheckCircle className="w-5 h-5" />
+                  {currentStep > step ? (
+                    <CheckCircle className="w-6 h-6" />
                   ) : (
-                    stepNumber
+                    <span>{step}</span>
                   )}
                 </div>
-                {stepNumber < 4 && (
+                <div className="ml-2 text-sm font-medium text-gray-600">
+                  {step === 1 && "Upload"}
+                  {step === 2 && "Process"}
+                  {step === 3 && "Details"}
+                  {step === 4 && "Publish"}
+                </div>
+                {step < 4 && (
                   <div
-                    className={`w-20 h-1 mx-2 ${
-                      step > stepNumber
-                        ? "bg-gradient-to-r from-blue-500 to-indigo-600"
-                        : "bg-slate-200"
+                    className={`w-16 h-0.5 ml-4 ${
+                      currentStep > step ? "bg-blue-500" : "bg-gray-200"
                     }`}
                   />
                 )}
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-2 text-sm">
-            <span
-              className={
-                step >= 1 ? "text-blue-600 font-medium" : "text-slate-500"
-              }
-            >
-              Upload
-            </span>
-            <span
-              className={
-                step >= 2 ? "text-blue-600 font-medium" : "text-slate-500"
-              }
-            >
-              Details
-            </span>
-            <span
-              className={
-                step >= 3 ? "text-blue-600 font-medium" : "text-slate-500"
-              }
-            >
-              Processing
-            </span>
-            <span
-              className={
-                step >= 4 ? "text-blue-600 font-medium" : "text-slate-500"
-              }
-            >
-              Complete
-            </span>
-          </div>
         </div>
 
         {/* Step 1: File Upload */}
-        {step === 1 && (
+        {currentStep === 1 && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-xl p-8"
           >
-            <Card className="bg-white/80 backdrop-blur-sm border border-white/20">
-              <CardHeader>
-                <CardTitle className="text-xl text-slate-800 flex items-center">
-                  <Video className="w-6 h-6 mr-2 text-blue-600" />
-                  Upload Your Educational Video
-                </CardTitle>
-                <CardDescription>
-                  Supported formats: MP4, MOV, AVI, WebM. Maximum size: 2GB
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div
-                  className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${
-                    dragActive
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-slate-300 hover:border-blue-400 hover:bg-slate-50"
-                  }`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                    <Upload className="w-8 h-8 text-white" />
-                  </div>
+            <div className="text-center mb-6">
+              <Video className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Upload Your Video
+              </h2>
+              <p className="text-gray-600">
+                Drag and drop your video file or click to browse
+              </p>
+            </div>
 
-                  <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                    Drag and drop your video here
-                  </h3>
+            <div
+              className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all"
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-lg font-medium text-gray-700 mb-2">
+                Drop your video here, or click to select
+              </p>
+              <p className="text-sm text-gray-500 mb-4">
+                Supports: {SUPPORTED_VIDEO_FORMATS.join(", ")} (Max: 2GB)
+              </p>
+              <Button className="bg-blue-500 hover:bg-blue-600">
+                <Upload className="w-4 h-4 mr-2" />
+                Select Video File
+              </Button>
+            </div>
 
-                  <p className="text-slate-600 mb-6">
-                    or click to browse from your computer
-                  </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={SUPPORTED_VIDEO_FORMATS.join(",")}
+              onChange={(e) => handleFileUpload(e.target.files)}
+              className="hidden"
+            />
 
-                  <Button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    Select Video File
-                  </Button>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="video/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
+            {errors.file && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center">
+                  <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
+                  <span className="text-red-700">{errors.file}</span>
                 </div>
-
-                {/* Quick tips */}
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg">
-                    <CheckCircle className="w-5 h-5 text-green-600 mb-2" />
-                    <h4 className="font-medium text-green-800">High Quality</h4>
-                    <p className="text-sm text-green-700">
-                      1080p or higher recommended
-                    </p>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg">
-                    <Clock className="w-5 h-5 text-blue-600 mb-2" />
-                    <h4 className="font-medium text-blue-800">
-                      Optimal Length
-                    </h4>
-                    <p className="text-sm text-blue-700">
-                      5-45 minutes works best
-                    </p>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
-                    <Target className="w-5 h-5 text-purple-600 mb-2" />
-                    <h4 className="font-medium text-purple-800">Clear Audio</h4>
-                    <p className="text-sm text-purple-700">
-                      Good sound quality essential
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            )}
           </motion.div>
         )}
 
-        {/* Step 2: Video Details */}
-        {step === 2 && videoFile && (
+        {/* Step 2: Upload Progress */}
+        {currentStep === 2 && isUploading && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-xl p-8"
           >
-            {/* Video Preview */}
-            <Card className="bg-white/80 backdrop-blur-sm border border-white/20">
-              <CardHeader>
-                <CardTitle className="text-xl text-slate-800 flex items-center">
-                  <Eye className="w-6 h-6 mr-2 text-blue-600" />
-                  Video Preview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="relative bg-black rounded-lg overflow-hidden">
-                    <video
-                      ref={videoRef}
-                      src={videoFile.preview}
-                      className="w-full aspect-video"
-                      controls
-                      muted
-                    />
-                  </div>
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                {uploadProgress.stage === "error" ? (
+                  <AlertCircle className="w-10 h-10 text-red-500" />
+                ) : uploadProgress.stage === "complete" ? (
+                  <CheckCircle className="w-10 h-10 text-green-500" />
+                ) : (
+                  <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+                )}
+              </div>
 
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-slate-700">
-                        File Details
-                      </span>
-                      <Badge className="bg-green-100 text-green-800">
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Ready to Upload
-                      </Badge>
-                    </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                {uploadProgress.message}
+              </h2>
 
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-slate-600">Duration:</span>
-                        <span className="font-medium">
-                          {formatDuration(videoFile.duration)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-600">File Size:</span>
-                        <span className="font-medium">{videoFile.size}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-600">Format:</span>
-                        <span className="font-medium">
-                          {videoFile.file.type}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+              {uploadProgress.details && (
+                <p className="text-gray-600 mb-6">{uploadProgress.details}</p>
+              )}
+
+              <div className="max-w-md mx-auto">
+                <Progress
+                  value={uploadProgress.progress}
+                  className="h-3 mb-2"
+                />
+                <div className="text-sm text-gray-500">
+                  {uploadProgress.progress}% complete
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            {/* Video Metadata */}
-            <Card className="bg-white/80 backdrop-blur-sm border border-white/20">
-              <CardHeader>
-                <CardTitle className="text-xl text-slate-800 flex items-center">
-                  <Edit className="w-6 h-6 mr-2 text-blue-600" />
-                  Video Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Title */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Title *
-                  </label>
-                  <Input
-                    value={metadata.title}
-                    onChange={(e) =>
-                      setMetadata((prev) => ({
-                        ...prev,
-                        title: e.target.value,
-                      }))
-                    }
-                    placeholder="Enter a descriptive title for your video"
-                    className="bg-white/80"
-                  />
-                </div>
+            {uploadProgress.stage === "error" && (
+              <div className="text-center">
+                <Button
+                  onClick={() => {
+                    setCurrentStep(1);
+                    setIsUploading(false);
+                    setUploadedFile(null);
+                  }}
+                  variant="outline"
+                >
+                  Try Again
+                </Button>
+              </div>
+            )}
+          </motion.div>
+        )}
 
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Description *
-                  </label>
-                  <Textarea
-                    value={metadata.description}
-                    onChange={(e) =>
-                      setMetadata((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    placeholder="Describe what your video teaches, include key topics and learning outcomes..."
-                    className="min-h-[120px] bg-white/80"
-                  />
-                </div>
+        {/* Step 3: Video Details */}
+        {currentStep === 3 && uploadedFile && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-xl overflow-hidden"
+          >
+            <div className="p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Video Details
+              </h2>
 
-                {/* Subject and Category */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Left Column - Form */}
+                <div className="space-y-6">
+                  {/* Basic Info */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Subject *
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Title *
                     </label>
-                    <select
-                      value={metadata.subject}
-                      onChange={(e) =>
-                        setMetadata((prev) => ({
-                          ...prev,
-                          subject: e.target.value,
-                        }))
-                      }
-                      className="w-full p-2 border border-slate-300 rounded-lg bg-white/80"
-                    >
-                      {subjects.map((subject) => (
-                        <option key={subject} value={subject}>
-                          {subject}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Category *
-                    </label>
-                    <select
-                      value={metadata.category}
-                      onChange={(e) =>
-                        setMetadata((prev) => ({
-                          ...prev,
-                          category: e.target.value,
-                        }))
-                      }
-                      className="w-full p-2 border border-slate-300 rounded-lg bg-white/80"
-                    >
-                      {categories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Difficulty and Language */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Difficulty Level *
-                    </label>
-                    <select
-                      value={metadata.difficulty}
-                      onChange={(e) =>
-                        setMetadata((prev) => ({
-                          ...prev,
-                          difficulty: e.target.value as any,
-                        }))
-                      }
-                      className="w-full p-2 border border-slate-300 rounded-lg bg-white/80"
-                    >
-                      <option value="Beginner">Beginner</option>
-                      <option value="Intermediate">Intermediate</option>
-                      <option value="Advanced">Advanced</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Language
-                    </label>
-                    <select
-                      value={metadata.language}
-                      onChange={(e) =>
-                        setMetadata((prev) => ({
-                          ...prev,
-                          language: e.target.value,
-                        }))
-                      }
-                      className="w-full p-2 border border-slate-300 rounded-lg bg-white/80"
-                    >
-                      {languages.map((language) => (
-                        <option key={language} value={language}>
-                          {language}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Tags */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Tags (helps with discovery)
-                  </label>
-                  <div className="flex space-x-2 mb-2">
                     <Input
-                      value={currentTag}
-                      onChange={(e) => setCurrentTag(e.target.value)}
-                      placeholder="Add relevant tags..."
-                      className="flex-1 bg-white/80"
-                      onKeyPress={(e) => e.key === "Enter" && addTag()}
+                      value={metadata.title}
+                      onChange={(e) =>
+                        setMetadata((prev) => ({
+                          ...prev,
+                          title: e.target.value,
+                        }))
+                      }
+                      placeholder="Enter a compelling title..."
+                      className={errors.title ? "border-red-500" : ""}
                     />
-                    <Button onClick={addTag} variant="outline">
-                      <Hash className="w-4 h-4 mr-1" />
-                      Add
-                    </Button>
+                    {errors.title && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.title}
+                      </p>
+                    )}
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    {metadata.tags.map((tag, index) => (
-                      <Badge key={index} className="bg-blue-100 text-blue-800">
-                        #{tag}
-                        <button
-                          onClick={() => removeTag(tag)}
-                          className="ml-1 hover:text-blue-600"
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description *
+                    </label>
+                    <Textarea
+                      value={metadata.description}
+                      onChange={(e) =>
+                        setMetadata((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
+                      placeholder="Describe your video content..."
+                      rows={4}
+                      className={errors.description ? "border-red-500" : ""}
+                    />
+                    {errors.description && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Category and Subject */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Category *
+                      </label>
+                      <Select
+                        value={metadata.category}
+                        onValueChange={(value) =>
+                          setMetadata((prev) => ({ ...prev, category: value }))
+                        }
+                      >
+                        <SelectTrigger
+                          className={errors.category ? "border-red-500" : ""}
                         >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </Badge>
-                    ))}
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CATEGORIES.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.category && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {errors.category}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Subject *
+                      </label>
+                      <Select
+                        value={metadata.subject}
+                        onValueChange={(value) =>
+                          setMetadata((prev) => ({ ...prev, subject: value }))
+                        }
+                      >
+                        <SelectTrigger
+                          className={errors.subject ? "border-red-500" : ""}
+                        >
+                          <SelectValue placeholder="Select subject" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SUBJECTS.map((subject) => (
+                            <SelectItem key={subject} value={subject}>
+                              {subject}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.subject && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {errors.subject}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Suggested competitive exam tags */}
-                  <div className="mt-3">
-                    <span className="text-xs text-slate-600">
-                      Suggested for competitive exams:
-                    </span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {competitiveExams.slice(0, 8).map((exam) => (
-                        <Button
+                  {/* Difficulty and Content Type */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Difficulty Level
+                      </label>
+                      <Select
+                        value={metadata.difficulty}
+                        onValueChange={(value: any) =>
+                          setMetadata((prev) => ({
+                            ...prev,
+                            difficulty: value,
+                          }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Beginner">Beginner</SelectItem>
+                          <SelectItem value="Intermediate">
+                            Intermediate
+                          </SelectItem>
+                          <SelectItem value="Advanced">Advanced</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-center space-x-3 pt-8">
+                      <Switch
+                        checked={metadata.isReelContent}
+                        onCheckedChange={(checked) =>
+                          setMetadata((prev) => ({
+                            ...prev,
+                            isReelContent: checked,
+                          }))
+                        }
+                      />
+                      <label className="text-sm font-medium text-gray-700">
+                        Short-form content (Reel)
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Tags
+                    </label>
+                    <div className="flex space-x-2 mb-2">
+                      <Input
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        placeholder="Add tags..."
+                        onKeyPress={(e) => e.key === "Enter" && addTag()}
+                      />
+                      <Button onClick={addTag} variant="outline">
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {metadata.tags.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="cursor-pointer"
+                          onClick={() => removeTag(tag)}
+                        >
+                          {tag}
+                          <X className="w-3 h-3 ml-1" />
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Competitive Exam Tags */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Competitive Exams (if applicable)
+                    </label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {COMPETITIVE_EXAMS.map((exam) => (
+                        <div
                           key={exam}
-                          variant="outline"
-                          size="sm"
-                          className="text-xs"
+                          className={`p-2 text-sm border rounded-md cursor-pointer transition-colors ${
+                            metadata.tags.includes(exam)
+                              ? "bg-blue-100 border-blue-500 text-blue-700"
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
                           onClick={() => {
-                            if (!metadata.tags.includes(exam)) {
+                            if (metadata.tags.includes(exam)) {
+                              removeTag(exam);
+                            } else {
                               setMetadata((prev) => ({
                                 ...prev,
                                 tags: [...prev.tags, exam],
@@ -809,333 +849,305 @@ export default function VideoUpload() {
                             }
                           }}
                         >
-                          +{exam}
-                        </Button>
+                          {exam}
+                        </div>
                       ))}
                     </div>
                   </div>
                 </div>
 
-                {/* Thumbnail Upload */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Custom Thumbnail (Optional)
-                  </label>
-                  <div className="flex items-center space-x-4">
-                    {metadata.thumbnail ? (
-                      <div className="relative">
-                        <img
-                          src={metadata.thumbnail.preview}
-                          alt="Thumbnail"
-                          className="w-32 h-18 object-cover rounded border"
-                        />
-                        <button
+                {/* Right Column - Preview */}
+                <div className="space-y-6">
+                  {/* Video Preview */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Preview
+                    </h3>
+                    <div className="bg-black rounded-lg overflow-hidden">
+                      <video
+                        ref={videoRef}
+                        src={uploadedFile.url}
+                        className="w-full h-48 object-cover"
+                        controls
+                      />
+                    </div>
+                    <div className="mt-2 text-sm text-gray-500">
+                      {uploadedFile.name} • {formatFileSize(uploadedFile.size)}
+                      {uploadedFile.duration &&
+                        ` • ${formatDuration(uploadedFile.duration)}`}
+                    </div>
+                  </div>
+
+                  {/* Thumbnail Selection */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Thumbnail
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {customThumbnails.map((thumbnail, index) => (
+                        <div
+                          key={index}
+                          className={`relative cursor-pointer rounded-lg overflow-hidden border-2 ${
+                            metadata.customThumbnail === thumbnail
+                              ? "border-blue-500"
+                              : "border-gray-200"
+                          }`}
                           onClick={() =>
                             setMetadata((prev) => ({
                               ...prev,
-                              thumbnail: undefined,
+                              customThumbnail: thumbnail,
                             }))
                           }
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center"
                         >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="w-32 h-18 bg-slate-200 rounded border flex items-center justify-center">
-                        <Image className="w-6 h-6 text-slate-400" />
-                      </div>
-                    )}
-
+                          <img
+                            src={thumbnail}
+                            alt={`Thumbnail ${index + 1}`}
+                            className="w-full h-20 object-cover"
+                          />
+                          {metadata.customThumbnail === thumbnail && (
+                            <div className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center">
+                              <CheckCircle className="w-6 h-6 text-blue-500" />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                     <Button
                       variant="outline"
+                      className="w-full mt-3"
                       onClick={() => thumbnailInputRef.current?.click()}
                     >
-                      <Camera className="w-4 h-4 mr-2" />
-                      Upload Thumbnail
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Custom Thumbnail
                     </Button>
-
                     <input
                       ref={thumbnailInputRef}
                       type="file"
-                      accept="image/*"
-                      onChange={handleThumbnailSelect}
+                      accept={SUPPORTED_IMAGE_FORMATS.join(",")}
                       className="hidden"
                     />
                   </div>
-                </div>
 
-                {/* Visibility and Settings */}
-                <div className="space-y-4">
-                  <h3 className="font-medium text-slate-800">
-                    Privacy & Settings
-                  </h3>
+                  {/* Privacy Settings */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Privacy & Settings
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Visibility
+                        </label>
+                        <Select
+                          value={metadata.visibility}
+                          onValueChange={(value: any) =>
+                            setMetadata((prev) => ({
+                              ...prev,
+                              visibility: value,
+                            }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="public">
+                              <div className="flex items-center">
+                                <Globe className="w-4 h-4 mr-2" />
+                                Public
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="unlisted">
+                              <div className="flex items-center">
+                                <EyeIcon className="w-4 h-4 mr-2" />
+                                Unlisted
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="private">
+                              <div className="flex items-center">
+                                <Lock className="w-4 h-4 mr-2" />
+                                Private
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Visibility
-                      </label>
-                      <select
-                        value={metadata.visibility}
-                        onChange={(e) =>
-                          setMetadata((prev) => ({
-                            ...prev,
-                            visibility: e.target.value as any,
-                          }))
-                        }
-                        className="w-full p-2 border border-slate-300 rounded-lg bg-white/80"
-                      >
-                        <option value="public">Public</option>
-                        <option value="unlisted">Unlisted</option>
-                        <option value="private">Private</option>
-                      </select>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-700">
+                            Allow comments
+                          </span>
+                          <Switch
+                            checked={metadata.allowComments}
+                            onCheckedChange={(checked) =>
+                              setMetadata((prev) => ({
+                                ...prev,
+                                allowComments: checked,
+                              }))
+                            }
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-700">
+                            Allow downloads
+                          </span>
+                          <Switch
+                            checked={metadata.allowDownloads}
+                            onCheckedChange={(checked) =>
+                              setMetadata((prev) => ({
+                                ...prev,
+                                allowDownloads: checked,
+                              }))
+                            }
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-700">
+                            Enable monetization
+                          </span>
+                          <Switch
+                            checked={metadata.monetization}
+                            onCheckedChange={(checked) =>
+                              setMetadata((prev) => ({
+                                ...prev,
+                                monetization: checked,
+                              }))
+                            }
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        id="allowComments"
-                        checked={metadata.allowComments}
-                        onChange={(e) =>
-                          setMetadata((prev) => ({
-                            ...prev,
-                            allowComments: e.target.checked,
-                          }))
-                        }
-                        className="rounded"
-                      />
-                      <label
-                        htmlFor="allowComments"
-                        className="text-sm text-slate-700"
-                      >
-                        Allow comments
-                      </label>
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        id="allowDownloads"
-                        checked={metadata.allowDownloads}
-                        onChange={(e) =>
-                          setMetadata((prev) => ({
-                            ...prev,
-                            allowDownloads: e.target.checked,
-                          }))
-                        }
-                        className="rounded"
-                      />
-                      <label
-                        htmlFor="allowDownloads"
-                        className="text-sm text-slate-700"
-                      >
-                        Allow downloads
-                      </label>
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        id="monetization"
-                        checked={metadata.monetization}
-                        onChange={(e) =>
-                          setMetadata((prev) => ({
-                            ...prev,
-                            monetization: e.target.checked,
-                          }))
-                        }
-                        className="rounded"
-                      />
-                      <label
-                        htmlFor="monetization"
-                        className="text-sm text-slate-700"
-                      >
-                        Enable monetization
-                      </label>
-                    </div>
-                  </div>
                 </div>
+              </div>
 
-                {/* Action Buttons */}
-                <div className="flex items-center justify-between pt-6 border-t">
-                  <Button variant="outline" onClick={() => setStep(1)}>
-                    <ChevronLeft className="w-4 h-4 mr-2" />
-                    Back
-                  </Button>
-
-                  <Button
-                    onClick={handleUpload}
-                    disabled={!metadata.title || !metadata.description}
-                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white"
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload Video
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              <div className="flex justify-between pt-8 border-t">
+                <Button variant="outline" onClick={() => setCurrentStep(1)}>
+                  Back
+                </Button>
+                <Button
+                  onClick={() => setCurrentStep(4)}
+                  className="bg-blue-500 hover:bg-blue-600"
+                >
+                  Continue to Publish
+                </Button>
+              </div>
+            </div>
           </motion.div>
         )}
 
-        {/* Step 3: Upload Progress */}
-        {step === 3 && (
+        {/* Step 4: Publish */}
+        {currentStep === 4 && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-xl p-8"
           >
-            <Card className="bg-white/80 backdrop-blur-sm border border-white/20">
-              <CardHeader>
-                <CardTitle className="text-xl text-slate-800 flex items-center">
-                  <Loader2 className="w-6 h-6 mr-2 text-blue-600 animate-spin" />
-                  Uploading Your Video
-                </CardTitle>
-                <CardDescription>
-                  Please don't close this window while your video is uploading
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Video Upload</span>
-                      <span>{Math.round(uploadProgress.video)}%</span>
-                    </div>
-                    <Progress value={uploadProgress.video} className="h-2" />
-                  </div>
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="w-10 h-10 text-green-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Ready to Publish!
+              </h2>
+              <p className="text-gray-600">
+                Your video is ready to inspire learners around the world
+              </p>
+            </div>
 
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Thumbnail Upload</span>
-                      <span>{Math.round(uploadProgress.thumbnail)}%</span>
-                    </div>
-                    <Progress
-                      value={uploadProgress.thumbnail}
-                      className="h-2"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Video Processing</span>
-                      <span>{Math.round(uploadProgress.processing)}%</span>
-                    </div>
-                    <Progress
-                      value={uploadProgress.processing}
-                      className="h-2"
-                    />
-                  </div>
-
-                  <div className="pt-4 border-t">
-                    <div className="flex justify-between text-sm mb-2 font-medium">
-                      <span>Overall Progress</span>
-                      <span>{Math.round(uploadProgress.overall)}%</span>
-                    </div>
-                    <Progress value={uploadProgress.overall} className="h-3" />
+            {/* Summary */}
+            <div className="bg-gray-50 rounded-lg p-6 mb-8">
+              <h3 className="font-semibold text-gray-900 mb-4">
+                Video Summary
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-gray-700">Title:</span>
+                  <p className="text-gray-600">{metadata.title}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Category:</span>
+                  <p className="text-gray-600">{metadata.category}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Subject:</span>
+                  <p className="text-gray-600">{metadata.subject}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Difficulty:</span>
+                  <p className="text-gray-600">{metadata.difficulty}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Visibility:</span>
+                  <p className="text-gray-600 capitalize">
+                    {metadata.visibility}
+                  </p>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">
+                    Content Type:
+                  </span>
+                  <p className="text-gray-600">
+                    {metadata.isReelContent
+                      ? "Short-form (Reel)"
+                      : "Long-form Video"}
+                  </p>
+                </div>
+              </div>
+              {metadata.tags.length > 0 && (
+                <div className="mt-4">
+                  <span className="font-medium text-gray-700">Tags:</span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {metadata.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
+              )}
+            </div>
 
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-800 mb-2">
-                    While you wait...
-                  </h4>
-                  <ul className="text-sm text-blue-700 space-y-1">
-                    <li>
-                      • Your video will be available in multiple quality options
-                    </li>
-                    <li>• Automatic captions will be generated</li>
-                    <li>• Video will be optimized for all devices</li>
-                    <li>
-                      • You'll receive notifications when processing is complete
-                    </li>
-                  </ul>
+            {/* Publishing Progress */}
+            {isUploading && (
+              <div className="mb-8">
+                <div className="flex items-center justify-center mb-4">
+                  <Loader2 className="w-8 h-8 text-blue-500 animate-spin mr-3" />
+                  <span className="text-lg font-medium text-gray-900">
+                    {uploadProgress.message}
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Step 4: Upload Complete */}
-        {step === 4 && uploadComplete && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            <Card className="bg-white/80 backdrop-blur-sm border border-white/20">
-              <CardContent className="text-center py-12">
-                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
-                  <CheckCircle className="w-10 h-10 text-white" />
+                <Progress value={uploadProgress.progress} className="h-3" />
+                <div className="text-center text-sm text-gray-500 mt-2">
+                  {uploadProgress.progress}% complete
                 </div>
+              </div>
+            )}
 
-                <h2 className="text-2xl font-bold text-slate-800 mb-2">
-                  Video Uploaded Successfully! 🎉
-                </h2>
-
-                <p className="text-slate-600 mb-8">
-                  Your educational content "{metadata.title}" has been uploaded
-                  and is now processing.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg">
-                    <Eye className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                    <h3 className="font-medium text-blue-800">Ready to View</h3>
-                    <p className="text-sm text-blue-700">
-                      Your video is live and discoverable
-                    </p>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg">
-                    <TrendingUp className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                    <h3 className="font-medium text-green-800">
-                      SEO Optimized
-                    </h3>
-                    <p className="text-sm text-green-700">
-                      Tagged for maximum reach
-                    </p>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
-                    <Award className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                    <h3 className="font-medium text-purple-800">
-                      Analytics Ready
-                    </h3>
-                    <p className="text-sm text-purple-700">
-                      Track views and engagement
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button
-                    onClick={() =>
-                      window.open(`/video/${Date.now()}`, "_blank")
-                    }
-                    className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
-                  >
-                    <Play className="w-4 h-4 mr-2" />
-                    View Video
-                  </Button>
-
-                  <Button
-                    onClick={() => window.open("/dashboard", "_blank")}
-                    variant="outline"
-                  >
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    View Analytics
-                  </Button>
-
-                  <Button onClick={resetUpload} variant="outline">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload Another
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Action Buttons */}
+            <div className="flex justify-between">
+              <Button
+                variant="outline"
+                onClick={() => setCurrentStep(3)}
+                disabled={isUploading}
+              >
+                Back to Edit
+              </Button>
+              <div className="space-x-3">
+                <Button variant="outline" disabled={isUploading}>
+                  Save as Draft
+                </Button>
+                <Button
+                  onClick={handlePublish}
+                  disabled={isUploading}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Publish Video
+                </Button>
+              </div>
+            </div>
           </motion.div>
         )}
       </div>
