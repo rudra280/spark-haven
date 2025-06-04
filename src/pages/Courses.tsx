@@ -940,7 +940,7 @@ export default function Courses() {
 
                       <div className="flex items-center space-x-6 text-sm">
                         <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <Star className="w-4 h-4 fill-blue-400 text-blue-400" />
                           <span>{selectedCourse.rating}</span>
                           <span>({selectedCourse.reviews} reviews)</span>
                         </div>
