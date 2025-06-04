@@ -97,7 +97,7 @@ interface AICapability {
 // Advanced AI Tutor Service (ChatGPT-like)
 class AdvancedAITutor {
   private static instance: AdvancedAITutor;
-  
+
   public static getInstance(): AdvancedAITutor {
     if (!AdvancedAITutor.instance) {
       AdvancedAITutor.instance = new AdvancedAITutor();
@@ -125,7 +125,7 @@ class AdvancedAITutor {
   // Process uploaded images
   async analyzeImage(imageUrl: string, question?: string): Promise<string> {
     await this.delay(2000);
-    
+
     return `I can see the image you've uploaded. Based on my analysis:
 
 🔍 **Image Analysis:**
@@ -148,7 +148,7 @@ Please ask me specific questions about what you see in the image, and I'll provi
   // Process audio input
   async processAudio(audioUrl: string): Promise<string> {
     await this.delay(3000);
-    
+
     return `🎵 **Audio Processing Complete**
 
 I've analyzed your audio input using advanced speech recognition. Here's what I understood:
@@ -169,37 +169,37 @@ Feel free to record another message or type your question, and I'll provide comp
 
   private getAdvancedResponse(prompt: string): string {
     const promptLower = prompt.toLowerCase();
-    
+
     // Mathematics responses
     if (promptLower.includes("calculus") || promptLower.includes("derivative") || promptLower.includes("integral")) {
       return this.getCalculusResponse(prompt);
     }
-    
+
     // Physics responses
     if (promptLower.includes("physics") || promptLower.includes("quantum") || promptLower.includes("relativity")) {
       return this.getPhysicsResponse(prompt);
     }
-    
+
     // Chemistry responses
     if (promptLower.includes("chemistry") || promptLower.includes("organic") || promptLower.includes("reaction")) {
       return this.getChemistryResponse(prompt);
     }
-    
+
     // Biology responses
     if (promptLower.includes("biology") || promptLower.includes("photosynthesis") || promptLower.includes("dna")) {
       return this.getBiologyResponse(prompt);
     }
-    
+
     // Programming responses
     if (promptLower.includes("python") || promptLower.includes("javascript") || promptLower.includes("programming")) {
       return this.getProgrammingResponse(prompt);
     }
-    
+
     // Machine Learning responses
     if (promptLower.includes("machine learning") || promptLower.includes("ai") || promptLower.includes("neural")) {
       return this.getMLResponse(prompt);
     }
-    
+
     // General educational response
     return this.getGeneralResponse(prompt);
   }
@@ -506,7 +506,7 @@ class Student:
         self.name = name
         self.age = age
         self.courses = []
-    
+
     def enroll(self, course):
         self.courses.append(course)
         print(f"{self.name} enrolled in {course}")
@@ -599,7 +599,7 @@ class Component {
     constructor(props) {
         this.props = props;
     }
-    
+
     render() {
         return \`<div>\${this.props.title}</div>\`;
     }
@@ -660,7 +660,7 @@ import unittest
 class TestCalculator(unittest.TestCase):
     def test_addition(self):
         self.assertEqual(add(2, 3), 5)
-    
+
     def test_division_by_zero(self):
         with self.assertRaises(ZeroDivisionError):
             divide(10, 0)
@@ -915,7 +915,7 @@ export default function AITutor() {
       model: "ChatGPT-4",
     }
   ]);
-  
+
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -980,7 +980,7 @@ export default function AITutor() {
 
     try {
       let aiResponse;
-      
+
       if (uploadedImage) {
         aiResponse = await aiTutor.analyzeImage(uploadedImage, inputMessage);
       } else {
@@ -1033,11 +1033,11 @@ export default function AITutor() {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('audio/')) {
       const url = URL.createObjectURL(file);
-      
+
       setIsTyping(true);
       try {
         const response = await aiTutor.processAudio(url);
-        
+
         const aiMessage: Message = {
           id: `ai_${Date.now()}`,
           type: "ai",
@@ -1062,7 +1062,7 @@ export default function AITutor() {
   // Handle voice recording
   const toggleRecording = () => {
     setIsRecording(!isRecording);
-    
+
     if (!isRecording) {
       // Start recording (simulated)
       setTimeout(() => {
@@ -1074,7 +1074,7 @@ export default function AITutor() {
 
   // Message feedback
   const handleFeedback = (messageId: string, feedback: "helpful" | "not_helpful") => {
-    setMessages(prev => prev.map(msg => 
+    setMessages(prev => prev.map(msg =>
       msg.id === messageId ? { ...msg, feedback } : msg
     ));
   };
@@ -1135,7 +1135,7 @@ export default function AITutor() {
             AI Tutor
           </h1>
           <p className="text-xl text-blue-200 max-w-3xl mx-auto">
-            Your personal ChatGPT-powered tutor with advanced AI capabilities. 
+            Your personal ChatGPT-powered tutor with advanced AI capabilities.
             Ask questions, upload images, record audio, and get comprehensive educational support.
           </p>
         </motion.div>
@@ -1188,20 +1188,20 @@ export default function AITutor() {
                     className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div className={`max-w-[80%] ${
-                      message.type === "user" 
-                        ? "bg-blue-600 text-white" 
+                      message.type === "user"
+                        ? "bg-blue-600 text-white"
                         : "bg-slate-700/80 text-slate-100"
                     } rounded-2xl p-4 backdrop-blur-sm`}>
                       {/* Message content */}
                       <div className="whitespace-pre-wrap mb-2">{message.content}</div>
-                      
+
                       {/* Attachments */}
                       {message.attachments?.map((attachment, index) => (
                         <div key={index} className="mt-3">
                           {attachment.type === "image" && attachment.url && (
-                            <img 
-                              src={attachment.url} 
-                              alt="Uploaded content" 
+                            <img
+                              src={attachment.url}
+                              alt="Uploaded content"
                               className="max-w-full h-auto rounded-lg border border-slate-600"
                             />
                           )}
@@ -1217,7 +1217,7 @@ export default function AITutor() {
                           )}
                         </div>
                       ))}
-                      
+
                       {/* Message metadata */}
                       <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-600/30">
                         <div className="flex items-center space-x-2 text-xs text-slate-400">
@@ -1225,7 +1225,7 @@ export default function AITutor() {
                           {message.model && <span>• {message.model}</span>}
                           {message.tokens && <span>• {message.tokens} tokens</span>}
                         </div>
-                        
+
                         {message.type === "ai" && (
                           <div className="flex items-center space-x-1">
                             <Button
@@ -1241,8 +1241,8 @@ export default function AITutor() {
                               size="sm"
                               onClick={() => handleFeedback(message.id, "helpful")}
                               className={`h-6 w-6 p-0 ${
-                                message.feedback === "helpful" 
-                                  ? "text-green-400" 
+                                message.feedback === "helpful"
+                                  ? "text-green-400"
                                   : "text-slate-400 hover:text-green-400"
                               }`}
                             >
@@ -1253,8 +1253,8 @@ export default function AITutor() {
                               size="sm"
                               onClick={() => handleFeedback(message.id, "not_helpful")}
                               className={`h-6 w-6 p-0 ${
-                                message.feedback === "not_helpful" 
-                                  ? "text-red-400" 
+                                message.feedback === "not_helpful"
+                                  ? "text-red-400"
                                   : "text-slate-400 hover:text-red-400"
                               }`}
                             >
@@ -1266,7 +1266,7 @@ export default function AITutor() {
                     </div>
                   </motion.div>
                 ))}
-                
+
                 {/* Typing indicator */}
                 {isTyping && (
                   <motion.div
@@ -1282,7 +1282,7 @@ export default function AITutor() {
                     </div>
                   </motion.div>
                 )}
-                
+
                 <div ref={messagesEndRef} />
               </div>
 
@@ -1291,9 +1291,9 @@ export default function AITutor() {
                 {/* Uploaded image preview */}
                 {uploadedImage && (
                   <div className="mb-3 relative inline-block">
-                    <img 
-                      src={uploadedImage} 
-                      alt="Upload preview" 
+                    <img
+                      src={uploadedImage}
+                      alt="Upload preview"
                       className="h-20 w-20 object-cover rounded-lg border border-slate-600"
                     />
                     <Button
