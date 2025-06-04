@@ -45,6 +45,7 @@ import {
   Cpu,
   Network,
   Server,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -482,7 +483,7 @@ Comprehensive biology education spanning molecular mechanisms to ecosystem dynam
 - Regeneration of ribulose bisphosphate (RuBP)
 
 **Overall Photosynthesis:**
-6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂
+6CO₂ + 6H₂O + light energy → C��H₁₂O₆ + 6O₂
 
 ## 🧬 **Genetics and Inheritance**
 
