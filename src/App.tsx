@@ -277,11 +277,11 @@ class ErrorBoundary extends React.Component<
 
 // Main App Content
 function AppContent() {
-  const [isInitialLoading, setIsInitialLoading] = useState(false); // Start with false
+  const [isInitialLoading, setIsInitialLoading] = useState(false); // No loading screen
   const { isLoading: authLoading, isAuthenticated } = useAuth();
 
-  // Remove artificial loading delays - instant access
-  const showLoading = authLoading;
+  // Instant access - no loading delays
+  const showLoading = false; // Always false for instant access
 
   return (
     <Router>
