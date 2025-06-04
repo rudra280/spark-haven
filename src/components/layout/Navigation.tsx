@@ -102,7 +102,6 @@ export function Navigation() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [notifications, setNotifications] = useState(3);
-  const [followingCount, setFollowingCount] = useState(12);
 
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
@@ -300,6 +299,12 @@ export function Navigation() {
                   size="icon"
                   variant="ghost"
                   className="relative text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  onClick={() => {
+                    // Mark notifications as read
+                    setNotifications(0);
+                    // You can add notification panel logic here
+                    console.log("Notifications clicked");
+                  }}
                 >
                   <Bell className="w-4 h-4" />
                   {notifications > 0 && (
@@ -390,11 +395,11 @@ export function Navigation() {
 
                     <DropdownMenuItem asChild>
                       <Link
-                        to="/following"
+                        to="/profile"
                         className="flex items-center space-x-2"
                       >
                         <UserPlus className="w-4 h-4" />
-                        <span>Following ({followingCount})</span>
+                        <span>Following</span>
                       </Link>
                     </DropdownMenuItem>
 
