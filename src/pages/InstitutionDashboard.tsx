@@ -170,13 +170,11 @@ export default function InstitutionDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <Card className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/30">
+            <Card className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-blue-500/30">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-yellow-400 text-sm font-medium">
-                      Revenue
-                    </p>
+                    <p className="text-blue-400 text-sm font-medium">Revenue</p>
                     <p className="text-3xl font-bold text-white">
                       ₹{formatNumber(stats.totalRevenue)}
                     </p>
@@ -184,7 +182,7 @@ export default function InstitutionDashboard() {
                       ↗ +18.7% this month
                     </p>
                   </div>
-                  <DollarSign className="w-12 h-12 text-yellow-400" />
+                  <DollarSign className="w-12 h-12 text-blue-400" />
                 </div>
               </CardContent>
             </Card>

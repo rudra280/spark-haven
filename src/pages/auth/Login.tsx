@@ -168,7 +168,7 @@ export default function Login() {
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
-                  <div className="w-4 h-4 mr-2 bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 rounded-sm flex items-center justify-center">
+                  <div className="w-4 h-4 mr-2 bg-gradient-to-r from-red-500 via-green-500 to-blue-500 rounded-sm flex items-center justify-center">
                     <span className="text-white text-xs font-bold">G</span>
                   </div>
                 )}

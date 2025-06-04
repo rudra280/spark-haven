@@ -507,7 +507,7 @@ export default function Profile() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Crown className="w-5 h-5 text-yellow-500" />
+                  <Crown className="w-5 h-5 text-blue-500" />
                   <span>Subscription Plan</span>
                 </CardTitle>
               </CardHeader>
@@ -523,7 +523,7 @@ export default function Profile() {
                         }
                         className={
                           user.subscription.plan !== "free"
-                            ? "bg-gradient-to-r from-yellow-500 to-orange-500"
+                            ? "bg-gradient-to-r from-blue-500 to-purple-500"
                             : ""
                         }
                       >
