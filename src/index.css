@@ -86,7 +86,7 @@
     scroll-behavior: smooth;
   }
 
-  /* COMPLETELY REMOVE ALL YELLOW/AMBER COLORS */
+  /* COMPLETELY REMOVE ALL YELLOW/AMBER COLORS - ENHANCED VERSION */
   .text-yellow-500,
   .text-amber-500,
   .bg-yellow-500,
@@ -107,10 +107,36 @@
   .text-amber-600,
   .bg-yellow-600,
   .bg-amber-600 {
-    color: rgb(59 130 246) !important; /* Blue instead */
+    color: rgb(59 130 246) !important; /* Professional Blue */
     background-color: rgb(59 130 246) !important;
     border-color: rgb(59 130 246) !important;
     fill: rgb(59 130 246) !important;
+  }
+
+  /* Enhanced High Contrast Text for Better Visibility */
+  .dark .text-slate-600 {
+    color: rgb(203 213 225) !important; /* Much lighter in dark mode */
+  }
+
+  .dark .text-slate-500 {
+    color: rgb(148 163 184) !important; /* Improved contrast */
+  }
+
+  .dark .text-slate-400 {
+    color: rgb(148 163 184) !important; /* Better visibility */
+  }
+
+  /* Professional Button Hover Effects */
+  .btn-gradient {
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+  }
+
+  .btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow-blue);
   }
 
   /* Star ratings and highlights use blue */
